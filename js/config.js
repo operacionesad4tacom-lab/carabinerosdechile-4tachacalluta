@@ -1,23 +1,21 @@
 // ============================================
-// SICOF - CONFIGURACIÓN CON SUPABASE AUTH
+// SICOF - CONFIGURACIÓN SIMPLIFICADA
 // ============================================
 
 // 🔐 CLAVES SUPABASE
 const SUPABASE_URL = "https://rytpgbfbeeuqzcgeujzy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dHBnYmZiZWV1cXpjZ2V1anp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NjUwMDcsImV4cCI6MjA4NDA0MTAwN30.dQ2WlMBAVqLg8hUWUPxpLMMw3XO7-PRTn9gxf9Bslac";
 
-// Inicializar Supabase CORRECTAMENTE
+// Inicializar Supabase
 window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================
-// CONFIGURACIÓN GENERAL
+// CONFIGURACIÓN DE REDIRECCIÓN
 // ============================================
-
-const PASSWORD_GENERICA = 'Montañaofrontera2026';
-
 window.SICOF_CONFIG = {
-    version: '2.0.0',
+    version: '2.1.0',
     redirectUrls: {
+        // Los roles se determinarán por metadata de Supabase
         digitador: 'servicios/datos-servicio.html',
         jefe: 'cuarteles/estado-operativo.html',
         admin: 'admin/admin-panel.html',
@@ -26,187 +24,154 @@ window.SICOF_CONFIG = {
 };
 
 // ============================================
-// USUARIOS AUTORIZADOS (ACTUALIZADO)
+// LOGIN - SOLO AUTENTICA CON SUPABASE
 // ============================================
-
-const USUARIOS_METADATA = {
-    'digitador.chacalluta@carabineros.cl': { 
-        nombre: 'Digitador Chacalluta', 
-        rol: 'digitador', 
-        cuartel_codigo: 'CHA' 
-    },
-    'digitador.visviri@carabineros.cl': { 
-        nombre: 'Digitador Visviri', 
-        rol: 'digitador', 
-        cuartel_codigo: 'VIS' 
-    },
-    'digitador.chungara@carabineros.cl': { 
-        nombre: 'Digitador Chungara', 
-        rol: 'digitador', 
-        cuartel_codigo: 'CHU' 
-    },
-    'jefe.chacalluta@carabineros.cl': { 
-        nombre: 'Jefe Chacalluta', 
-        rol: 'jefe', 
-        cuartel_codigo: 'CHA' 
-    },
-    'jefe.visviri@carabineros.cl': { 
-        nombre: 'Jefe Visviri', 
-        rol: 'jefe', 
-        cuartel_codigo: 'VIS' 
-    },
-    'jefe.chungara@carabineros.cl': { 
-        nombre: 'Jefe Chungara', 
-        rol: 'jefe', 
-        cuartel_codigo: 'CHU' 
-    },
-    'jefatura@carabineros.cl': { 
-        nombre: 'Jefatura Regional', 
-        rol: 'jefatura', 
-        cuartel_codigo: null 
-    },
-    'admin@carabineros.cl': { 
-        nombre: 'Administrador', 
-        rol: 'admin', 
-        cuartel_codigo: null 
-    }
-};
-
-// ============================================
-// LOGIN MEJORADO CON MANEJO DE ERRORES
-// ============================================
-
 window.loginUsuario = async function (email, password) {
-    console.log('🔐 Iniciando login para:', email);
-    
-    // Normalizar email
-    email = email.toLowerCase().trim();
+    console.log('🔐 Intentando autenticar:', email);
     
     try {
-        // 1. Intentar autenticación con Supabase
+        // 1. LIMPIAR SESIONES ANTERIORES (importante)
+        await window.supabase.auth.signOut();
+        
+        // 2. AUTENTICACIÓN CON SUPABASE
         const { data, error } = await window.supabase.auth.signInWithPassword({
-            email: email,
+            email: email.toLowerCase().trim(),
             password: password
         });
 
-        // 2. Manejar errores de Supabase
+        // 3. MANEJAR ERRORES
         if (error) {
-            console.error('❌ Error Supabase:', error);
+            console.error('❌ Error de autenticación:', error.message);
             
-            let mensajeError = 'Error desconocido';
+            // Mensajes más amigables
             if (error.message.includes('Invalid login credentials')) {
-                mensajeError = 'Usuario o contraseña incorrectos';
+                throw new Error('Correo o contraseña incorrectos');
             } else if (error.message.includes('Email not confirmed')) {
-                mensajeError = 'Debes confirmar tu email primero';
+                throw new Error('Debes confirmar tu correo primero');
             } else {
-                mensajeError = error.message;
+                throw new Error('Error de conexión: ' + error.message);
             }
-            
-            throw new Error(mensajeError);
         }
 
-        console.log('✅ Supabase login exitoso:', data.user.email);
-
-        // 3. Verificar si el usuario está autorizado en SICOF
-        const metadata = USUARIOS_METADATA[email];
-        if (!metadata) {
-            console.warn('⚠️ Usuario no autorizado en SICOF:', email);
-            // Cerrar sesión de Supabase
-            await window.supabase.auth.signOut();
-            throw new Error('Usuario no autorizado para acceder al sistema SICOF');
-        }
-
-        // 4. Crear objeto usuario con metadata
-        const usuario = {
-            id: data.user.id,
-            email: data.user.email,
-            nombre: metadata.nombre,
-            rol: metadata.rol,
-            cuartel_codigo: metadata.cuartel_codigo,
+        // 4. OBTENER INFORMACIÓN DEL USUARIO AUTENTICADO
+        const user = data.user;
+        console.log('✅ Usuario autenticado:', user.email);
+        
+        // 5. OBTENER METADATOS DE SUPABASE
+        // Supabase guarda los metadatos en user_metadata
+        const userMetadata = user.user_metadata || {};
+        
+        // 6. CREAR OBJETO USUARIO CON METADATOS DE SUPABASE
+        const usuarioSICOF = {
+            id: user.id,
+            email: user.email,
+            // Usar metadata de Supabase o valores por defecto
+            nombre: userMetadata.nombre || user.email.split('@')[0],
+            rol: userMetadata.rol || 'usuario', // Si no tiene rol, poner 'usuario'
+            cuartel_codigo: userMetadata.cuartel_codigo || null,
             session: data.session,
-            timestamp: new Date().toISOString()
+            auth_timestamp: new Date().toISOString()
         };
 
-        console.log('👤 Usuario autenticado:', usuario.nombre, '- Rol:', usuario.rol);
-        return usuario;
-
-    } catch (err) {
-        console.error('🔥 Error en loginUsuario:', err);
+        console.log('👤 Datos del usuario:', usuarioSICOF);
         
-        // Re-lanzar el error para que lo maneje el HTML
-        if (err instanceof Error) {
-            throw err;
-        } else {
-            throw new Error('Error inesperado en el servidor');
-        }
+        // 7. GUARDAR EN LOCALSTORAGE (opcional, para persistencia)
+        localStorage.setItem('sicof_user', JSON.stringify(usuarioSICOF));
+        localStorage.setItem('supabase_session', JSON.stringify(data.session));
+        
+        return usuarioSICOF;
+
+    } catch (error) {
+        console.error('🔥 Error crítico en login:', error);
+        throw error; // Re-lanzar el error para manejarlo en el HTML
     }
 };
 
 // ============================================
-// VERIFICAR SESIÓN (CORREGIDO - UNA "S")
+// VERIFICAR SESIÓN - SOLO SUPABASE
 // ============================================
-
 window.verificarSesion = async function () {
     try {
-        console.log('🔍 Verificando sesión activa...');
+        console.log('🔍 Verificando sesión en Supabase...');
         
-        // Obtener sesión de Supabase
-        const { data: { session } } = await window.supabase.auth.getSession();
+        // 1. OBTENER SESIÓN DE SUPABASE
+        const { data: { session }, error } = await window.supabase.auth.getSession();
         
+        if (error) {
+            console.error('Error obteniendo sesión:', error);
+            return null;
+        }
+        
+        // 2. SI NO HAY SESIÓN, SALIR
         if (!session || !session.user) {
-            console.log('📭 No hay sesión activa en Supabase');
+            console.log('📭 No hay usuario autenticado');
+            localStorage.removeItem('sicof_user');
+            localStorage.removeItem('supabase_session');
             return null;
         }
-
-        const email = session.user.email.toLowerCase();
-        console.log('📧 Email de sesión:', email);
-
-        // Verificar si está en usuarios autorizados
-        const metadata = USUARIOS_METADATA[email];
-        if (!metadata) {
-            console.warn('⚠️ Sesión activa pero usuario no autorizado en SICOF');
-            return null;
-        }
-
+        
+        // 3. OBTENER USER DE LA SESIÓN
+        const user = session.user;
+        console.log('✅ Sesión activa para:', user.email);
+        
+        // 4. OBTENER METADATOS DE SUPABASE
+        const userMetadata = user.user_metadata || {};
+        
+        // 5. CONSTRUIR OBJETO USUARIO
         const usuario = {
-            id: session.user.id,
-            email: session.user.email,
-            nombre: metadata.nombre,
-            rol: metadata.rol,
-            cuartel_codigo: metadata.cuartel_codigo,
+            id: user.id,
+            email: user.email,
+            nombre: userMetadata.nombre || user.email.split('@')[0],
+            rol: userMetadata.rol || 'usuario',
+            cuartel_codigo: userMetadata.cuartel_codigo || null,
             session: session
         };
-
-        console.log('✅ Sesión válida para:', usuario.nombre);
+        
+        // 6. ACTUALIZAR LOCALSTORAGE
+        localStorage.setItem('sicof_user', JSON.stringify(usuario));
+        localStorage.setItem('supabase_session', JSON.stringify(session));
+        
         return usuario;
-
+        
     } catch (error) {
-        console.error('❌ Error en verificarSesion:', error);
+        console.error('❌ Error verificando sesión:', error);
         return null;
     }
 };
 
 // ============================================
-// PROTEGER PÁGINAS POR ROL
+// PROTEGER PÁGINAS
 // ============================================
-
 window.protegerPagina = async function (rolRequerido = null) {
     try {
-        const user = await window.verificarSesion();
-
-        if (!user) {
-            alert('⚠️ Debes iniciar sesión para acceder a esta página');
+        // 1. VERIFICAR SESIÓN
+        const usuario = await window.verificarSesion();
+        
+        if (!usuario) {
+            alert('⚠️ Debes iniciar sesión');
             window.location.href = '/index.html';
             return null;
         }
-
-        if (rolRequerido && user.rol !== rolRequerido) {
-            alert(`⛔ Acceso denegado.\n\nTu rol: ${user.rol}\nRol requerido: ${rolRequerido}`);
+        
+        // 2. VERIFICAR ROL SI SE ESPECIFICA
+        if (rolRequerido && usuario.rol !== rolRequerido) {
+            alert(`⛔ Acceso denegado. Tu rol es: ${usuario.rol}`);
             window.location.href = '/index.html';
             return null;
         }
-
-        return user;
+        
+        // 3. REDIRIGIR SEGÚN ROL SI ESTÁ EN PÁGINA INCORRECTA
+        const paginaActual = window.location.pathname;
+        const paginaEsperada = window.SICOF_CONFIG.redirectUrls[usuario.rol];
+        
+        if (paginaEsperada && !paginaActual.includes(paginaEsperada)) {
+            console.log(`🔀 Redirigiendo a: ${paginaEsperada}`);
+            window.location.href = paginaEsperada;
+            return null;
+        }
+        
+        return usuario;
+        
     } catch (error) {
         console.error('Error en protegerPagina:', error);
         window.location.href = '/index.html';
@@ -217,13 +182,23 @@ window.protegerPagina = async function (rolRequerido = null) {
 // ============================================
 // LOGOUT
 // ============================================
-
 window.logout = async function () {
     try {
-        await window.supabase.auth.signOut();
+        // 1. CERRAR SESIÓN EN SUPABASE
+        const { error } = await window.supabase.auth.signOut();
+        
+        if (error) {
+            console.error('Error cerrando sesión en Supabase:', error);
+        }
+        
+        // 2. LIMPIAR LOCALSTORAGE
         localStorage.removeItem('sicof_user');
+        localStorage.removeItem('supabase_session');
+        
+        // 3. REDIRIGIR AL LOGIN
         console.log('👋 Sesión cerrada correctamente');
         window.location.href = 'index.html';
+        
     } catch (error) {
         console.error('Error en logout:', error);
         alert('Error al cerrar sesión');
@@ -231,69 +206,39 @@ window.logout = async function () {
 };
 
 // ============================================
-// FUNCIONES DE DIAGNÓSTICO
+// FUNCIONES DE PRUEBA
 // ============================================
-
-// Para probar desde consola del navegador
-window.probarLoginDirecto = async function(email = 'admin@carabineros.cl', password = 'Montañaofrontera2026') {
-    console.log('🧪 Probando login directo...');
+window.probarConexionSupabase = async function () {
+    console.log('🧪 Probando conexión con Supabase...');
     
     try {
-        const result = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
+        const { data, error } = await window.supabase.auth.getSession();
         
-        if (result.error) {
-            console.error('❌ Error:', result.error.message);
-            
-            // ERROR ESPECÍFICO: Usuario sin contraseña
-            if (result.error.message.includes('Invalid login credentials')) {
-                console.log('\n🔧 SOLUCIÓN:');
-                console.log('1. Ve a Supabase Dashboard → Authentication → Users');
-                console.log('2. Encuentra el usuario:', email);
-                console.log('3. Haz clic en "Reset Password"');
-                console.log('4. O ejecuta este SQL en el editor SQL:');
-                console.log(`
-UPDATE auth.users 
-SET encrypted_password = crypt('Montañaofrontera2026', gen_salt('bf'))
-WHERE email = '${email}';
-                `);
-            }
+        if (error) {
+            console.error('❌ Error de conexión:', error.message);
             return false;
         }
         
-        console.log('✅ Login exitoso!');
-        console.log('Usuario:', result.data.user);
-        console.log('Session:', result.data.session);
-        
-        // Verificar metadata
-        const emailLower = email.toLowerCase();
-        if (USUARIOS_METADATA[emailLower]) {
-            console.log('✅ Usuario autorizado en SICOF');
-        } else {
-            console.warn('⚠️ Usuario NO está en USUARIOS_METADATA');
-        }
-        
+        console.log('✅ Conexión OK. Estado:', data.session ? 'Con sesión' : 'Sin sesión');
         return true;
+        
     } catch (error) {
-        console.error('❌ Error catch:', error);
+        console.error('❌ Error:', error);
         return false;
     }
-};
-
-// Limpiar todo
-window.limpiarTodo = function() {
-    localStorage.clear();
-    supabase.auth.signOut();
-    console.log('🧹 Todo limpiado');
-    alert('Sesión limpiada. Recarga la página.');
 };
 
 // ============================================
 // INICIALIZACIÓN
 // ============================================
+console.log('🚀 SICOF Config v2.1.0 cargado');
+console.log('🔗 Supabase URL:', SUPABASE_URL);
+console.log('📊 Modo: Solo autenticación Supabase');
 
-console.log('🚀 SICOF Config v2.0.0 cargado');
-console.log('Supabase URL:', SUPABASE_URL);
-console.log('Usuarios disponibles:', Object.keys(USUARIOS_METADATA));
+// Verificar conexión al cargar
+window.addEventListener('DOMContentLoaded', async () => {
+    const conexionOK = await window.probarConexionSupabase();
+    if (!conexionOK) {
+        console.warn('⚠️ Problema de conexión con Supabase');
+    }
+});
