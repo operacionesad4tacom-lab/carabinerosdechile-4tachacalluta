@@ -406,7 +406,6 @@
     <script>
         // Variables globales
         let servicioId = null;
-        let supabase = null;
         
         // Función para mostrar mensajes
         function mostrarMensaje(texto, tipo = 'info') {
@@ -431,8 +430,10 @@
             
             // Obtener ID del servicio
             servicioId = localStorage.getItem('servicio_id');
+            console.log('Paso 3 - servicio_id encontrado:', servicioId);
+            
             if (!servicioId) {
-                mostrarMensaje('No se encontró el servicio. Complete el paso 1 primero.', 'danger');
+                mostrarMensaje('❌ No se encontró el servicio. Complete el paso 1 primero.', 'danger');
                 setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
                 return;
             }
@@ -440,7 +441,8 @@
             // Verificar que venga del paso 2
             const paso2Data = localStorage.getItem('servicio_paso2');
             if (!paso2Data) {
-                window.location.href = 'demanda-ciudadana.html';
+                mostrarMensaje('❌ Datos del paso 2 no encontrados', 'danger');
+                setTimeout(() => window.location.href = 'demanda-ciudadana.html', 2000);
                 return;
             }
             
@@ -455,15 +457,10 @@
                 }
             }
             
-            // Configurar Supabase
-            if (window.SICOF_CONFIG && window.SICOF_CONFIG.supabase) {
-                supabase = window.SICOF_CONFIG.supabase;
-            }
-            
             // Configurar validación en tiempo real
             configurarValidacionTiempoReal();
             
-            console.log('Paso 3 - Servicio ID:', servicioId);
+            console.log('Paso 3 - Listo para continuar');
         });
         
         function configurarValidacionTiempoReal() {
@@ -582,21 +579,21 @@
             const sitiosReal = parseInt(document.getElementById('sitios_realizados').value) || 0;
             
             if (hitosReal > hitosPlan) {
-                mostrarMensaje('No puede realizar más hitos de los planificados', 'danger');
+                mostrarMensaje('❌ No puede realizar más hitos de los planificados', 'danger');
                 return;
             }
             
             if (pnhReal > pnhPlan) {
-                mostrarMensaje('No puede realizar más PNH de los planificados', 'danger');
+                mostrarMensaje('❌ No puede realizar más PNH de los planificados', 'danger');
                 return;
             }
             
             if (sitiosReal > sitiosPlan) {
-                mostrarMensaje('No puede realizar más sitios de los planificados', 'danger');
+                mostrarMensaje('❌ No puede realizar más sitios de los planificados', 'danger');
                 return;
             }
             
-            // Recopilar datos del formulario
+            // Recopilar datos del formulario (EXACTAMENTE como la tabla)
             const formData = {
                 hitos_planificados: hitosPlan,
                 pnh_planificados: pnhPlan,
@@ -611,50 +608,67 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             try {
-                console.log('Actualizando servicio con datos de demanda preventiva:', formData);
+                console.log('Paso 3 - Actualizando servicio ID:', servicioId, 'Datos:', formData);
                 
-                // 1. Actualizar en Supabase si está disponible
-                if (supabase && servicioId) {
-                    const { error } = await supabase
-                        .from('servicios')
-                        .update(formData)
-                        .eq('id', servicioId);
-                    
-                    if (error) {
-                        console.error('Error al actualizar en Supabase:', error);
-                        throw new Error(`Error de base de datos: ${error.message}`);
-                    }
-                    
-                    console.log('✓ Datos de demanda preventiva actualizados en Supabase');
-                } else {
-                    console.warn('⚠ No se pudo actualizar en Supabase (modo offline)');
+                // 1. Verificar que Supabase esté configurado
+                if (!window.SICOF_CONFIG || !window.SICOF_CONFIG.supabase) {
+                    throw new Error('Configuración de Supabase no encontrada');
                 }
                 
-                // 2. Guardar datos en localStorage
+                const supabase = window.SICOF_CONFIG.supabase;
+                
+                // 2. Verificar que el servicio existe
+                const { data: servicioExistente, error: errorVerificar } = await supabase
+                    .from('servicios')
+                    .select('id')
+                    .eq('id', servicioId)
+                    .single();
+                
+                if (errorVerificar) {
+                    throw new Error(`El servicio no existe en la base de datos: ${errorVerificar.message}`);
+                }
+                
+                console.log('✓ Servicio verificado:', servicioExistente);
+                
+                // 3. ACTUALIZAR en Supabase
+                const { error } = await supabase
+                    .from('servicios')
+                    .update(formData)
+                    .eq('id', servicioId);
+                
+                if (error) {
+                    console.error('Error al actualizar en Supabase:', error);
+                    throw new Error(`Error de base de datos: ${error.message}`);
+                }
+                
+                console.log('✓ Datos de demanda preventiva actualizados en Supabase');
+                
+                // 4. Guardar datos en localStorage
                 localStorage.setItem('servicio_paso3', JSON.stringify(formData));
                 
-                // 3. Mostrar mensaje de éxito
+                // 5. Mostrar mensaje de éxito
                 mostrarMensaje('✅ Datos guardados correctamente. Redirigiendo al resumen...', 'success');
                 
-                // 4. Pequeña pausa
+                // 6. Pequeña pausa
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 
-                // 5. Redirigir al resumen
+                // 7. Redirigir al resumen
                 window.location.href = 'resumen-confirmacion.html';
                 
             } catch (error) {
                 console.error('Error guardando datos:', error);
-                mostrarMensaje('❌ Error al guardar los datos: ' + error.message, 'danger');
+                mostrarMensaje(`❌ Error al guardar: ${error.message}`, 'danger');
                 
                 // Guardar en localStorage como fallback
                 try {
                     localStorage.setItem('servicio_paso3', JSON.stringify(formData));
                     localStorage.setItem('servicio_offline', 'true');
                     console.warn('✓ Datos guardados en localStorage (modo offline)');
-                    mostrarMensaje('⚠ Datos guardados localmente. Redirigiendo al resumen...', 'warning');
+                    mostrarMensaje('⚠ Modo offline - Datos guardados localmente. Continuando...', 'warning');
                     
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    window.location.href = 'resumen-confirmacion.html';
+                    setTimeout(() => {
+                        window.location.href = 'resumen-confirmacion.html';
+                    }, 2000);
                 } catch (localError) {
                     console.error('Error guardando en localStorage:', localError);
                 }
@@ -675,6 +689,15 @@
                 }
             });
         });
+        
+        // Función para debugging
+        window.debugInfo = function() {
+            console.log('=== DEBUG PASO 3 ===');
+            console.log('servicio_id:', localStorage.getItem('servicio_id'));
+            console.log('servicio_paso2:', localStorage.getItem('servicio_paso2'));
+            console.log('SICOF_CONFIG:', window.SICOF_CONFIG ? 'Disponible' : 'No disponible');
+            console.log('====================');
+        };
     </script>
 </body>
 </html>
