@@ -128,12 +128,12 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label>Usuario</label>
-                    <input type="email" id="email" placeholder="usuario@carabineros.cl" required>
+                    <input type="email" id="email" placeholder="usuario@carabineros.cl" required autocomplete="username">
                 </div>
                 
                 <div class="form-group">
                     <label>Contraseña</label>
-                    <input type="password" id="password" placeholder="********" required value="Montañaofrontera2026">
+                    <input type="password" id="password" placeholder="********" required autocomplete="current-password" value="Montañaofrontera2026">
                 </div>
                 
                 <button type="submit" class="btn-login" id="loginBtn">INICIAR SESIÓN</button>
@@ -145,7 +145,7 @@
         </div>
     </div>
 
-    <!-- Supabase -->
+    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
@@ -153,10 +153,10 @@
         const SUPABASE_URL = "https://rytpgbfbeeuqzcgeujzy.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dHBnYmZiZWV1cXpjZ2V1anp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NjUwMDcsImV4cCI6MjA4NDA0MTAwN30.dQ2WlMBAVqLg8hUWUPxpLMMw3XO7-PRTn9gxf9Bslac";
         
-        // Inicializar Supabase
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inicializar Supabase (SOLO UNA VEZ)
+        const clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        // Configuración
+        // Configuración del sistema
         const SICOF_CONFIG = {
             redirectUrls: {
                 digitador: 'servicios/datos-servicio.html',
@@ -167,20 +167,26 @@
             }
         };
         
-        // FUNCIONES
+        // FUNCIÓN DE LOGIN
         async function loginUsuario(email, password) {
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                console.log('Intentando login con:', email);
+                
+                const { data, error } = await clientSupabase.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
                 
                 if (error) {
+                    console.error('Error Supabase:', error.message);
+                    
                     if (error.message.includes('Email logins are disabled')) {
                         throw new Error('ERROR: Login por email deshabilitado. Contacte al administrador.');
                     }
                     throw new Error('Usuario o contraseña incorrectos');
                 }
+                
+                console.log('Login exitoso');
                 
                 const user = data.user;
                 const metadata = user.user_metadata || {};
@@ -194,13 +200,16 @@
                 };
                 
             } catch (error) {
+                console.error('Error en loginUsuario:', error);
                 throw error;
             }
         }
         
+        // VERIFICAR SESIÓN
         async function verificarSesion() {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                const { data: { session } } = await clientSupabase.auth.getSession();
+                
                 if (session?.user) {
                     const metadata = session.user.user_metadata || {};
                     return {
@@ -211,50 +220,79 @@
                     };
                 }
                 return null;
+                
             } catch (error) {
+                console.error('Error en verificarSesion:', error);
                 return null;
             }
         }
         
         // MANEJO DEL FORMULARIO
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('SICOF Login inicializado');
+            
             // Verificar si ya está logueado
             const user = await verificarSesion();
             if (user) {
-                const destino = SICOF_CONFIG.redirectUrls[user.rol];
-                if (destino) window.location.href = destino;
+                console.log('Usuario ya autenticado:', user.email);
+                mostrarMensaje(`Bienvenido de vuelta, ${user.nombre}`, 'success');
+                
+                setTimeout(() => {
+                    const destino = SICOF_CONFIG.redirectUrls[user.rol];
+                    if (destino) {
+                        window.location.href = destino;
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
+                }, 1500);
             }
             
             // Configurar formulario
-            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            const form = document.getElementById('loginForm');
+            const btn = document.getElementById('loginBtn');
+            let procesando = false;
+            
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
+                
+                if (procesando) return;
                 
                 const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
-                const btn = document.getElementById('loginBtn');
-                const msg = document.getElementById('message');
                 
                 // Validación básica
+                if (!email) {
+                    mostrarMensaje('Ingrese su correo institucional', 'error');
+                    return;
+                }
+                
                 if (!email.endsWith('@carabineros.cl')) {
                     mostrarMensaje('Solo correos @carabineros.cl permitidos', 'error');
                     return;
                 }
                 
-                // Deshabilitar botón
+                if (!password) {
+                    mostrarMensaje('Ingrese su contraseña', 'error');
+                    return;
+                }
+                
+                // Iniciar proceso de login
+                procesando = true;
                 btn.disabled = true;
                 btn.textContent = 'VERIFICANDO...';
-                msg.style.display = 'none';
                 
                 try {
                     const usuario = await loginUsuario(email, password);
                     
                     // Guardar en localStorage
                     localStorage.setItem('sicof_user', JSON.stringify(usuario));
-                    localStorage.setItem('supabase_session', JSON.stringify(usuario.session));
+                    if (usuario.session) {
+                        localStorage.setItem('supabase_session', JSON.stringify(usuario.session));
+                    }
                     
-                    mostrarMensaje(`Acceso autorizado: ${usuario.nombre}`, 'success');
+                    mostrarMensaje(`✅ Acceso autorizado: ${usuario.nombre}`, 'success');
                     
-                    // Redirigir
+                    // Redirigir según rol
                     setTimeout(() => {
                         const destino = SICOF_CONFIG.redirectUrls[usuario.rol];
                         if (destino) {
@@ -265,13 +303,15 @@
                     }, 1000);
                     
                 } catch (error) {
-                    mostrarMensaje(error.message, 'error');
+                    mostrarMensaje(`❌ ${error.message}`, 'error');
+                    procesando = false;
                     btn.disabled = false;
                     btn.textContent = 'INICIAR SESIÓN';
                 }
             });
         });
         
+        // MOSTRAR MENSAJES
         function mostrarMensaje(texto, tipo) {
             const msg = document.getElementById('message');
             msg.textContent = texto;
@@ -283,23 +323,30 @@
             }
         }
         
-        // FUNCIONES DE DEBUG
-        window.testLogin = async function(email = 'admin@carabineros.cl') {
+        // FUNCIONES DE DEBUG (para consola)
+        window.probarLogin = async function(email = 'admin@carabineros.cl') {
+            console.log('Probando login con:', email);
             try {
                 const usuario = await loginUsuario(email, 'Montañaofrontera2026');
-                console.log('Login exitoso:', usuario);
+                console.log('✅ Login exitoso:', usuario);
                 return usuario;
             } catch (error) {
-                console.error('Error:', error.message);
+                console.error('❌ Error:', error.message);
                 return null;
             }
         };
         
-        window.limpiarTodo = function() {
+        window.limpiarSesion = function() {
             localStorage.clear();
-            supabase.auth.signOut();
-            console.log('Sesión limpiada');
+            clientSupabase.auth.signOut();
+            console.log('🧹 Sesión limpiada');
             location.reload();
+        };
+        
+        window.mostrarEstado = function() {
+            console.log('Estado actual:');
+            console.log('- URL Supabase:', SUPABASE_URL);
+            console.log('- Usuario en localStorage:', localStorage.getItem('sicof_user'));
         };
     </script>
 </body>
