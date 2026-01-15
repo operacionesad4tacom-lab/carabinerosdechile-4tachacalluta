@@ -410,21 +410,86 @@
             document.getElementById('visibilidad').addEventListener('input', actualizarPanelRiesgo);
         });
         
-        async function cargarCuarteles() {
-            const select = document.getElementById('cuartel_codigo');
-            const user = JSON.parse(localStorage.getItem('sicof_user'));
+async function cargarCuarteles() {
+    const select = document.getElementById('cuartel_codigo');
+    const user = JSON.parse(localStorage.getItem('sicof_user'));
+    
+    try {
+        // 1. VERIFICAR CONEXIÓN SUPABASE
+        if (!window.supabase) {
+            mostrarMensaje('Error: No hay conexión con la base de datos', 'danger');
+            console.error('ERROR: window.supabase no está definido');
             
-            if (user.rol === 'digitador' && user.cuartel_codigo) {
-                const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
-                if (cuartel) {
-                    select.innerHTML = `<option value="${cuartel.codigo}">${cuartel.nombre}</option>`;
-                    select.disabled = true;
-                }
+            // Cargar datos estáticos como fallback
+            cargarCuartelesEstaticos(select, user);
+            return;
+        }
+        
+        // 2. CONSULTAR TABLA "cuarteles" EN SUPABASE
+        const { data: cuartelesData, error } = await window.supabase
+            .from('cuarteles')  // ← NOMBRE EXACTO de tu tabla
+            .select('codigo, nombre, activo')
+            .eq('activo', true)  // Solo cuarteles activos
+            .order('nombre');    // Orden alfabético
+        
+        if (error) {
+            console.error('Error de Supabase:', error);
+            mostrarMensaje('Error al cargar cuarteles desde la base de datos', 'danger');
+            cargarCuartelesEstaticos(select, user);
+            return;
+        }
+        
+        // 3. CASO 1: DIGITADOR CON CUARTEL ASIGNADO
+        if (user.rol === 'digitador' && user.cuartel_codigo) {
+            // Buscar el cuartel específico del usuario
+            const miCuartel = cuartelesData.find(c => c.codigo === user.cuartel_codigo);
+            
+            if (miCuartel) {
+                select.innerHTML = `<option value="${miCuartel.codigo}">${miCuartel.nombre}</option>`;
+                select.disabled = true; // No puede cambiar su cuartel
+                console.log('Cuartel asignado al digitador:', miCuartel);
             } else {
-                select.innerHTML = '<option value="">Seleccionar cuartel...</option>' +
-                    window.SICOF_CONFIG.cuarteles.map(cuartel => 
-                        `<option value="${cuartel.codigo}">${cuartel.nombre}</option>`
-                    ).join('');
+                // Si no encuentra su cuartel, mostrar opciones
+                cargarOpcionesCuarteles(select, cuartelesData);
+                mostrarMensaje('Tu cuartel asignado no está disponible', 'warning');
+            }
+        } 
+        // 4. CASO 2: ADMINISTRADOR O USUARIO SIN CUARTEL ASIGNADO
+        else {
+            cargarOpcionesCuarteles(select, cuartelesData);
+            console.log('Cuarteles cargados desde Supabase:', cuartelesData.length);
+        }
+        
+    } catch (error) {
+        console.error('Error inesperado:', error);
+        mostrarMensaje('Error inesperado al cargar cuarteles', 'danger');
+        cargarCuartelesEstaticos(select, user);
+    }
+}
+
+// FUNCIONES AUXILIARES
+function cargarOpcionesCuarteles(select, cuartelesData) {
+    select.innerHTML = '<option value="">Seleccionar cuartel...</option>' +
+        cuartelesData.map(cuartel => 
+            `<option value="${cuartel.codigo}">${cuartel.nombre}</option>`
+        ).join('');
+}
+
+        function cargarCuartelesEstaticos(select, user) {
+            // Fallback con datos estáticos de config.js
+            if (window.SICOF_CONFIG && window.SICOF_CONFIG.cuarteles) {
+                if (user.rol === 'digitador' && user.cuartel_codigo) {
+                    const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
+                    if (cuartel) {
+                        select.innerHTML = `<option value="${cuartel.codigo}">${cuartel.nombre}</option>`;
+                        select.disabled = true;
+                    }
+                } else {
+                    cargarOpcionesCuarteles(select, window.SICOF_CONFIG.cuarteles);
+                }
+                console.warn('Usando datos estáticos de cuarteles');
+            } else {
+                select.innerHTML = '<option value="">No hay cuarteles disponibles</option>';
             }
         }
         
@@ -527,3 +592,4 @@
     </script>
 </body>
 </html>
+
