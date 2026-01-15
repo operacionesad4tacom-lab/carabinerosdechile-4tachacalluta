@@ -1,267 +1,78 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SICOF - Login</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #084c2a, #0b6b3a);
-            font-family: Arial, sans-serif;
-        }
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const msg = document.getElementById('message');
+    const loginBtn = document.getElementById('loginBtn');
+    
+    // Validación básica
+    if (!email || !password) {
+        mostrarError('Por favor completa todos los campos');
+        return;
+    }
+    
+    // Deshabilitar botón
+    loginBtn.disabled = true;
+    loginBtn.textContent = '⏳ Autenticando...';
+    msg.style.display = 'none';
+    
+    try {
+        // SOLO LLAMAMOS A SUPABASE
+        const usuario = await window.loginUsuario(email, password);
         
-        .login-box {
-            width: 90%;
-            max-width: 400px;
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
+        // Mostrar éxito
+        msg.innerHTML = `
+            <strong>✅ Autenticación exitosa</strong><br>
+            <small>Bienvenido ${usuario.nombre} (${usuario.rol})</small>
+        `;
+        msg.className = 'alert alert-success';
+        msg.style.display = 'block';
         
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+        // Redirigir según el rol que viene de Supabase
+        setTimeout(() => {
+            const destino = window.SICOF_CONFIG.redirectUrls[usuario.rol] || 'dashboard.html';
+            window.location.href = destino;
+        }, 1000);
         
-        .logo img {
-            height: 60px;
-        }
+    } catch (error) {
+        // Mostrar error
+        mostrarError(error.message);
         
-        h2 {
-            text-align: center;
-            color: #084c2a;
-            margin-bottom: 20px;
-        }
-        
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: bold;
-        }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        input:focus {
-            border-color: #0b6b3a;
-            outline: none;
-        }
-        
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #0b6b3a;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        
-        button:hover {
-            background: #084c2a;
-        }
-        
-        .message {
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            text-align: center;
-            display: none;
-        }
-        
-        .error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
-        .success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        
-        .test-users {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        
-        .test-btn {
-            background: #f0f0f0;
-            color: #333;
-            margin: 5px 0;
-        }
-        
-        .test-btn:hover {
-            background: #e0e0e0;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-box">
-        <div class="logo">
-            <img src="assets/logos/escudo-carabineros.png" alt="Carabineros">
-        </div>
-        
-        <h2>SICOF - Login</h2>
-        
-        <div id="message" class="message"></div>
-        
-        <form id="loginForm">
-            <div class="input-group">
-                <label>Correo:</label>
-                <input type="email" id="email" required placeholder="usuario@carabineros.cl">
-            </div>
-            
-            <div class="input-group">
-                <label>Contraseña:</label>
-                <input type="password" id="password" required value="Montañaofrontera2026">
-            </div>
-            
-            <button type="submit" id="loginBtn">INGRESAR</button>
-        </form>
-        
-        <div class="test-users">
-            <p style="text-align: center; margin-bottom: 10px; color: #666;">Usuarios de prueba:</p>
-            <button class="test-btn" onclick="testLogin('digitador.chacalluta@carabineros.cl')">Digitador Chacalluta</button>
-            <button class="test-btn" onclick="testLogin('jefe.chacalluta@carabineros.cl')">Jefe Chacalluta</button>
-            <button class="test-btn" onclick="testLogin('admin@carabineros.cl')">Administrador</button>
-        </div>
-        
-        <p style="margin-top: 15px; text-align: center; color: #888; font-size: 12px;">
-            Contraseña: Montañaofrontera2026
-        </p>
-    </div>
+        // Rehabilitar botón
+        loginBtn.disabled = false;
+        loginBtn.textContent = '🚪 INGRESAR';
+    }
+});
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // CONFIGURACIÓN SIMPLE
-        const SUPABASE_URL = "https://rytpgbfbeeuqzcgeujzy.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dHBnYmZiZWV1cXpjZ2V1anp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NjUwMDcsImV4cCI6MjA4NDA0MTAwN30.dQ2WlMBAVqLg8hUWUPxpLMMw3XO7-PRTn9gxf9Bslac";
-        
-        const supabase = window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        // USUARIOS PERMITIDOS
-        const USUARIOS = {
-            'digitador.chacalluta@carabineros.cl': { nombre: 'Digitador Chacalluta', rol: 'digitador' },
-            'jefe.chacalluta@carabineros.cl': { nombre: 'Jefe Chacalluta', rol: 'jefe' },
-            'admin@carabineros.cl': { nombre: 'Administrador', rol: 'admin' }
-        };
-        
-        // FUNCIÓN DE LOGIN SIMPLIFICADA
-        async function login(email, password) {
-            try {
-                console.log('Intentando login con:', email);
-                
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-                
-                if (error) {
-                    console.error('Error Supabase:', error);
-                    throw new Error(error.message);
-                }
-                
-                console.log('Login exitoso:', data.user);
-                
-                const usuario = USUARIOS[email.toLowerCase()];
-                if (!usuario) {
-                    throw new Error('Usuario no autorizado en el sistema');
-                }
-                
-                return {
-                    ...usuario,
-                    email: data.user.email,
-                    session: data.session
-                };
-                
-            } catch (error) {
-                console.error('Error completo:', error);
-                throw error;
-            }
+function mostrarError(mensaje) {
+    const msg = document.getElementById('message');
+    msg.innerHTML = `<strong>❌ ${mensaje}</strong>`;
+    msg.className = 'alert alert-danger';
+    msg.style.display = 'block';
+    
+    setTimeout(() => msg.style.display = 'none', 5000);
+}
+
+// Función para pruebas rápidas
+function autoLogin(email) {
+    document.getElementById('email').value = email;
+    document.getElementById('password').value = 'Montañaofrontera2026';
+    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+}
+
+// Verificar si ya está logueado
+(async () => {
+    try {
+        const user = await window.verificarSesion();
+        if (user) {
+            console.log('Redirigiendo usuario autenticado:', user.rol);
+            const destino = window.SICOF_CONFIG.redirectUrls[user.rol] || 'dashboard.html';
+            window.location.href = destino;
         }
-        
-        // MANEJADOR DEL FORMULARIO
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('loginBtn');
-            const msg = document.getElementById('message');
-            
-            btn.disabled = true;
-            btn.textContent = 'VERIFICANDO...';
-            msg.style.display = 'none';
-            
-            try {
-                const usuario = await login(email, password);
-                
-                msg.textContent = `✅ Bienvenido ${usuario.nombre}`;
-                msg.className = 'message success';
-                msg.style.display = 'block';
-                
-                // Guardar usuario
-                localStorage.setItem('sicof_user', JSON.stringify(usuario));
-                
-                // Redirigir según rol
-                setTimeout(() => {
-                    if (usuario.rol === 'digitador') window.location.href = 'servicios/datos-servicio.html';
-                    else if (usuario.rol === 'jefe') window.location.href = 'cuarteles/estado-operativo.html';
-                    else if (usuario.rol === 'admin') window.location.href = 'admin/admin-panel.html';
-                    else window.location.href = 'dashboard.html';
-                }, 1000);
-                
-            } catch (error) {
-                msg.textContent = `❌ Error: ${error.message}`;
-                msg.className = 'message error';
-                msg.style.display = 'block';
-                
-                btn.disabled = false;
-                btn.textContent = 'INGRESAR';
-            }
-        });
-        
-        // FUNCIÓN PARA PRUEBAS
-        function testLogin(email) {
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = 'Montañaofrontera2026';
-            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-        }
-        
-        // VERIFICAR SI YA ESTÁ LOGUEADO
-        async function verificarSesion() {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session && session.user) {
-                    const usuario = USUARIOS[session.user.email.toLowerCase()];
-                    if (usuario) {
-                        localStorage.setItem('sicof_user', JSON.stringify(usuario));
-                        // Redirigir según rol
-                        if (usuario.rol === 'digitador') window.location.href = 'servicios/datos-servicio.html';
-                        else if (usuario.rol === 'jefe') window.location.href = 'cuarteles/estado-operativo.html';
-                        else if (usuario.rol === 'admin') window.location.href = 'admin/admin-panel.html';
-                    }
-                }
-            } catch (error) {
-                console.log('No hay sesión activa');
-            }
-        }
-        
-        // Ejecutar al cargar
-        verificarSesion();
-    </script>
-</body>
-</html>
+    } catch (error) {
+        console.log('No hay sesión activa');
+    }
+})();
+</script>
