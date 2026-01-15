@@ -443,7 +443,6 @@
     <script>
         // Variables globales
         let servicioId = null;
-        // ELIMINAR ESTA LÍNEA: let supabase = null; // <-- ESTO CAUSABA EL ERROR
         
         // Función para mostrar mensajes
         function mostrarMensaje(texto, tipo = 'info') {
@@ -466,10 +465,12 @@
                 return;
             }
             
-            // Obtener ID del servicio
+            // Obtener ID del servicio (VERIFICACIÓN CRÍTICA)
             servicioId = localStorage.getItem('servicio_id');
+            console.log('Paso 2 - servicio_id encontrado:', servicioId);
+            
             if (!servicioId) {
-                mostrarMensaje('No se encontró el servicio. Complete el paso 1 primero.', 'danger');
+                mostrarMensaje('❌ No se encontró el servicio. Complete el paso 1 primero.', 'danger');
                 setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
                 return;
             }
@@ -477,7 +478,8 @@
             // Verificar que venga del paso 1
             const paso1Data = localStorage.getItem('servicio_paso1');
             if (!paso1Data) {
-                window.location.href = 'datos-servicio.html';
+                mostrarMensaje('❌ Datos del paso 1 no encontrados', 'danger');
+                setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
                 return;
             }
             
@@ -492,14 +494,14 @@
                 }
             }
             
-            console.log('Paso 2 - Servicio ID:', servicioId);
+            console.log('Paso 2 - Listo para continuar, ID:', servicioId);
         });
         
         // Manejar envío del formulario
         document.getElementById('demandaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Recopilar datos del formulario
+            // Recopilar datos del formulario (EXACTAMENTE como la tabla)
             const formData = {
                 controles_investigativos: parseInt(document.getElementById('controles_investigativos').value) || 0,
                 controles_preventivos: parseInt(document.getElementById('controles_preventivos').value) || 0,
@@ -516,7 +518,7 @@
             
             // Validaciones
             if (formData.detenidos_cantidad > 0 && !formData.motivo_detencion) {
-                mostrarMensaje('Si hay detenidos, debe especificar el motivo', 'warning');
+                mostrarMensaje('⚠ Si hay detenidos, debe especificar el motivo', 'warning');
                 return;
             }
             
@@ -524,17 +526,31 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             try {
-                console.log('Actualizando servicio con datos de demanda ciudadana:', formData);
+                console.log('Paso 2 - Actualizando servicio ID:', servicioId, 'Datos:', formData);
                 
                 // 1. Verificar que Supabase esté configurado
                 if (!window.SICOF_CONFIG || !window.SICOF_CONFIG.supabase) {
                     throw new Error('Configuración de Supabase no encontrada');
                 }
                 
-                // 2. Acceder a supabase desde SICOF_CONFIG (que viene de config.js)
                 const supabase = window.SICOF_CONFIG.supabase;
                 
-                // 3. Actualizar en Supabase
+                // 2. Verificar que el servicio existe (DEBUG)
+                console.log('Verificando existencia del servicio...');
+                const { data: servicioExistente, error: errorVerificar } = await supabase
+                    .from('servicios')
+                    .select('id, cuartel_codigo, nombre_servicio')
+                    .eq('id', servicioId)
+                    .single();
+                
+                if (errorVerificar) {
+                    console.error('Error verificando servicio:', errorVerificar);
+                    throw new Error(`El servicio no existe en la base de datos: ${errorVerificar.message}`);
+                }
+                
+                console.log('✓ Servicio verificado:', servicioExistente);
+                
+                // 3. ACTUALIZAR en Supabase
                 const { error } = await supabase
                     .from('servicios')
                     .update(formData)
@@ -561,17 +577,18 @@
                 
             } catch (error) {
                 console.error('Error guardando datos:', error);
-                mostrarMensaje('❌ Error al guardar los datos: ' + error.message, 'danger');
+                mostrarMensaje(`❌ Error al guardar: ${error.message}`, 'danger');
                 
                 // Guardar en localStorage como fallback
                 try {
                     localStorage.setItem('servicio_paso2', JSON.stringify(formData));
                     localStorage.setItem('servicio_offline', 'true');
                     console.warn('✓ Datos guardados en localStorage (modo offline)');
-                    mostrarMensaje('⚠ Datos guardados localmente. Redirigiendo al siguiente paso...', 'warning');
+                    mostrarMensaje('⚠ Modo offline - Datos guardados localmente. Continuando...', 'warning');
                     
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    window.location.href = 'demanda-preventiva.html';
+                    setTimeout(() => {
+                        window.location.href = 'demanda-preventiva.html';
+                    }, 2000);
                 } catch (localError) {
                     console.error('Error guardando en localStorage:', localError);
                 }
@@ -592,6 +609,15 @@
                 }
             });
         });
+        
+        // Función para debugging
+        window.debugInfo = function() {
+            console.log('=== DEBUG PASO 2 ===');
+            console.log('servicio_id:', localStorage.getItem('servicio_id'));
+            console.log('servicio_paso1:', localStorage.getItem('servicio_paso1'));
+            console.log('SICOF_CONFIG:', window.SICOF_CONFIG ? 'Disponible' : 'No disponible');
+            console.log('====================');
+        };
     </script>
 </body>
 </html>
