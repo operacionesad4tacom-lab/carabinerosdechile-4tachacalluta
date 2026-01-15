@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICOF - Ranking de Cuarteles</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <link rel="stylesheet" href="../css/tablet.css">
+    <link rel="stylesheet" href="../css/desktop.css">
+    <link rel="stylesheet" href="../css/charts.css">
+    <link rel="icon" href="../assets/logos/favicon.ico">
+    <style>
+        .ranking-table {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+            border: 1px solid var(--verde-claro);
+        }
+        
+        .ranking-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 120px 120px 120px;
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--verde-claro);
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        
+        .ranking-row:hover {
+            background-color: var(--gris-claro);
+        }
+        
+        .ranking-row.header {
+            background-color: var(--verde-claro);
+            font-weight: 600;
+            color: var(--verde-oscuro);
+        }
+        
+        .ranking-position {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .position-1 { color: #FFD700; }
+        .position-2 { color: #C0C0C0; }
+        .position-3 { color: #CD7F32; }
+        
+        .score-bar {
+            height: 8px;
+            background-color: var(--gris-claro);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--verde-oficial), var(--verde-exito));
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <header class="header-institucional">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="../assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
+                <div class="logo-text">
+                    <div class="logo-title">SICOF - Sistema Integrado</div>
+                    <div class="logo-subtitle">Control Operativo Fronterizo</div>
+                </div>
+            </div>
+            <div class="user-info" style="color: var(--blanco); text-align: right;">
+                <div style="font-weight: 600;">RANKING JEFATURA</div>
+                <div style="font-size: 0.875rem; opacity: 0.9;" id="userInfo">Cargando...</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding: var(--spacing-xl) 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
+            <div>
+                <h1 style="margin-bottom: var(--spacing-xs);">🏆 Ranking de Cuarteles</h1>
+                <p style="color: var(--gris-medio);">Clasificación por desempeño operacional</p>
+            </div>
+            <select id="periodo" class="form-control" style="max-width: 200px;" onchange="cargarRanking()">
+                <option value="mes">Último mes</option>
+                <option value="trimestre">Último trimestre</option>
+                <option value="semestre">Último semestre</option>
+                <option value="ano">Último año</option>
+            </select>
+        </div>
+        
+        <div id="loadingMessage" class="alert alert-info" style="display: none;">
+            <div class="loading-spinner" style="display: inline-block; margin-right: 10px;"></div>
+            Calculando ranking...
+        </div>
+        
+        <div class="ranking-table" id="rankingContainer">
+            <div class="ranking-row header">
+                <div>Pos.</div>
+                <div>Cuartel</div>
+                <div style="text-align: center;">Servicios</div>
+                <div style="text-align: center;">Controles</div>
+                <div style="text-align: center;">Cumplimiento</div>
+                <div style="text-align: center;">Puntuación</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await protectPage('jefatura');
+            if (!user) return;
+            updateUserInfo(user);
+            await cargarRanking();
+        });
+        
+        async function cargarRanking() {
+            try {
+                document.getElementById('loadingMessage').style.display = 'block';
+                
+                const periodo = document.getElementById('periodo').value;
+                const fechas = getDateRange(periodo);
+                
+                const { data, error } = await window.supabase
+                    .from('servicios')
+                    .select('*')
+                    .gte('fecha', fechas.start)
+                    .lte('fecha', fechas.end);
+                
+                if (error) throw error;
+                
+                const ranking = calcularRanking(data);
+                mostrarRanking(ranking);
+                
+                document.getElementById('loadingMessage').style.display = 'none';
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error al cargar ranking', 'danger');
+            }
+        }
+        
+        function calcularRanking(servicios) {
+            const porCuartel = {};
+            
+            servicios.forEach(s => {
+                if (!porCuartel[s.cuartel_codigo]) {
+                    porCuartel[s.cuartel_codigo] = {
+                        codigo: s.cuartel_codigo,
+                        servicios: 0,
+                        controles: 0,
+                        cumplimiento: []
+                    };
+                }
+                
+                porCuartel[s.cuartel_codigo].servicios++;
+                porCuartel[s.cuartel_codigo].controles += 
+                    (s.controles_investigativos || 0) + (s.controles_preventivos || 0) + 
+                    (s.controles_migratorios || 0) + (s.controles_vehiculares || 0);
+                
+                if (s.hitos_planificados > 0 || s.pnh_planificados > 0 || s.sitios_planificados > 0) {
+                    const cum = (
+                        (s.hitos_planificados > 0 ? (s.hitos_realizados / s.hitos_planificados) * 100 : 0) +
+                        (s.pnh_planificados > 0 ? (s.pnh_realizados / s.pnh_planificados) * 100 : 0) +
+                        (s.sitios_planificados > 0 ? (s.sitios_realizados / s.sitios_planificados) * 100 : 0)
+                    ) / 3;
+                    porCuartel[s.cuartel_codigo].cumplimiento.push(cum);
+                }
+            });
+            
+            // Calcular puntuación
+            const ranking = Object.values(porCuartel).map(cuartel => {
+                const cumProm = cuartel.cumplimiento.length > 0 
+                    ? cuartel.cumplimiento.reduce((a, b) => a + b, 0) / cuartel.cumplimiento.length 
+                    : 0;
+                
+                const puntuacion = (cuartel.servicios * 10) + (cuartel.controles * 2) + cumProm;
+                
+                return {
+                    ...cuartel,
+                    cumplimientoPromedio: cumProm,
+                    puntuacion
+                };
+            });
+            
+            // Ordenar por puntuación
+            ranking.sort((a, b) => b.puntuacion - a.puntuacion);
+            
+            return ranking;
+        }
+        
+        function mostrarRanking(ranking) {
+            const container = document.getElementById('rankingContainer');
+            const maxPuntuacion = ranking.length > 0 ? ranking[0].puntuacion : 100;
+            
+            const rows = ranking.map((cuartel, index) => {
+                const cuartelInfo = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === cuartel.codigo);
+                const nombre = cuartelInfo ? cuartelInfo.nombre : cuartel.codigo;
+                const positionClass = index < 3 ? `position-${index + 1}` : '';
+                const scorePercent = (cuartel.puntuacion / maxPuntuacion) * 100;
+                
+                return `
+                    <div class="ranking-row">
+                        <div class="ranking-position ${positionClass}">
+                            ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                        </div>
+                        <div>
+                            <strong>${nombre}</strong>
+                            <div class="score-bar">
+                                <div class="score-fill" style="width: ${scorePercent}%"></div>
+                            </div>
+                        </div>
+                        <div style="text-align: center;">${formatNumber(cuartel.servicios)}</div>
+                        <div style="text-align: center;">${formatNumber(cuartel.controles)}</div>
+                        <div style="text-align: center;">
+                            <span class="badge ${getBadgeByPercentage(cuartel.cumplimientoPromedio)}">
+                                ${formatPorcentaje(cuartel.cumplimientoPromedio)}
+                            </span>
+                        </div>
+                        <div style="text-align: center; font-weight: bold; color: var(--verde-oficial);">
+                            ${Math.round(cuartel.puntuacion)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = `
+                <div class="ranking-row header">
+                    <div>Pos.</div>
+                    <div>Cuartel</div>
+                    <div style="text-align: center;">Servicios</div>
+                    <div style="text-align: center;">Controles</div>
+                    <div style="text-align: center;">Cumplimiento</div>
+                    <div style="text-align: center;">Puntuación</div>
+                </div>
+                ${rows}
+            `;
+        }
+    </script>
+</body>
+</html>

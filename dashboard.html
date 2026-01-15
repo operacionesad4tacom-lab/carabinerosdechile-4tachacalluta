@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICOF - Dashboard de Gestión</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="css/tablet.css">
+    <link rel="stylesheet" href="css/desktop.css">
+    <link rel="icon" href="assets/logos/favicon.ico">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--verde-claro);
+        }
+        
+        .dashboard-title {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+        
+        .dashboard-icon {
+            font-size: 2rem;
+        }
+        
+        .filtros-container {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            border: 1px solid var(--verde-claro);
+        }
+        
+        .filtros-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            color: var(--verde-oscuro);
+        }
+        
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .kpi-card {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-xl);
+            border: 1px solid var(--verde-claro);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .kpi-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+        
+        .kpi-titulo {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gris-medio);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .kpi-valor {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+            line-height: 1;
+        }
+        
+        .kpi-tendencia {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .tendencia-positiva {
+            color: var(--verde-exito);
+        }
+        
+        .tendencia-negativa {
+            color: var(--rojo-alerta);
+        }
+        
+        .tendencia-neutra {
+            color: var(--gris-medio);
+        }
+        
+        .tabla-container {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 1px solid var(--verde-claro);
+            overflow-x: auto;
+        }
+        
+        .tabla-titulo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            color: var(--verde-oscuro);
+        }
+        
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--verde-claro);
+            transition: background-color 0.2s ease;
+        }
+        
+        .ranking-item:hover {
+            background-color: var(--gris-claro);
+        }
+        
+        .ranking-posicion {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--verde-claro);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--verde-oscuro);
+            margin-right: var(--spacing-md);
+            flex-shrink: 0;
+        }
+        
+        .ranking-posicion.top1 {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #FFF;
+        }
+        
+        .ranking-posicion.top2 {
+            background: linear-gradient(135deg, #C0C0C0 0%, #A0A0A0 100%);
+            color: #FFF;
+        }
+        
+        .ranking-posicion.top3 {
+            background: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%);
+            color: #FFF;
+        }
+        
+        .ranking-info {
+            flex: 1;
+        }
+        
+        .ranking-nombre {
+            font-weight: 600;
+            color: var(--gris-profesional);
+        }
+        
+        .ranking-datos {
+            display: flex;
+            gap: var(--spacing-md);
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+        }
+        
+        .ranking-puntuacion {
+            font-weight: 700;
+            color: var(--verde-oficial);
+        }
+        
+        .grafico-container {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 1px solid var(--verde-claro);
+        }
+        
+        .grafico-titulo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            color: var(--verde-oscuro);
+        }
+        
+        .cuarteles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+        
+        .cuartel-card {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--verde-claro);
+        }
+        
+        .cuartel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .cuartel-nombre {
+            font-weight: 600;
+            color: var(--gris-profesional);
+        }
+        
+        .cuartel-estado {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .estado-optimo {
+            background-color: var(--verde-exito);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+        }
+        
+        .estado-advertencia {
+            background-color: var(--naranja-advertencia);
+            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.2);
+        }
+        
+        .estado-critico {
+            background-color: var(--rojo-alerta);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+        }
+        
+        .cuartel-datos {
+            font-size: 0.875rem;
+        }
+        
+        .cuartel-dato {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .cuartel-label {
+            color: var(--gris-medio);
+        }
+        
+        .cuartel-valor {
+            font-weight: 600;
+            color: var(--gris-profesional);
+        }
+        
+        .alertas-container {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border: 2px solid #ff9800;
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .alertas-titulo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            color: #e65100;
+        }
+        
+        .alerta-item {
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: var(--spacing-sm);
+            border-left: 4px solid #ff9800;
+        }
+        
+        .alerta-nivel {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: var(--spacing-sm);
+        }
+        
+        .alerta-critica {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        
+        .alerta-media {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .alerta-leve {
+            background: #f1f8e9;
+            color: #689f38;
+        }
+        
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xxl);
+            color: var(--gris-medio);
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: var(--spacing-xxl);
+            color: var(--gris-medio);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Institucional -->
+    <header class="header-institucional">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
+                <div class="logo-text">
+                    <div class="logo-title">SICOF - Sistema Integrado</div>
+                    <div class="logo-subtitle">Dashboard de Gestión Fronteriza</div>
+                </div>
+            </div>
+            <div class="user-info" style="color: var(--blanco); text-align: right;">
+                <div style="font-weight: 600;" id="cuartelInfo">Jefatura</div>
+                <div style="font-size: 0.875rem; opacity: 0.9;" id="userInfo">Cargando...</div>
+                <button onclick="logout()" style="background: none; border: 1px solid var(--blanco); color: var(--blanco); padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; margin-top: 4px; cursor: pointer;">
+                    🚪 Salir
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="container" style="padding: var(--spacing-xl) 0;">
+        <!-- Header Dashboard -->
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                <span class="dashboard-icon">📊</span>
+                <h1 style="margin: 0;">DASHBOARD DE GESTIÓN FRONTERIZA</h1>
+            </div>
+            
+            <div style="display: flex; gap: var(--spacing-sm);">
+                <button class="btn btn-outline" onclick="exportarReporte()">
+                    📤 Exportar
+                </button>
+                <button class="btn btn-primary" onclick="actualizarDashboard()">
+                    🔄 Actualizar
+                </button>
+            </div>
+        </div>
+        
+        <!-- Filtros -->
+        <div class="filtros-container">
+            <div class="filtros-header">
+                <span>🔍</span>
+                <h3 style="margin: 0;">FILTROS DE VISUALIZACIÓN</h3>
+            </div>
+            
+            <div class="filtros-grid">
+                <div class="form-group">
+                    <label for="periodo" class="form-label">PERÍODO</label>
+                    <select id="periodo" class="form-control" onchange="cargarDashboard()">
+                        <option value="hoy">Hoy</option>
+                        <option value="semana">Esta semana</option>
+                        <option value="mes" selected>Este mes</option>
+                        <option value="trimestre">Este trimestre</option>
+                        <option value="anio">Este año</option>
+                        <option value="personalizado">Personalizado</option>
+                    </select>
+                </div>
+                
+                <div id="fechasPersonalizado" style="display: none;">
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label for="fechaDesde" class="form-label">DESDE</label>
+                            <input type="date" id="fechaDesde" class="form-control" onchange="cargarDashboard()">
+                        </div>
+                        <div class="form-group">
+                            <label for="fechaHasta" class="form-label">HASTA</label>
+                            <input type="date" id="fechaHasta" class="form-control" onchange="cargarDashboard()">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cuarteles" class="form-label">CUARTELES</label>
+                    <select id="cuarteles" class="form-control" onchange="cargarDashboard()">
+                        <option value="todos">Todos los cuarteles</option>
+                        <!-- Opciones se cargarán dinámicamente -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipoDatos" class="form-label">TIPO DE DATOS</label>
+                    <select id="tipoDatos" class="form-control" onchange="cambiarVista()">
+                        <option value="servicios">Servicios Policiales</option>
+                        <option value="estado">Estado de Cuarteles</option>
+                        <option value="ranking">Ranking Comparativo</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenido Dinámico -->
+        <div id="contenidoDashboard">
+            <!-- Se mostrará contenido dinámico según el tipo de datos -->
+            <div class="loading-container">
+                <div class="loading-spinner" style="width: 60px; height: 60px;"></div>
+                <div style="margin-top: var(--spacing-md);">Cargando dashboard...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script>
+        // Variables globales
+        let userData = {};
+        let datosDashboard = {};
+        let cuartelesAsignados = [];
+        let chartInstances = {};
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', async () => {
+            userData = JSON.parse(localStorage.getItem('sicof_user'));
+            
+            if (!userData || userData.rol !== 'jefatura') {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Mostrar información del usuario
+            document.getElementById('userInfo').textContent = userData.email;
+            
+            // Cargar cuarteles asignados
+            await cargarCuartelesAsignados();
+            
+            // Cargar dashboard inicial
+            await cargarDashboard();
+            
+            // Configurar eventos
+            document.getElementById('periodo').addEventListener('change', function() {
+                const mostrarFechas = this.value === 'personalizado';
+                document.getElementById('fechasPersonalizado').style.display = mostrarFechas ? 'block' : 'none';
+            });
+        });
+        
+        async function cargarCuartelesAsignados() {
+            try {
+                const { data: { user } } = await window.supabase.auth.getUser();
+                if (!user) return;
+                
+                // Para jefatura, obtener cuarteles asignados
+                const { data: asignaciones } = await window.supabase
+                    .from('jefatura_cuarteles')
+                    .select('cuartel_codigo')
+                    .eq('usuario_id', user.id);
+                
+                if (asignaciones && asignaciones.length > 0) {
+                    cuartelesAsignados = asignaciones.map(a => a.cuartel_codigo);
+                    
+                    // Cargar nombres de cuarteles
+                    const { data: cuartelesData } = await window.supabase
+                        .from('cuarteles')
+                        .select('codigo, nombre')
+                        .in('codigo', cuartelesAsignados);
+                    
+                    if (cuartelesData) {
+                        const select = document.getElementById('cuarteles');
+                        select.innerHTML = `
+                            <option value="todos">Todos los cuarteles asignados</option>
+                            ${cuartelesData.map(c => 
+                                `<option value="${c.codigo}">${c.nombre}</option>`
+                            ).join('')}
+                        `;
+                        
+                        // Actualizar info del header
+                        document.getElementById('cuartelInfo').textContent = 
+                            `Jefatura (${cuartelesData.length} cuarteles)`;
+                    }
+                } else {
+                    // Si no tiene asignaciones específicas, mostrar todos los cuarteles
+                    const { data: cuartelesData } = await window.supabase
+                        .from('cuarteles')
+                        .select('codigo, nombre');
+                    
+                    if (cuartelesData) {
+                        const select = document.getElementById('cuarteles');
+                        select.innerHTML = `
+                            <option value="todos">Todos los cuarteles</option>
+                            ${cuartelesData.map(c => 
+                                `<option value="${c.codigo}">${c.nombre}</option>`
+                            ).join('')}
+                        `;
+                        
+                        cuartelesAsignados = cuartelesData.map(c => c.codigo);
+                    }
+                }
+            } catch (error) {
+                console.error('Error al cargar cuarteles:', error);
+            }
+        }
+        
+        async function cargarDashboard() {
+            const container = document.getElementById('contenidoDashboard');
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner" style="width: 60px; height: 60px;"></div>
+                    <div style="margin-top: var(--spacing-md);">Cargando datos...</div>
+                </div>
+            `;
+            
+            try {
+                // Obtener fechas según período seleccionado
+                const { fechaInicio, fechaFin } = obtenerFechasPeriodo();
+                
+                // Obtener cuartel seleccionado
+                const cuartelSeleccionado = document.getElementById('cuarteles').value;
+                
+                // Obtener tipo de datos
+                const tipoDatos = document.getElementById('tipoDatos').value;
+                
+                // Cargar datos según tipo
+                switch(tipoDatos) {
+                    case 'servicios':
+                        await cargarDatosServicios(fechaInicio, fechaFin, cuartelSeleccionado);
+                        break;
+                    case 'estado':
+                        await cargarDatosEstado(fechaInicio, fechaFin, cuartelSeleccionado);
+                        break;
+                    case 'ranking':
+                        await cargarRanking(fechaInicio, fechaFin, cuartelSeleccionado);
+                        break;
+                }
+                
+            } catch (error) {
+                console.error('Error al cargar dashboard:', error);
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error al cargar datos</strong>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function obtenerFechasPeriodo() {
+            const periodo = document.getElementById('periodo').value;
+            const hoy = new Date();
+            
+            switch(periodo) {
+                case 'hoy':
+                    const hoyStr = hoy.toISOString().split('T')[0];
+                    return { fechaInicio: hoyStr, fechaFin: hoyStr };
+                    
+                case 'semana':
+                    const inicioSemana = new Date(hoy);
+                    inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+                    return {
+                        fechaInicio: inicioSemana.toISOString().split('T')[0],
+                        fechaFin: hoy.toISOString().split('T')[0]
+                    };
+                    
+                case 'mes':
+                    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                    return {
+                        fechaInicio: inicioMes.toISOString().split('T')[0],
+                        fechaFin: hoy.toISOString().split('T')[0]
+                    };
+                    
+                case 'trimestre':
+                    const trimestre = Math.floor(hoy.getMonth() / 3);
+                    const inicioTrimestre = new Date(hoy.getFullYear(), trimestre * 3, 1);
+                    return {
+                        fechaInicio: inicioTrimestre.toISOString().split('T')[0],
+                        fechaFin: hoy.toISOString().split('T')[0]
+                    };
+                    
+                case 'anio':
+                    const inicioAnio = new Date(hoy.getFullYear(), 0, 1);
+                    return {
+                        fechaInicio: inicioAnio.toISOString().split('T')[0],
+                        fechaFin: hoy.toISOString().split('T')[0]
+                    };
+                    
+                case 'personalizado':
+                    const desde = document.getElementById('fechaDesde').value;
+                    const hasta = document.getElementById('fechaHasta').value;
+                    return { fechaInicio: desde, fechaFin: hasta };
+                    
+                default:
+                    return { fechaInicio: null, fechaFin: null };
+            }
+        }
+        
+        async function cargarDatosServicios(fechaInicio, fechaFin, cuartelSeleccionado) {
+            // Construir query
+            let query = window.supabase
+                .from('servicios')
+                .select(`
+                    *,
+                    cuarteles!inner(nombre)
+                `)
+                .eq('is_locked', true);
+            
+            // Filtrar por fechas
+            if (fechaInicio && fechaFin) {
+                query = query.gte('fecha', fechaInicio).lte('fecha', fechaFin);
+            }
+            
+            // Filtrar por cuartel
+            if (cuartelSeleccionado !== 'todos') {
+                query = query.eq('cuartel_codigo', cuartelSeleccionado);
+            } else if (cuartelesAsignados.length > 0) {
+                query = query.in('cuartel_codigo', cuartelesAsignados);
+            }
+            
+            const { data: servicios, error } = await query;
+            
+            if (error) throw error;
+            
+            // Calcular KPIs
+            const kpis = calcularKPIsServicios(servicios);
+            
+            // Mostrar contenido
+            mostrarDashboardServicios(kpis, servicios);
+        }
+        
+        function calcularKPIsServicios(servicios) {
+            if (!servicios || servicios.length === 0) {
+                return {
+                    totalServicios: 0,
+                    totalControles: 0,
+                    totalDetenidos: 0,
+                    efectividadPromedio: 0,
+                    cumplimientoPromedio: 0
+                };
+            }
+            
+            const totalServicios = servicios.length;
+            const totalControles = servicios.reduce((sum, s) => sum + (s.total_controles || 0), 0);
+            const totalDetenidos = servicios.reduce((sum, s) => sum + (s.detenidos_cantidad || 0), 0);
+            
+            const efectividadPromedio = servicios.length > 0
+                ? servicios.reduce((sum, s) => sum + (s.efectividad_vehicular || 0), 0) / servicios.length
+                : 0;
+            
+            const cumplimientoPromedio = servicios.length > 0
+                ? servicios.reduce((sum, s) => sum + (s.cumplimiento_demanda || 0), 0) / servicios.length
+                : 0;
+            
+            return {
+                totalServicios,
+                totalControles,
+                totalDetenidos,
+                efectividadPromedio: Math.round(efectividadPromedio * 100) / 100,
+                cumplimientoPromedio: Math.round(cumplimientoPromedio * 100) / 100
+            };
+        }
+        
+        function mostrarDashboardServicios(kpis, servicios) {
+            const container = document.getElementById('contenidoDashboard');
+            
+            container.innerHTML = `
+                <!-- KPIs -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-titulo">TOTAL SERVICIOS</div>
+                            <div class="kpi-icon">📋</div>
+                        </div>
+                        <div class="kpi-valor">${kpis.totalServicios.toLocaleString()}</div>
+                        <div class="kpi-tendencia tendencia-positiva">
+                            ▲ ${Math.round(kpis.totalServicios / 30)} por día
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-titulo">TOTAL CONTROLES</div>
+                            <div class="kpi-icon">🔍</div>
+                        </div>
+                        <div class="kpi-valor">${kpis.totalControles.toLocaleString()}</div>
+                        <div class="kpi-tendencia tendencia-positiva">
+                            ▲ ${Math.round(kpis.totalControles / kpis.totalServicios)} por servicio
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-titulo">EFECTIVIDAD VEHICULAR</div>
+                            <div class="kpi-icon">🎯</div>
+                        </div>
+                        <div class="kpi-valor">${kpis.efectividadPromedio}%</div>
+                        <div class="kpi-tendencia ${kpis.efectividadPromedio >= 80 ? 'tendencia-positiva' : kpis.efectividadPromedio >= 50 ? 'tendencia-neutra' : 'tendencia-negativa'}">
+                            ${kpis.efectividadPromedio >= 80 ? '★ Excelente' : kpis.efectividadPromedio >= 50 ? '● Adecuada' : '⚠️ Mejorable'}
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-titulo">CUMPLIMIENTO DEMANDA</div>
+                            <div class="kpi-icon">✅</div>
+                        </div>
+                        <div class="kpi-valor">${kpis.cumplimientoPromedio}%</div>
+                        <div class="kpi-tendencia ${kpis.cumplimientoPromedio >= 90 ? 'tendencia-positiva' : kpis.cumplimientoPromedio >= 70 ? 'tendencia-neutra' : 'tendencia-negativa'}">
+                            ${kpis.cumplimientoPromedio >= 90 ? '★ Excelente' : kpis.cumplimientoPromedio >= 70 ? '● Adecuado' : '⚠️ Mejorable'}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráfico de distribución -->
+                <div class="grafico-container">
+                    <div class="grafico-titulo">
+                        <span>📊</span>
+                        <h3 style="margin: 0;">DISTRIBUCIÓN DE CONTROLES POR TIPO</h3>
+                    </div>
+                    <canvas id="graficoControles" height="200"></canvas>
+                </div>
+                
+                <!-- Servicios recientes -->
+                <div class="tabla-container">
+                    <div class="tabla-titulo">
+                        <span>📋</span>
+                        <h3 style="margin: 0;">SERVICIOS RECIENTES</h3>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Cuartel</th>
+                                    <th>Servicio</th>
+                                    <th>Controles</th>
+                                    <th>Detenidos</th>
+                                    <th>Efectividad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaServicios">
+                                <!-- Datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Llenar tabla de servicios
+            const tablaBody = document.getElementById('tablaServicios');
+            if (servicios && servicios.length > 0) {
+                const serviciosOrdenados = servicios.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                const serviciosMostrar = serviciosOrdenados.slice(0, 10);
+                
+                tablaBody.innerHTML = serviciosMostrar.map(servicio => `
+                    <tr>
+                        <td>${new Date(servicio.fecha).toLocaleDateString('es-CL')}</td>
+                        <td>${servicio.cuarteles?.nombre || servicio.cuartel_codigo}</td>
+                        <td>${servicio.nombre_servicio.substring(0, 30)}${servicio.nombre_servicio.length > 30 ? '...' : ''}</td>
+                        <td>${servicio.total_controles?.toLocaleString() || 0}</td>
+                        <td>${servicio.detenidos_cantidad || 0}</td>
+                        <td>
+                            <span style="color: ${servicio.efectividad_vehicular >= 80 ? 'var(--verde-exito)' : servicio.efectividad_vehicular >= 50 ? 'var(--naranja-advertencia)' : 'var(--rojo-alerta)'}">
+                                ${servicio.efectividad_vehicular?.toFixed(1) || 0}%
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tablaBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: var(--gris-medio); padding: var(--spacing-xl);">
+                            No hay servicios registrados en el período seleccionado
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            // Crear gráfico
+            crearGraficoControles(servicios);
+        }
+        
+        function crearGraficoControles(servicios) {
+            const ctx = document.getElementById('graficoControles').getContext('2d');
+            
+            // Destruir gráfico anterior si existe
+            if (chartInstances.graficoControles) {
+                chartInstances.graficoControles.destroy();
+            }
+            
+            // Calcular totales
+            const totales = {
+                investigativos: servicios.reduce((sum, s) => sum + (s.controles_investigativos || 0), 0),
+                preventivos: servicios.reduce((sum, s) => sum + (s.controles_preventivos || 0), 0),
+                migratorios: servicios.reduce((sum, s) => sum + (s.controles_migratorios || 0), 0),
+                vehiculares: servicios.reduce((sum, s) => sum + (s.controles_vehiculares || 0), 0)
+            };
+            
+            const total = Object.values(totales).reduce((sum, val) => sum + val, 0);
+            
+            chartInstances.graficoControles = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Investigativos', 'Preventivos', 'Migratorios', 'Vehiculares'],
+                    datasets: [{
+                        data: [totales.investigativos, totales.preventivos, totales.migratorios, totales.vehiculares],
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.8)',
+                            'rgba(46, 204, 113, 0.8)',
+                            'rgba(155, 89, 182, 0.8)',
+                            'rgba(230, 126, 34, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(52, 152, 219, 1)',
+                            'rgba(46, 204, 113, 1)',
+                            'rgba(155, 89, 182, 1)',
+                            'rgba(230, 126, 34, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return `${context.label}: ${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        async function cargarDatosEstado(fechaInicio, fechaFin, cuartelSeleccionado) {
+            // Construir query para estado de cuarteles
+            let query = window.supabase
+                .from('estado_cuarteles')
+                .select(`
+                    *,
+                    cuarteles!inner(nombre)
+                `)
+                .eq('is_locked', true);
+            
+            // Filtrar por fechas
+            if (fechaInicio && fechaFin) {
+                query = query.gte('fecha', fechaInicio).lte('fecha', fechaFin);
+            }
+            
+            // Filtrar por cuartel
+            if (cuartelSeleccionado !== 'todos') {
+                query = query.eq('cuartel_codigo', cuartelSeleccionado);
+            } else if (cuartelesAsignados.length > 0) {
+                query = query.in('cuartel_codigo', cuartelesAsignados);
+            }
+            
+            const { data: estados, error } = await query;
+            
+            if (error) throw error;
+            
+            // Agrupar por cuartel (último estado de cada cuartel)
+            const estadosPorCuartel = {};
+            if (estados) {
+                estados.forEach(estado => {
+                    if (!estadosPorCuartel[estado.cuartel_codigo] || 
+                        new Date(estado.fecha) > new Date(estadosPorCuartel[estado.cuartel_codigo].fecha)) {
+                        estadosPorCuartel[estado.cuartel_codigo] = estado;
+                    }
+                });
+            }
+            
+            // Mostrar dashboard de estado
+            mostrarDashboardEstado(estadosPorCuartel);
+        }
+        
+        function mostrarDashboardEstado(estadosPorCuartel) {
+            const container = document.getElementById('contenidoDashboard');
+            const estadosArray = Object.values(estadosPorCuartel);
+            
+            // Calcular KPIs de estado
+            const kpis = calcularKPIsEstado(estadosArray);
+            
+            container.innerHTML = `
+                <!-- KPIs de Estado -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-titulo">CUARTELES REPORTADOS</div>
+                            <div class="kpi-icon">🏢</div>
+                        </div>
+                        <div class="kpi-valor">${estadosArray.length}</div>
+                        <div class="kpi-tendencia">
+                            de ${cuartelesAsignados.length} asignados
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-titulo">VEHÍCULOS OPERATIVOS</div>
+                            <div class="kpi-icon">🚗</div>
+                        </div>
+                        <div class="kpi-valor">${kpis.vehiculosOperativos}%</div>
+                        <div class="kpi-tendencia ${kpis.vehiculosOperativos >= 80 ? 'tendencia-positiva' : kpis.vehiculosOperativos >= 50 ? 'tendencia-neutra' : 'tendencia-negativa'}">
+                            ${kpis.totalVehiculos} vehículos totales
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-titulo">CUARTELES CON ELECTRICIDAD</div>
+                            <div class="kpi-icon">💡</div>
+                        </div>
+                        <div class="kpi-valor">${kpis.conElectricidad}</div>
+                        <div class="kpi-tendencia ${kpis.porcentajeElectricidad >= 90 ? 'tendencia-positiva' : kpis.porcentajeElectricidad >= 70 ? 'tendencia-neutra' : 'tendencia-negativa'}">
+                            ${kpis.porcentajeElectricidad}% de los cuarteles
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-titulo">NOVEDADES REPORTADAS</div>
+                            <div class="kpi-icon">❗</div>
+                        </div>
+                        <div class="kpi-valor">${kpis.conNovedades}</div>
+                        <div class="kpi-tendencia ${kpis.conNovedades === 0 ? 'tendencia-positiva' : 'tendencia-negativa'}">
+                            ${kpis.conNovedades === 0 ? 'Sin novedades' : 'Con novedades'}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alertas -->
+                ${kpis.alertas.length > 0 ? `
+                <div class="alertas-container">
+                    <div class="alertas-titulo">
+                        <span>🚨</span>
+                        <h3 style="margin: 0;">ALERTAS Y NOVEDADES</h3>
+                    </div>
+                    ${kpis.alertas.map(alerta => `
+                        <div class="alerta-item">
+                            <span class="alerta-nivel ${alerta.nivel === 'critica' ? 'alerta-critica' : alerta.nivel === 'media' ? 'alerta-media' : 'alerta-leve'}">
+                                ${alerta.nivel.toUpperCase()}
+                            </span>
+                            <strong>${alerta.cuartel}:</strong> ${alerta.mensaje}
+                        </div>
+                    `).join('')}
+                </div>
+                ` : ''}
+                
+                <!-- Estado por cuartel -->
+                <div class="tabla-container">
+                    <div class="tabla-titulo">
+                        <span>📊</span>
+                        <h3 style="margin: 0;">ESTADO ACTUAL POR CUARTEL</h3>
+                    </div>
+                    
+                    <div class="cuarteles-grid" id="gridCuarteles">
+                        <!-- Tarjetas de cuarteles se cargarán dinámicamente -->
+                    </div>
+                </div>
+            `;
+            
+            // Llenar grid de cuarteles
+            const gridCuarteles = document.getElementById('gridCuarteles');
+            if (estadosArray.length > 0) {
+                gridCuarteles.innerHTML = estadosArray.map(estado => {
+                    const nivelCombustible = estado.nivel_combustible_vehiculo;
+                    const nivelAgua = estado.nivel_agua;
+                    const nivelGeneral = calcularNivelGeneral(estado);
+                    
+                    return `
+                        <div class="cuartel-card">
+                            <div class="cuartel-header">
+                                <div class="cuartel-nombre">${estado.cuarteles?.nombre || estado.cuartel_codigo}</div>
+                                <div class="cuartel-estado ${nivelGeneral}"></div>
+                            </div>
+                            
+                            <div class="cuartel-datos">
+                                <div class="cuartel-dato">
+                                    <span class="cuartel-label">Último reporte:</span>
+                                    <span class="cuartel-valor">${new Date(estado.fecha).toLocaleDateString('es-CL')}</span>
+                                </div>
+                                
+                                <div class="cuartel-dato">
+                                    <span class="cuartel-label">Vehículos:</span>
+                                    <span class="cuartel-valor">${estado.vehiculos_operativos}/${estado.vehiculos_totales}</span>
+                                </div>
+                                
+                                <div class="cuartel-dato">
+                                    <span class="cuartel-label">Electricidad:</span>
+                                    <span class="cuartel-valor" style="color: ${estado.tiene_electricidad ? 'var(--verde-exito)' : 'var(--rojo-alerta)'}">
+                                        ${estado.tiene_electricidad ? '✅ Sí' : '❌ No'}
+                                    </span>
+                                </div>
+                                
+                                <div class="cuartel-dato">
+                                    <span class="cuartel-label">Combustible:</span>
+                                    <span class="cuartel-valor" style="color: ${nivelCombustible === 'alto' ? 'var(--verde-exito)' : nivelCombustible === 'medio' ? 'var(--naranja-advertencia)' : 'var(--rojo-alerta)'}">
+                                        ${nivelCombustible.toUpperCase()}
+                                    </span>
+                                </div>
+                                
+                                <div class="cuartel-dato">
+                                    <span class="cuartel-label">Agua:</span>
+                                    <span class="cuartel-valor" style="color: ${nivelAgua === 'alto' ? 'var(--verde-exito)' : nivelAgua === 'medio' ? 'var(--naranja-advertencia)' : 'var(--rojo-alerta)'}">
+                                        ${nivelAgua.toUpperCase()}
+                                    </span>
+                                </div>
+                                
+                                ${estado.tuvo_novedades ? `
+                                <div class="cuartel-dato">
+                                    <span class="cuartel-label">Novedades:</span>
+                                    <span class="cuartel-valor" style="color: var(--rojo-alerta);">
+                                        ⚠️ Sí
+                                    </span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                gridCuarteles.innerHTML = `
+                    <div class="no-data" style="grid-column: 1 / -1;">
+                        <div style="font-size: 3rem; margin-bottom: var(--spacing-md);">🏢</div>
+                        <h3 style="color: var(--gris-medio); margin-bottom: var(--spacing-sm);">
+                            No hay reportes de estado en el período seleccionado
+                        </h3>
+                        <p style="color: var(--gris-medio);">
+                            Los jefes de destacamento aún no han reportado el estado de sus cuarteles.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+        
+        function calcularKPIsEstado(estados) {
+            if (!estados || estados.length === 0) {
+                return {
+                    vehiculosOperativos: 0,
+                    totalVehiculos: 0,
+                    conElectricidad: 0,
+                    porcentajeElectricidad: 0,
+                    conNovedades: 0,
+                    alertas: []
+                };
+            }
+            
+            let totalVehiculos = 0;
+            let vehiculosOperativos = 0;
+            let conElectricidad = 0;
+            let conNovedades = 0;
+            const alertas = [];
+            
+            estados.forEach(estado => {
+                totalVehiculos += estado.vehiculos_totales || 0;
+                vehiculosOperativos += estado.vehiculos_operativos || 0;
+                
+                if (estado.tiene_electricidad) conElectricidad++;
+                if (estado.tuvo_novedades) conNovedades++;
+                
+                // Detectar alertas
+                if (estado.nivel_combustible_vehiculo === 'bajo') {
+                    alertas.push({
+                        cuartel: estado.cuarteles?.nombre || estado.cuartel_codigo,
+                        mensaje: 'Combustible de vehículos en nivel bajo',
+                        nivel: 'critica'
+                    });
+                }
+                
+                if (!estado.tiene_electricidad) {
+                    alertas.push({
+                        cuartel: estado.cuarteles?.nombre || estado.cuartel_codigo,
+                        mensaje: 'Sin servicio eléctrico',
+                        nivel: 'media'
+                    });
+                }
+                
+                if (estado.nivel_agua === 'bajo') {
+                    alertas.push({
+                        cuartel: estado.cuarteles?.nombre || estado.cuartel_codigo,
+                        mensaje: 'Agua potable en nivel bajo',
+                        nivel: 'media'
+                    });
+                }
+                
+                if (estado.tuvo_novedades && estado.novedades_descripcion) {
+                    alertas.push({
+                        cuartel: estado.cuarteles?.nombre || estado.cuartel_codigo,
+                        mensaje: `Novedad reportada: ${estado.novedades_descripcion.substring(0, 50)}...`,
+                        nivel: estado.nivel_combustible_vehiculo === 'bajo' ? 'critica' : 'media'
+                    });
+                }
+            });
+            
+            const porcentajeVehiculos = totalVehiculos > 0 
+                ? Math.round((vehiculosOperativos / totalVehiculos) * 100) 
+                : 0;
+            
+            const porcentajeElectricidad = estados.length > 0
+                ? Math.round((conElectricidad / estados.length) * 100)
+                : 0;
+            
+            return {
+                vehiculosOperativos: porcentajeVehiculos,
+                totalVehiculos,
+                conElectricidad,
+                porcentajeElectricidad,
+                conNovedades,
+                alertas
+            };
+        }
+        
+        function calcularNivelGeneral(estado) {
+            let puntos = 0;
+            
+            // Puntos por electricidad
+            puntos += estado.tiene_electricidad ? 2 : 0;
+            
+            // Puntos por niveles de recursos
+            const puntosRecurso = {
+                'alto': 2,
+                'medio': 1,
+                'bajo': 0
+            };
+            
+            puntos += puntosRecurso[estado.nivel_agua] || 0;
+            puntos += puntosRecurso[estado.nivel_gas] || 0;
+            puntos += puntosRecurso[estado.nivel_combustible_vehiculo] || 0;
+            puntos += puntosRecurso[estado.nivel_combustible_generador] || 0;
+            
+            // Descuento por novedades
+            puntos -= estado.tuvo_novedades ? 2 : 0;
+            
+            // Determinar nivel
+            if (puntos >= 6) return 'estado-optimo';
+            if (puntos >= 3) return 'estado-advertencia';
+            return 'estado-critico';
+        }
+        
+        async function cargarRanking(fechaInicio, fechaFin, cuartelSeleccionado) {
+            try {
+                // Construir array de cuarteles para filtrar
+                let cuartelesFiltro = [];
+                if (cuartelSeleccionado !== 'todos') {
+                    cuartelesFiltro = [cuartelSeleccionado];
+                } else if (cuartelesAsignados.length > 0) {
+                    cuartelesFiltro = cuartelesAsignados;
+                }
+                
+                // Llamar a la función de ranking en Supabase
+                const { data: ranking, error } = await window.supabase.rpc('calcular_ranking', {
+                    p_fecha_inicio: fechaInicio,
+                    p_fecha_fin: fechaFin,
+                    p_cuarteles: cuartelesFiltro.length > 0 ? cuartelesFiltro : null
+                });
+                
+                if (error) throw error;
+                
+                // Mostrar ranking
+                mostrarDashboardRanking(ranking || []);
+                
+            } catch (error) {
+                console.error('Error al cargar ranking:', error);
+                // Si falla la función, calcular ranking manualmente
+                await calcularRankingManual(fechaInicio, fechaFin, cuartelSeleccionado);
+            }
+        }
+        
+        async function calcularRankingManual(fechaInicio, fechaFin, cuartelSeleccionado) {
+            // Obtener servicios para calcular ranking manualmente
+            let query = window.supabase
+                .from('servicios')
+                .select(`
+                    *,
+                    cuarteles!inner(nombre)
+                `)
+                .eq('is_locked', true);
+            
+            if (fechaInicio && fechaFin) {
+                query = query.gte('fecha', fechaInicio).lte('fecha', fechaFin);
+            }
+            
+            if (cuartelSeleccionado !== 'todos') {
+                query = query.eq('cuartel_codigo', cuartelSeleccionado);
+            } else if (cuartelesAsignados.length > 0) {
+                query = query.in('cuartel_codigo', cuartelesAsignados);
+            }
+            
+            const { data: servicios, error } = await query;
+            
+            if (error) throw error;
+            
+            // Agrupar por cuartel
+            const datosPorCuartel = {};
+            
+            if (servicios) {
+                servicios.forEach(servicio => {
+                    const codigo = servicio.cuartel_codigo;
+                    const nombre = servicio.cuarteles?.nombre || codigo;
+                    
+                    if (!datosPorCuartel[codigo]) {
+                        datosPorCuartel[codigo] = {
+                            cuartel_codigo: codigo,
+                            cuartel_nombre: nombre,
+                            total_controles: 0,
+                            total_detenidos: 0,
+                            efectividad_promedio: [],
+                            cumplimiento_promedio: []
+                        };
+                    }
+                    
+                    datosPorCuartel[codigo].total_controles += servicio.total_controles || 0;
+                    datosPorCuartel[codigo].total_detenidos += servicio.detenidos_cantidad || 0;
+                    datosPorCuartel[codigo].efectividad_promedio.push(servicio.efectividad_vehicular || 0);
+                    datosPorCuartel[codigo].cumplimiento_promedio.push(servicio.cumplimiento_demanda || 0);
+                });
+            }
+            
+            // Calcular promedios y puntuación
+            const ranking = Object.values(datosPorCuartel).map(cuartel => {
+                const efectividadPromedio = cuartel.efectividad_promedio.length > 0
+                    ? cuartel.efectividad_promedio.reduce((a, b) => a + b, 0) / cuartel.efectividad_promedio.length
+                    : 0;
+                
+                const cumplimientoPromedio = cuartel.cumplimiento_promedio.length > 0
+                    ? cuartel.cumplimiento_promedio.reduce((a, b) => a + b, 0) / cuartel.cumplimiento_promedio.length
+                    : 0;
+                
+                // Fórmula de puntuación
+                const puntuacion = 
+                    (cuartel.total_controles * 0.3) +
+                    (cuartel.total_detenidos * 0.4) +
+                    (efectividadPromedio * 0.2) +
+                    (cumplimientoPromedio * 0.1);
+                
+                return {
+                    cuartel_codigo: cuartel.cuartel_codigo,
+                    cuartel_nombre: cuartel.cuartel_nombre,
+                    total_controles: cuartel.total_controles,
+                    total_detenidos: cuartel.total_detenidos,
+                    efectividad_promedio: Math.round(efectividadPromedio * 100) / 100,
+                    cumplimiento_promedio: Math.round(cumplimientoPromedio * 100) / 100,
+                    puntuacion: Math.round(puntuacion * 100) / 100
+                };
+            });
+            
+            // Ordenar por puntuación
+            ranking.sort((a, b) => b.puntuacion - a.puntuacion);
+            
+            // Añadir ranking
+            ranking.forEach((item, index) => {
+                item.ranking = index + 1;
+            });
+            
+            mostrarDashboardRanking(ranking);
+        }
+        
+        function mostrarDashboardRanking(ranking) {
+            const container = document.getElementById('contenidoDashboard');
+            
+            container.innerHTML = `
+                <!-- Título -->
+                <div style="text-align: center; margin-bottom: var(--spacing-xl);">
+                    <h2 style="color: var(--verde-oscuro); margin-bottom: var(--spacing-sm);">
+                        🏆 RANKING DE LABOR POR CUARTEL
+                    </h2>
+                    <p style="color: var(--gris-medio);">
+                        Período: ${obtenerTextoPeriodo()}
+                    </p>
+                </div>
+                
+                <!-- Top 3 destacados -->
+                ${ranking.length >= 3 ? `
+                <div class="kpi-grid" style="margin-bottom: var(--spacing-xl);">
+                    ${ranking.slice(0, 3).map((item, index) => `
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <div class="kpi-titulo">${index === 0 ? '🥇 PRIMER LUGAR' : index === 1 ? '🥈 SEGUNDO LUGAR' : '🥉 TERCER LUGAR'}</div>
+                                <div class="kpi-icon">${index === 0 ? '🏆' : index === 1 ? '🥈' : '🥉'}</div>
+                            </div>
+                            <div class="kpi-valor">${item.cuartel_nombre}</div>
+                            <div class="kpi-tendencia tendencia-positiva">
+                                Puntuación: ${item.puntuacion.toFixed(1)}
+                            </div>
+                            <div style="font-size: 0.875rem; color: var(--gris-medio); margin-top: var(--spacing-md);">
+                                ${item.total_controles.toLocaleString()} controles • ${item.total_detenidos} detenciones
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                ` : ''}
+                
+                <!-- Lista completa de ranking -->
+                <div class="tabla-container">
+                    <div class="tabla-titulo">
+                        <span>📋</span>
+                        <h3 style="margin: 0;">RANKING COMPLETO</h3>
+                    </div>
+                    
+                    <div id="listaRanking">
+                        ${ranking.length > 0 ? ranking.map(item => `
+                            <div class="ranking-item">
+                                <div class="ranking-posicion ${item.ranking === 1 ? 'top1' : item.ranking === 2 ? 'top2' : item.ranking === 3 ? 'top3' : ''}">
+                                    ${item.ranking}
+                                </div>
+                                <div class="ranking-info">
+                                    <div class="ranking-nombre">${item.cuartel_nombre}</div>
+                                    <div class="ranking-datos">
+                                        <span>Controles: ${item.total_controles.toLocaleString()}</span>
+                                        <span>•</span>
+                                        <span>Detenidos: ${item.total_detenidos}</span>
+                                        <span>•</span>
+                                        <span>Efectividad: ${item.efectividad_promedio}%</span>
+                                        <span>•</span>
+                                        <span>Cumplimiento: ${item.cumplimiento_promedio}%</span>
+                                    </div>
+                                </div>
+                                <div class="ranking-puntuacion">
+                                    ${item.puntuacion.toFixed(1)} pts
+                                </div>
+                            </div>
+                        `).join('') : `
+                            <div class="no-data">
+                                <div style="font-size: 3rem; margin-bottom: var(--spacing-md);">📊</div>
+                                <h3 style="color: var(--gris-medio); margin-bottom: var(--spacing-sm);">
+                                    No hay datos para mostrar ranking
+                                </h3>
+                                <p style="color: var(--gris-medio);">
+                                    No se encontraron servicios en el período seleccionado.
+                                </p>
+                            </div>
+                        `}
+                    </div>
+                </div>
+                
+                <!-- Gráfico de ranking -->
+                ${ranking.length > 0 ? `
+                <div class="grafico-container">
+                    <div class="grafico-titulo">
+                        <span>📈</span>
+                        <h3 style="margin: 0;">COMPARATIVA DE PUNTUACIÓN</h3>
+                    </div>
+                    <canvas id="graficoRanking" height="300"></canvas>
+                </div>
+                ` : ''}
+            `;
+            
+            // Crear gráfico de ranking si hay datos
+            if (ranking.length > 0) {
+                crearGraficoRanking(ranking);
+            }
+        }
+        
+        function crearGraficoRanking(ranking) {
+            const ctx = document.getElementById('graficoRanking').getContext('2d');
+            
+            // Destruir gráfico anterior si existe
+            if (chartInstances.graficoRanking) {
+                chartInstances.graficoRanking.destroy();
+            }
+            
+            // Ordenar por nombre para el gráfico
+            const rankingOrdenado = [...ranking].sort((a, b) => a.cuartel_nombre.localeCompare(b.cuartel_nombre));
+            
+            chartInstances.graficoRanking = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: rankingOrdenado.map(item => item.cuartel_nombre),
+                    datasets: [{
+                        label: 'Puntuación',
+                        data: rankingOrdenado.map(item => item.puntuacion),
+                        backgroundColor: rankingOrdenado.map(item => 
+                            item.ranking === 1 ? 'rgba(255, 215, 0, 0.8)' :
+                            item.ranking === 2 ? 'rgba(192, 192, 192, 0.8)' :
+                            item.ranking === 3 ? 'rgba(205, 127, 50, 0.8)' :
+                            'rgba(11, 107, 58, 0.8)'
+                        ),
+                        borderColor: rankingOrdenado.map(item => 
+                            item.ranking === 1 ? 'rgb(255, 215, 0)' :
+                            item.ranking === 2 ? 'rgb(192, 192, 192)' :
+                            item.ranking === 3 ? 'rgb(205, 127, 50)' :
+                            'rgb(11, 107, 58)'
+                        ),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const item = rankingOrdenado[context.dataIndex];
+                                    return [
+                                        `Puntuación: ${item.puntuacion.toFixed(1)}`,
+                                        `Controles: ${item.total_controles.toLocaleString()}`,
+                                        `Detenidos: ${item.total_detenidos}`,
+                                        `Efectividad: ${item.efectividad_promedio}%`,
+                                        `Cumplimiento: ${item.cumplimiento_promedio}%`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Puntuación'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function obtenerTextoPeriodo() {
+            const periodo = document.getElementById('periodo').value;
+            const hoy = new Date();
+            
+            switch(periodo) {
+                case 'hoy':
+                    return 'Hoy';
+                case 'semana':
+                    return 'Esta semana';
+                case 'mes':
+                    const mes = hoy.toLocaleDateString('es-CL', { month: 'long' });
+                    return `Mes de ${mes.charAt(0).toUpperCase() + mes.slice(1)}`;
+                case 'trimestre':
+                    const trimestre = Math.floor(hoy.getMonth() / 3) + 1;
+                    return `${trimestre}° trimestre ${hoy.getFullYear()}`;
+                case 'anio':
+                    return `Año ${hoy.getFullYear()}`;
+                case 'personalizado':
+                    const desde = document.getElementById('fechaDesde').value;
+                    const hasta = document.getElementById('fechaHasta').value;
+                    if (desde && hasta) {
+                        return `${desde} al ${hasta}`;
+                    }
+                    return 'Período personalizado';
+                default:
+                    return 'Período actual';
+            }
+        }
+        
+        function cambiarVista() {
+            cargarDashboard();
+        }
+        
+        function actualizarDashboard() {
+            cargarDashboard();
+            
+            // Mostrar mensaje de actualización
+            const container = document.getElementById('contenidoDashboard');
+            const oldHTML = container.innerHTML;
+            
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner" style="width: 60px; height: 60px;"></div>
+                    <div style="margin-top: var(--spacing-md);">Actualizando datos...</div>
+                </div>
+            `;
+        }
+        
+        function exportarReporte() {
+            alert('Función de exportación en desarrollo.\n\nSe exportará un reporte en PDF con todos los datos del dashboard.');
+            // En una implementación completa, aquí se generaría un PDF
+        }
+        
+        function logout() {
+            localStorage.removeItem('sicof_user');
+            window.location.href = 'index.html';
+        }
+        
+        // Inicializar fechas personalizadas
+        const hoy = new Date().toISOString().split('T')[0];
+        const haceUnMes = new Date();
+        haceUnMes.setMonth(haceUnMes.getMonth() - 1);
+        const haceUnMesStr = haceUnMes.toISOString().split('T')[0];
+        
+        document.getElementById('fechaDesde').value = haceUnMesStr;
+        document.getElementById('fechaHasta').value = hoy;
+    </script>
+</body>
+</html>

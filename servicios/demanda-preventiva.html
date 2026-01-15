@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICOF - Demanda Preventiva</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <link rel="stylesheet" href="../css/tablet.css">
+    <link rel="stylesheet" href="../css/desktop.css">
+    <link rel="icon" href="../assets/logos/favicon.ico">
+    <style>
+        .paso-indicador {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+        }
+        
+        .paso-indicador::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--verde-claro);
+            z-index: 1;
+        }
+        
+        .paso {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .paso-numero {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--verde-claro);
+            color: var(--gris-medio);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin-bottom: var(--spacing-sm);
+            border: 4px solid var(--blanco);
+            transition: all 0.3s ease;
+        }
+        
+        .paso.activo .paso-numero {
+            background-color: var(--verde-oficial);
+            color: var(--blanco);
+            transform: scale(1.1);
+        }
+        
+        .paso.completado .paso-numero {
+            background-color: var(--verde-exito);
+            color: var(--blanco);
+        }
+        
+        .paso-texto {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gris-medio);
+            text-align: center;
+            max-width: 100px;
+        }
+        
+        .paso.activo .paso-texto {
+            color: var(--verde-oficial);
+        }
+        
+        .form-section {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 1px solid var(--verde-claro);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            color: var(--verde-oscuro);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--verde-claro);
+        }
+        
+        .section-icon {
+            font-size: 1.5rem;
+        }
+        
+        .planificacion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+        }
+        
+        .planificacion-card {
+            background: var(--gris-claro);
+            padding: var(--spacing-xl);
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--verde-claro);
+        }
+        
+        .planificacion-header {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .planificacion-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .planificacion-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--verde-oscuro);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .planificacion-subtitle {
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+        }
+        
+        .planificacion-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+            text-align: center;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .input-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gris-profesional);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .planificacion-input {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 2px solid var(--gris-medio);
+            border-radius: var(--border-radius-sm);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            font-family: var(--font-primary);
+            background: var(--blanco);
+        }
+        
+        .planificacion-input:focus {
+            outline: none;
+            border-color: var(--verde-oficial);
+            box-shadow: 0 0 0 3px rgba(11, 107, 58, 0.1);
+        }
+        
+        .validacion-mensaje {
+            font-size: 0.75rem;
+            margin-top: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+        }
+        
+        .validacion-correcta {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--verde-exito);
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+        
+        .validacion-incorrecta {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--rojo-alerta);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Institucional -->
+    <header class="header-institucional">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="../assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
+                <div class="logo-text">
+                    <div class="logo-title">SICOF - Sistema Integrado</div>
+                    <div class="logo-subtitle">Control Operativo Fronterizo</div>
+                </div>
+            </div>
+            <div class="user-info" style="color: var(--blanco); text-align: right;">
+                <div id="cuartelNombre" style="font-weight: 600;">Cargando...</div>
+                <div style="font-size: 0.875rem; opacity: 0.9;" id="userInfo">Digitador</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="container" style="padding: var(--spacing-xl) 0;">
+        <!-- Indicador de Pasos -->
+        <div class="paso-indicador">
+            <div class="paso completado">
+                <div class="paso-numero">✓</div>
+                <div class="paso-texto">Datos del Servicio</div>
+            </div>
+            <div class="paso completado">
+                <div class="paso-numero">✓</div>
+                <div class="paso-texto">Demanda Ciudadana</div>
+            </div>
+            <div class="paso activo">
+                <div class="paso-numero">3</div>
+                <div class="paso-texto">Demanda Preventiva</div>
+            </div>
+            <div class="paso">
+                <div class="paso-numero">4</div>
+                <div class="paso-texto">Confirmación</div>
+            </div>
+        </div>
+        
+        <!-- Mensajes -->
+        <div id="message" class="alert" style="display: none;"></div>
+        
+        <!-- Formulario -->
+        <form id="preventivaForm">
+            <!-- Planificación Carta de Situación -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span class="section-icon">🗺️</span>
+                    PLANIFICACIÓN CARTA DE SITUACIÓN
+                </h3>
+                
+                <div class="planificacion-grid">
+                    <!-- HITOS -->
+                    <div class="planificacion-card">
+                        <div class="planificacion-header">
+                            <div class="planificacion-icon">📍</div>
+                            <div class="planificacion-title">HITOS FRONTERIZOS</div>
+                            <div class="planificacion-subtitle">Marcadores territoriales</div>
+                        </div>
+                        
+                        <div class="planificacion-inputs">
+                            <div class="input-group">
+                                <div class="input-label">PLANIFICADOS</div>
+                                <input 
+                                    type="number" 
+                                    id="hitos_planificados"
+                                    class="planificacion-input"
+                                    min="0"
+                                    max="999"
+                                    value="0"
+                                >
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="input-label">REALIZADOS</div>
+                                <input 
+                                    type="number" 
+                                    id="hitos_realizados"
+                                    class="planificacion-input"
+                                    min="0"
+                                    max="999"
+                                    value="0"
+                                >
+                            </div>
+                        </div>
+                        
+                        <div id="hitosValidacion" class="validacion-mensaje" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- PASOS NO HABILITADOS -->
+                    <div class="planificacion-card">
+                        <div class="planificacion-header">
+                            <div class="planificacion-icon">🚫</div>
+                            <div class="planificacion-title">PASOS NO HABILITADOS</div>
+                            <div class="planificacion-subtitle">Cruces fronterizos no oficiales</div>
+                        </div>
+                        
+                        <div class="planificacion-inputs">
+                            <div class="input-group">
+                                <div class="input-label">PLANIFICADOS</div>
+                                <input 
+                                    type="number" 
+                                    id="pnh_planificados"
+                                    class="planificacion-input"
+                                    min="0"
+                                    max="999"
+                                    value="0"
+                                >
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="input-label">REALIZADOS</div>
+                                <input 
+                                    type="number" 
+                                    id="pnh_realizados"
+                                    class="planificacion-input"
+                                    min="0"
+                                    max="999"
+                                    value="0"
+                                >
+                            </div>
+                        </div>
+                        
+                        <div id="pnhValidacion" class="validacion-mensaje" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- SITIOS DE INTERÉS -->
+                    <div class="planificacion-card">
+                        <div class="planificacion-header">
+                            <div class="planificacion-icon">👁️</div>
+                            <div class="planificacion-title">SITIOS DE INTERÉS</div>
+                            <div class="planificacion-subtitle">Puntos de vigilancia estratégica</div>
+                        </div>
+                        
+                        <div class="planificacion-inputs">
+                            <div class="input-group">
+                                <div class="input-label">PLANIFICADOS</div>
+                                <input 
+                                    type="number" 
+                                    id="sitios_planificados"
+                                    class="planificacion-input"
+                                    min="0"
+                                    max="999"
+                                    value="0"
+                                >
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="input-label">REALIZADOS</div>
+                                <input 
+                                    type="number" 
+                                    id="sitios_realizados"
+                                    class="planificacion-input"
+                                    min="0"
+                                    max="999"
+                                    value="0"
+                                >
+                            </div>
+                        </div>
+                        
+                        <div id="sitiosValidacion" class="validacion-mensaje" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <!-- Observaciones -->
+                <div class="form-group" style="margin-top: var(--spacing-xl);">
+                    <label for="observaciones" class="form-label">
+                        📝 OBSERVACIONES
+                    </label>
+                    <textarea 
+                        id="observaciones" 
+                        class="form-control"
+                        rows="4"
+                        placeholder="Ingrese observaciones relevantes sobre la demanda preventiva..."
+                        maxlength="1000"
+                    ></textarea>
+                    <div style="font-size: 0.75rem; color: var(--gris-medio); margin-top: 4px;">
+                        Máximo 1000 caracteres
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones de Navegación -->
+            <div style="display: flex; justify-content: space-between;">
+                <button type="button" class="btn btn-outline" onclick="window.location.href='demanda-ciudadana.html'">
+                    ← VOLVER
+                </button>
+                
+                <div style="display: flex; gap: var(--spacing-md);">
+                    <button type="button" class="btn btn-outline" onclick="window.location.href='../index.html'">
+                        🚪 Salir
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        VER RESUMEN →
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        // Verificar autenticación
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = JSON.parse(localStorage.getItem('sicof_user'));
+            
+            if (!user || user.rol !== 'digitador') {
+                window.location.href = '../index.html';
+                return;
+            }
+            
+            // Verificar que venga del paso 2
+            const paso2Data = localStorage.getItem('servicio_paso2');
+            if (!paso2Data) {
+                window.location.href = 'datos-servicio.html';
+                return;
+            }
+            
+            // Mostrar información del usuario
+            document.getElementById('userInfo').textContent = `${user.rol.toUpperCase()} - ${user.email}`;
+            
+            // Mostrar cuartel
+            const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
+            if (cuartel) {
+                document.getElementById('cuartelNombre').textContent = cuartel.nombre;
+            }
+            
+            // Configurar validación en tiempo real
+            configurarValidacionTiempoReal();
+        });
+        
+        function configurarValidacionTiempoReal() {
+            // Validar hitos
+            const hitosPlan = document.getElementById('hitos_planificados');
+            const hitosReal = document.getElementById('hitos_realizados');
+            const hitosValidacion = document.getElementById('hitosValidacion');
+            
+            function validarHitos() {
+                const plan = parseInt(hitosPlan.value) || 0;
+                const real = parseInt(hitosReal.value) || 0;
+                
+                if (real > plan) {
+                    hitosValidacion.textContent = `⚠️ No puede realizar más (${real}) de lo planificado (${plan})`;
+                    hitosValidacion.className = 'validacion-mensaje validacion-incorrecta';
+                    hitosValidacion.style.display = 'block';
+                    return false;
+                } else if (plan > 0 && real === 0) {
+                    hitosValidacion.textContent = 'ℹ️ Planificó visitas pero no realizó ninguna';
+                    hitosValidacion.className = 'validacion-mensaje';
+                    hitosValidacion.style.display = 'block';
+                    return true;
+                } else if (real > 0) {
+                    hitosValidacion.textContent = `✅ Cumplimiento: ${Math.round((real/plan)*100)}%`;
+                    hitosValidacion.className = 'validacion-mensaje validacion-correcta';
+                    hitosValidacion.style.display = 'block';
+                    return true;
+                } else {
+                    hitosValidacion.style.display = 'none';
+                    return true;
+                }
+            }
+            
+            hitosPlan.addEventListener('input', validarHitos);
+            hitosReal.addEventListener('input', validarHitos);
+            
+            // Validar PNH
+            const pnhPlan = document.getElementById('pnh_planificados');
+            const pnhReal = document.getElementById('pnh_realizados');
+            const pnhValidacion = document.getElementById('pnhValidacion');
+            
+            function validarPNH() {
+                const plan = parseInt(pnhPlan.value) || 0;
+                const real = parseInt(pnhReal.value) || 0;
+                
+                if (real > plan) {
+                    pnhValidacion.textContent = `⚠️ No puede realizar más (${real}) de lo planificado (${plan})`;
+                    pnhValidacion.className = 'validacion-mensaje validacion-incorrecta';
+                    pnhValidacion.style.display = 'block';
+                    return false;
+                } else if (plan > 0 && real === 0) {
+                    pnhValidacion.textContent = 'ℹ️ Planificó visitas pero no realizó ninguna';
+                    pnhValidacion.className = 'validacion-mensaje';
+                    pnhValidacion.style.display = 'block';
+                    return true;
+                } else if (real > 0) {
+                    pnhValidacion.textContent = `✅ Cumplimiento: ${Math.round((real/plan)*100)}%`;
+                    pnhValidacion.className = 'validacion-mensaje validacion-correcta';
+                    pnhValidacion.style.display = 'block';
+                    return true;
+                } else {
+                    pnhValidacion.style.display = 'none';
+                    return true;
+                }
+            }
+            
+            pnhPlan.addEventListener('input', validarPNH);
+            pnhReal.addEventListener('input', validarPNH);
+            
+            // Validar sitios
+            const sitiosPlan = document.getElementById('sitios_planificados');
+            const sitiosReal = document.getElementById('sitios_realizados');
+            const sitiosValidacion = document.getElementById('sitiosValidacion');
+            
+            function validarSitios() {
+                const plan = parseInt(sitiosPlan.value) || 0;
+                const real = parseInt(sitiosReal.value) || 0;
+                
+                if (real > plan) {
+                    sitiosValidacion.textContent = `⚠️ No puede realizar más (${real}) de lo planificado (${plan})`;
+                    sitiosValidacion.className = 'validacion-mensaje validacion-incorrecta';
+                    sitiosValidacion.style.display = 'block';
+                    return false;
+                } else if (plan > 0 && real === 0) {
+                    sitiosValidacion.textContent = 'ℹ️ Planificó visitas pero no realizó ninguna';
+                    sitiosValidacion.className = 'validacion-mensaje';
+                    sitiosValidacion.style.display = 'block';
+                    return true;
+                } else if (real > 0) {
+                    sitiosValidacion.textContent = `✅ Cumplimiento: ${Math.round((real/plan)*100)}%`;
+                    sitiosValidacion.className = 'validacion-mensaje validacion-correcta';
+                    sitiosValidacion.style.display = 'block';
+                    return true;
+                } else {
+                    sitiosValidacion.style.display = 'none';
+                    return true;
+                }
+            }
+            
+            sitiosPlan.addEventListener('input', validarSitios);
+            sitiosReal.addEventListener('input', validarSitios);
+        }
+        
+        // Manejar envío del formulario
+        document.getElementById('preventivaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validar que no se realice más de lo planificado
+            const hitosPlan = parseInt(document.getElementById('hitos_planificados').value) || 0;
+            const hitosReal = parseInt(document.getElementById('hitos_realizados').value) || 0;
+            
+            const pnhPlan = parseInt(document.getElementById('pnh_planificados').value) || 0;
+            const pnhReal = parseInt(document.getElementById('pnh_realizados').value) || 0;
+            
+            const sitiosPlan = parseInt(document.getElementById('sitios_planificados').value) || 0;
+            const sitiosReal = parseInt(document.getElementById('sitios_realizados').value) || 0;
+            
+            if (hitosReal > hitosPlan) {
+                mostrarMensaje('No puede realizar más hitos de los planificados', 'danger');
+                return;
+            }
+            
+            if (pnhReal > pnhPlan) {
+                mostrarMensaje('No puede realizar más PNH de los planificados', 'danger');
+                return;
+            }
+            
+            if (sitiosReal > sitiosPlan) {
+                mostrarMensaje('No puede realizar más sitios de los planificados', 'danger');
+                return;
+            }
+            
+            // Recopilar datos del formulario
+            const formData = {
+                hitos_planificados: hitosPlan,
+                pnh_planificados: pnhPlan,
+                sitios_planificados: sitiosPlan,
+                hitos_realizados: hitosReal,
+                pnh_realizados: pnhReal,
+                sitios_realizados: sitiosReal,
+                observaciones: document.getElementById('observaciones').value.trim() || null
+            };
+            
+            // Guardar datos en localStorage
+            localStorage.setItem('servicio_paso3', JSON.stringify(formData));
+            
+            // Redirigir al resumen
+            window.location.href = 'resumen-confirmacion.html';
+        });
+        
+        function mostrarMensaje(texto, tipo = 'info') {
+            const messageEl = document.getElementById('message');
+            messageEl.innerHTML = texto;
+            messageEl.className = `alert alert-${tipo}`;
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Validar números positivos
+        document.querySelectorAll('.planificacion-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const value = parseInt(this.value);
+                if (isNaN(value) || value < 0) {
+                    this.value = 0;
+                }
+                if (value > 999) {
+                    this.value = 999;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

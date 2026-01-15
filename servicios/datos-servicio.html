@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICOF - Nuevo Servicio</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <link rel="stylesheet" href="../css/tablet.css">
+    <link rel="stylesheet" href="../css/desktop.css">
+    <link rel="icon" href="../assets/logos/favicon.ico">
+    <style>
+        .paso-indicador {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+        }
+        
+        .paso-indicador::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--verde-claro);
+            z-index: 1;
+        }
+        
+        .paso {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .paso-numero {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--verde-claro);
+            color: var(--gris-medio);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin-bottom: var(--spacing-sm);
+            border: 4px solid var(--blanco);
+            transition: all 0.3s ease;
+        }
+        
+        .paso.activo .paso-numero {
+            background-color: var(--verde-oficial);
+            color: var(--blanco);
+            transform: scale(1.1);
+        }
+        
+        .paso.completado .paso-numero {
+            background-color: var(--verde-exito);
+            color: var(--blanco);
+        }
+        
+        .paso-texto {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gris-medio);
+            text-align: center;
+            max-width: 100px;
+        }
+        
+        .paso.activo .paso-texto {
+            color: var(--verde-oficial);
+        }
+        
+        .form-section {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 1px solid var(--verde-claro);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            color: var(--verde-oscuro);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--verde-claro);
+        }
+        
+        .section-icon {
+            font-size: 1.5rem;
+        }
+        
+        .time-inputs {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+        
+        .time-separator {
+            font-size: 1.5rem;
+            color: var(--gris-medio);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Institucional -->
+    <header class="header-institucional">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="../assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
+                <div class="logo-text">
+                    <div class="logo-title">SICOF - Sistema Integrado</div>
+                    <div class="logo-subtitle">Control Operativo Fronterizo</div>
+                </div>
+            </div>
+            <div class="user-info" style="color: var(--blanco); text-align: right;">
+                <div id="cuartelNombre" style="font-weight: 600;">Cargando...</div>
+                <div style="font-size: 0.875rem; opacity: 0.9;" id="userInfo">Digitador</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="container" style="padding: var(--spacing-xl) 0;">
+        <!-- Indicador de Pasos -->
+        <div class="paso-indicador">
+            <div class="paso activo">
+                <div class="paso-numero">1</div>
+                <div class="paso-texto">Datos del Servicio</div>
+            </div>
+            <div class="paso">
+                <div class="paso-numero">2</div>
+                <div class="paso-texto">Demanda Ciudadana</div>
+            </div>
+            <div class="paso">
+                <div class="paso-numero">3</div>
+                <div class="paso-texto">Demanda Preventiva</div>
+            </div>
+            <div class="paso">
+                <div class="paso-numero">4</div>
+                <div class="paso-texto">Confirmación</div>
+            </div>
+        </div>
+        
+        <!-- Mensajes -->
+        <div id="message" class="alert" style="display: none;"></div>
+        
+        <!-- Formulario -->
+        <form id="servicioForm">
+            <!-- Datos Básicos -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span class="section-icon">📋</span>
+                    DATOS BÁSICOS DEL SERVICIO
+                </h3>
+                
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label for="fecha" class="form-label">
+                            📅 FECHA DEL SERVICIO
+                        </label>
+                        <input 
+                            type="date" 
+                            id="fecha" 
+                            class="form-control"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cuartel_codigo" class="form-label">
+                            🏛️ CUARTEL POLICIAL
+                        </label>
+                        <select id="cuartel_codigo" class="form-control" required>
+                            <option value="">Seleccionar cuartel...</option>
+                            <!-- Opciones se cargarán dinámicamente -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombre_servicio" class="form-label">
+                        🚔 NOMBRE DEL SERVICIO
+                    </label>
+                    <input 
+                        type="text" 
+                        id="nombre_servicio" 
+                        class="form-control"
+                        placeholder="Ej: Patrullaje fronterizo sector norte"
+                        maxlength="200"
+                        required
+                    >
+                    <div style="font-size: 0.75rem; color: var(--gris-medio); margin-top: 4px;">
+                        Máximo 200 caracteres
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="jefe_servicio" class="form-label">
+                        👮‍♂️ JEFE DEL SERVICIO
+                    </label>
+                    <input 
+                        type="text" 
+                        id="jefe_servicio" 
+                        class="form-control"
+                        placeholder="Ej: Capitán Juan Pérez"
+                        required
+                    >
+                </div>
+                
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="form-label">
+                            🕐 HORARIO DEL SERVICIO
+                        </label>
+                        <div class="time-inputs">
+                            <input 
+                                type="time" 
+                                id="horario_inicio" 
+                                class="form-control"
+                                required
+                            >
+                            <span class="time-separator">─</span>
+                            <input 
+                                type="time" 
+                                id="horario_termino" 
+                                class="form-control"
+                                required
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones de Navegación -->
+            <div style="display: flex; justify-content: flex-end; gap: var(--spacing-md);">
+                <button type="button" class="btn btn-outline" onclick="window.location.href='../index.html'">
+                    🚪 Salir
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    CONTINUAR →
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/modules/digitador.js"></script>
+    <script>
+        // Verificar autenticación y cargar datos
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = JSON.parse(localStorage.getItem('sicof_user'));
+            
+            if (!user || user.rol !== 'digitador') {
+                window.location.href = '../index.html';
+                return;
+            }
+            
+            // Mostrar información del usuario
+            document.getElementById('userInfo').textContent = `${user.rol.toUpperCase()} - ${user.email}`;
+            
+            // Cargar cuarteles disponibles
+            await cargarCuarteles();
+            
+            // Si el usuario tiene cuartel asignado, seleccionarlo automáticamente
+            if (user.cuartel_codigo) {
+                const select = document.getElementById('cuartel_codigo');
+                select.value = user.cuartel_codigo;
+                
+                // Obtener nombre del cuartel
+                const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
+                if (cuartel) {
+                    document.getElementById('cuartelNombre').textContent = cuartel.nombre;
+                }
+            }
+            
+            // Establecer fecha por defecto (hoy)
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha').value = hoy;
+        });
+        
+        async function cargarCuarteles() {
+            const select = document.getElementById('cuartel_codigo');
+            const user = JSON.parse(localStorage.getItem('sicof_user'));
+            
+            // Si es digitador, mostrar solo su cuartel
+            if (user.rol === 'digitador' && user.cuartel_codigo) {
+                const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
+                if (cuartel) {
+                    select.innerHTML = `
+                        <option value="${cuartel.codigo}">${cuartel.nombre}</option>
+                    `;
+                    select.disabled = true;
+                }
+            } else {
+                // Para otros roles, mostrar todos los cuarteles
+                select.innerHTML = window.SICOF_CONFIG.cuarteles.map(cuartel => 
+                    `<option value="${cuartel.codigo}">${cuartel.nombre}</option>`
+                ).join('');
+            }
+        }
+        
+        // Manejar envío del formulario
+        document.getElementById('servicioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                fecha: document.getElementById('fecha').value,
+                cuartel_codigo: document.getElementById('cuartel_codigo').value,
+                nombre_servicio: document.getElementById('nombre_servicio').value,
+                jefe_servicio: document.getElementById('jefe_servicio').value,
+                horario_inicio: document.getElementById('horario_inicio').value,
+                horario_termino: document.getElementById('horario_termino').value
+            };
+            
+            // Validaciones básicas
+            if (formData.horario_inicio >= formData.horario_termino) {
+                mostrarMensaje('El horario de término debe ser posterior al de inicio', 'danger');
+                return;
+            }
+            
+            // Guardar datos en localStorage para pasos siguientes
+            localStorage.setItem('servicio_paso1', JSON.stringify(formData));
+            
+            // Redirigir al siguiente paso
+            window.location.href = 'demanda-ciudadana.html';
+        });
+        
+        function mostrarMensaje(texto, tipo = 'info') {
+            const messageEl = document.getElementById('message');
+            messageEl.innerHTML = texto;
+            messageEl.className = `alert alert-${tipo}`;
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

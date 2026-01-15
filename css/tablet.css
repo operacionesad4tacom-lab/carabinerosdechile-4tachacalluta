@@ -1,0 +1,49 @@
+/* ============================================
+   ESTILOS TABLET (768px - 1024px)
+============================================ */
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .container {
+        padding: 0 var(--spacing-md);
+    }
+    
+    .grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .table th,
+    .table td {
+        padding: var(--spacing-sm);
+    }
+    
+    /* Sidebar colapsable */
+    .sidebar {
+        width: 200px;
+        transition: width var(--transition-normal);
+    }
+    
+    .sidebar.collapsed {
+        width: 70px;
+    }
+    
+    .sidebar.collapsed .nav-text {
+        display: none;
+    }
+    
+    /* Dashboard tablet */
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .kpi-card {
+        min-height: 120px;
+    }
+}

@@ -1,0 +1,666 @@
+/* ============================================
+   print.css
+   Estilos específicos para impresión
+   Carabineros de Chile - SICOF
+============================================ */
+
+@media print {
+    /* ====================
+       RESET Y CONFIGURACIÓN
+    ==================== */
+    
+    * {
+        text-shadow: none !important;
+        box-shadow: none !important;
+        filter: none !important;
+    }
+    
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt !important;
+        line-height: 1.4 !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        width: 100% !important;
+    }
+    
+    /* ====================
+       OCULTAR ELEMENTOS
+    ==================== */
+    
+    .no-print,
+    .header-institucional,
+    .mobile-nav,
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-outline,
+    .btn-danger,
+    .paso-indicador,
+    .alert,
+    #message,
+    #loginMessage,
+    .loading-overlay,
+    .loading-container,
+    .alerta-confirmacion,
+    .filtros-container,
+    .admin-sidebar,
+    .table-actions,
+    .pagination,
+    .action-buttons,
+    .modal-overlay,
+    .checkbox-group,
+    .time-inputs,
+    .counter-grid,
+    .planificacion-grid,
+    .nivel-options,
+    .vehiculos-inputs {
+        display: none !important;
+    }
+    
+    /* ====================
+       TIPOGRAFÍA
+    ==================== */
+    
+    h1, h2, h3, h4, h5, h6 {
+        color: black !important;
+        page-break-after: avoid;
+        page-break-inside: avoid;
+    }
+    
+    h1 {
+        font-size: 18pt !important;
+        margin-top: 20pt !important;
+        margin-bottom: 10pt !important;
+    }
+    
+    h2 {
+        font-size: 16pt !important;
+        margin-top: 16pt !important;
+        margin-bottom: 8pt !important;
+    }
+    
+    h3 {
+        font-size: 14pt !important;
+        margin-top: 14pt !important;
+        margin-bottom: 7pt !important;
+    }
+    
+    p, li, td, th {
+        font-size: 11pt !important;
+    }
+    
+    /* ====================
+       LOGO INSTITUCIONAL
+    ==================== */
+    
+    .logo-container {
+        display: flex !important;
+        align-items: center !important;
+        margin-bottom: 20pt !important;
+        padding-bottom: 10pt !important;
+        border-bottom: 2pt solid black !important;
+    }
+    
+    .logo-img {
+        height: 40pt !important;
+        margin-right: 15pt !important;
+        filter: grayscale(100%) !important;
+    }
+    
+    .logo-text {
+        flex: 1 !important;
+    }
+    
+    .logo-title {
+        font-size: 14pt !important;
+        font-weight: bold !important;
+        color: black !important;
+        margin-bottom: 2pt !important;
+    }
+    
+    .logo-subtitle {
+        font-size: 10pt !important;
+        color: black !important;
+    }
+    
+    /* ====================
+       ENCABEZADO DE REPORTE
+    ==================== */
+    
+    .print-header {
+        text-align: center;
+        margin-bottom: 20pt;
+        padding-bottom: 10pt;
+        border-bottom: 1pt solid #ccc;
+    }
+    
+    .print-title {
+        font-size: 16pt;
+        font-weight: bold;
+        margin-bottom: 5pt;
+    }
+    
+    .print-subtitle {
+        font-size: 12pt;
+        color: #666;
+        margin-bottom: 5pt;
+    }
+    
+    .print-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10pt;
+        color: #666;
+        margin-top: 10pt;
+    }
+    
+    /* ====================
+       TARJETAS Y CONTENEDORES
+    ==================== */
+    
+    .card,
+    .form-section,
+    .resumen-card,
+    .kpi-card,
+    .indicador-card,
+    .planificacion-card,
+    .counter-group {
+        background: white !important;
+        border: 1pt solid #ccc !important;
+        box-shadow: none !important;
+        margin-bottom: 15pt !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    .card-header,
+    .section-title,
+    .resumen-header,
+    .kpi-header,
+    .planificacion-header {
+        background: #f5f5f5 !important;
+        border-bottom: 1pt solid #ccc !important;
+        padding: 8pt 10pt !important;
+        color: black !important;
+    }
+    
+    .card-body,
+    .resumen-item,
+    .kpi-valor {
+        padding: 10pt !important;
+        color: black !important;
+    }
+    
+    /* ====================
+       TABLAS
+    ==================== */
+    
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-bottom: 15pt !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    .table th {
+        background: #f5f5f5 !important;
+        color: black !important;
+        border: 1pt solid #ccc !important;
+        padding: 6pt !important;
+        font-weight: bold !important;
+        font-size: 10pt !important;
+        text-align: left !important;
+    }
+    
+    .table td {
+        border: 1pt solid #ccc !important;
+        padding: 6pt !important;
+        font-size: 10pt !important;
+        vertical-align: top !important;
+    }
+    
+    .table tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .table-container {
+        overflow: visible !important;
+        border: none !important;
+    }
+    
+    /* ====================
+       FORMULARIOS
+    ==================== */
+    
+    .form-group {
+        margin-bottom: 10pt !important;
+        page-break-inside: avoid;
+    }
+    
+    .form-label {
+        color: black !important;
+        font-weight: bold !important;
+        font-size: 10pt !important;
+        margin-bottom: 3pt !important;
+    }
+    
+    .form-control,
+    .counter-input,
+    .planificacion-input {
+        border: 1pt solid #ccc !important;
+        background: white !important;
+        color: black !important;
+        padding: 4pt !important;
+        font-size: 10pt !important;
+        min-height: auto !important;
+    }
+    
+    .form-row,
+    .grid {
+        display: block !important;
+        page-break-inside: avoid;
+    }
+    
+    /* ====================
+       RESÚMENES E INDICADORES
+    ==================== */
+    
+    .resumen-grid,
+    .kpi-grid,
+    .indicadores-grid {
+        display: block !important;
+    }
+    
+    .resumen-item {
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 4pt 0 !important;
+        border-bottom: 0.5pt solid #eee !important;
+    }
+    
+    .resumen-label {
+        color: #666 !important;
+        font-weight: normal !important;
+    }
+    
+    .resumen-value {
+        color: black !important;
+        font-weight: bold !important;
+        text-align: right !important;
+    }
+    
+    .kpi-valor {
+        font-size: 20pt !important;
+        color: black !important;
+        text-align: center !important;
+        margin-bottom: 5pt !important;
+    }
+    
+    .kpi-titulo {
+        font-size: 9pt !important;
+        color: #666 !important;
+        text-align: center !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5pt !important;
+    }
+    
+    /* ====================
+       GRÁFICOS (REEMPLAZAR CON TABLAS)
+    ==================== */
+    
+    canvas,
+    .grafico-container {
+        display: none !important;
+    }
+    
+    .grafico-alternativo {
+        display: block !important;
+        margin: 15pt 0 !important;
+        page-break-inside: avoid;
+    }
+    
+    .grafico-tabla {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 10pt !important;
+    }
+    
+    .grafico-tabla th {
+        background: #f5f5f5 !important;
+        border: 1pt solid #ccc !important;
+        padding: 6pt !important;
+        text-align: center !important;
+    }
+    
+    .grafico-tabla td {
+        border: 1pt solid #ccc !important;
+        padding: 6pt !important;
+        text-align: center !important;
+    }
+    
+    /* ====================
+       BADGES Y ESTADOS
+    ==================== */
+    
+    .badge,
+    .estado-semaforo,
+    .cuartel-estado {
+        background: #f5f5f5 !important;
+        color: black !important;
+        border: 1pt solid #ccc !important;
+        padding: 2pt 6pt !important;
+        font-size: 9pt !important;
+        display: inline-block !important;
+    }
+    
+    .badge-success,
+    .estado-optimo {
+        background: #e8f5e9 !important;
+        border-color: #4caf50 !important;
+        color: #2e7d32 !important;
+    }
+    
+    .badge-warning,
+    .estado-advertencia {
+        background: #fff3e0 !important;
+        border-color: #ff9800 !important;
+        color: #ef6c00 !important;
+    }
+    
+    .badge-danger,
+    .estado-critico {
+        background: #ffebee !important;
+        border-color: #f44336 !important;
+        color: #c62828 !important;
+    }
+    
+    /* ====================
+       ALERTAS
+    ==================== */
+    
+    .alert {
+        display: block !important;
+        background: #f5f5f5 !important;
+        border: 1pt solid #ccc !important;
+        padding: 8pt !important;
+        margin: 10pt 0 !important;
+        page-break-inside: avoid;
+    }
+    
+    .alert-success {
+        border-color: #4caf50 !important;
+        background: #e8f5e9 !important;
+    }
+    
+    .alert-danger {
+        border-color: #f44336 !important;
+        background: #ffebee !important;
+    }
+    
+    .alert-warning {
+        border-color: #ff9800 !important;
+        background: #fff3e0 !important;
+    }
+    
+    .alert-info {
+        border-color: #2196f3 !important;
+        background: #e3f2fd !important;
+    }
+    
+    /* ====================
+       PAGINACIÓN Y SALTO DE PÁGINA
+    ==================== */
+    
+    .page-break {
+        page-break-before: always;
+        break-before: page;
+    }
+    
+    .avoid-break {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    h1, h2, h3, h4 {
+        page-break-after: avoid;
+    }
+    
+    /* ====================
+       FOOTER DE PÁGINA
+    ==================== */
+    
+    @page {
+        margin: 20mm;
+        size: A4;
+        
+        @bottom-left {
+            content: "Carabineros de Chile - SICOF";
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        @bottom-right {
+            content: "Página " counter(page) " de " counter(pages);
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        @top-center {
+            content: "CONFIDENCIAL - USO INTERNO";
+            font-size: 9pt;
+            color: #666;
+            font-weight: bold;
+        }
+    }
+    
+    /* ====================
+       ESPECÍFICO PARA REPORTES
+    ==================== */
+    
+    .reporte-container {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: none !important;
+    }
+    
+    .reporte-meta {
+        display: flex !important;
+        justify-content: space-between !important;
+        font-size: 10pt !important;
+        color: #666 !important;
+        margin-bottom: 15pt !important;
+        padding-bottom: 8pt !important;
+        border-bottom: 1pt solid #ccc !important;
+    }
+    
+    .reporte-codigo {
+        font-family: monospace !important;
+        font-size: 9pt !important;
+        background: #f5f5f5 !important;
+        padding: 2pt 4pt !important;
+        border-radius: 2pt !important;
+    }
+    
+    /* ====================
+       DASHBOARD IMPRIMIBLE
+    ==================== */
+    
+    .dashboard-print {
+        column-count: 2;
+        column-gap: 20pt;
+    }
+    
+    .dashboard-section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin-bottom: 15pt;
+    }
+    
+    /* ====================
+       RANKING IMPRIMIBLE
+    ==================== */
+    
+    .ranking-item {
+        display: flex !important;
+        align-items: center !important;
+        padding: 4pt 0 !important;
+        border-bottom: 0.5pt solid #eee !important;
+    }
+    
+    .ranking-posicion {
+        width: 20pt !important;
+        height: 20pt !important;
+        background: #f5f5f5 !important;
+        color: black !important;
+        margin-right: 8pt !important;
+        border: 1pt solid #ccc !important;
+    }
+    
+    .ranking-info {
+        flex: 1 !important;
+    }
+    
+    .ranking-datos {
+        font-size: 9pt !important;
+        color: #666 !important;
+    }
+    
+    /* ====================
+       OBSERVACIONES Y NOTAS
+    ==================== */
+    
+    .observaciones {
+        margin-top: 20pt !important;
+        padding-top: 10pt !important;
+        border-top: 1pt solid #ccc !important;
+        font-size: 10pt !important;
+        color: #666 !important;
+    }
+    
+    .nota-importante {
+        background: #fff3e0 !important;
+        border: 1pt solid #ff9800 !important;
+        padding: 8pt !important;
+        margin: 10pt 0 !important;
+        font-size: 10pt !important;
+        page-break-inside: avoid;
+    }
+    
+    /* ====================
+       FIRMAS Y AUTORIZACIONES
+    ==================== */
+    
+    .firmas-container {
+        margin-top: 30pt !important;
+        page-break-before: avoid;
+    }
+    
+    .firma-linea {
+        border-top: 1pt solid #ccc !important;
+        margin-top: 20pt !important;
+        padding-top: 5pt !important;
+        text-align: center !important;
+        font-size: 10pt !important;
+    }
+    
+    .firma-nombre {
+        font-weight: bold !important;
+        margin-bottom: 2pt !important;
+    }
+    
+    .firma-cargo {
+        color: #666 !important;
+        font-size: 9pt !important;
+    }
+    
+    /* ====================
+       UTILIDADES DE IMPRESIÓN
+    ==================== */
+    
+    .print-only {
+        display: block !important;
+    }
+    
+    .screen-only {
+        display: none !important;
+    }
+    
+    .watermark {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) rotate(-45deg) !important;
+        font-size: 60pt !important;
+        color: rgba(0, 0, 0, 0.1) !important;
+        z-index: 9999 !important;
+        pointer-events: none !important;
+        white-space: nowrap !important;
+    }
+    
+    /* ====================
+       RESPONSIVE PRINT
+    ==================== */
+    
+    @page :first {
+        margin-top: 15mm;
+        
+        @top-center {
+            content: "INFORME OFICIAL - SICOF";
+            font-size: 11pt;
+            color: black;
+        }
+    }
+    
+    @page :left {
+        margin-left: 25mm;
+        margin-right: 15mm;
+    }
+    
+    @page :right {
+        margin-left: 15mm;
+        margin-right: 25mm;
+    }
+    
+    /* ====================
+       IMPRESIÓN A COLOR
+    ==================== */
+    
+    @media print and (color) {
+        .logo-img {
+            filter: none !important;
+        }
+        
+        .badge-success,
+        .estado-optimo {
+            color: #2e7d32 !important;
+        }
+        
+        .badge-warning,
+        .estado-advertencia {
+            color: #ef6c00 !important;
+        }
+        
+        .badge-danger,
+        .estado-critico {
+            color: #c62828 !important;
+        }
+    }
+    
+    /* ====================
+       IMPRESIÓN EN MODO PAISAJE
+    ==================== */
+    
+    @media print and (orientation: landscape) {
+        .dashboard-print {
+            column-count: 3;
+        }
+        
+        .table {
+            font-size: 9pt !important;
+        }
+    }
+}

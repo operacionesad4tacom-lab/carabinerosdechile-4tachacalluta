@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICOF - Panel de Administración</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="css/tablet.css">
+    <link rel="stylesheet" href="css/desktop.css">
+    <link rel="icon" href="assets/logos/favicon.ico">
+    <style>
+        /* Estilos específicos para panel admin */
+        .admin-container {
+            min-height: 100vh;
+            background: var(--gris-claro);
+        }
+        
+        .admin-sidebar {
+            width: 280px;
+            background: var(--verde-oscuro);
+            color: var(--blanco);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+        
+        .admin-main {
+            margin-left: 280px;
+            padding: var(--spacing-xl);
+            min-height: 100vh;
+        }
+        
+        .sidebar-header {
+            padding: var(--spacing-xl);
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-nav {
+            padding: var(--spacing-lg) 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md) var(--spacing-xl);
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--blanco);
+        }
+        
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--blanco);
+            border-left-color: var(--dorado-institucional);
+        }
+        
+        .nav-icon {
+            font-size: 1.25rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--verde-claro);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .stat-card {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--verde-claro);
+            text-align: center;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+            opacity: 0.8;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--verde-oficial);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-table-container {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+            border: 1px solid var(--verde-claro);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .table-tabs {
+            display: flex;
+            background: var(--verde-claro);
+            border-bottom: 1px solid var(--verde-claro);
+        }
+        
+        .table-tab {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: none;
+            border: none;
+            border-right: 1px solid var(--verde-claro);
+            font-family: var(--font-primary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--verde-oscuro);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .table-tab:hover {
+            background: rgba(11, 107, 58, 0.1);
+        }
+        
+        .table-tab.active {
+            background: var(--blanco);
+            color: var(--verde-oficial);
+            border-bottom: 3px solid var(--verde-oficial);
+        }
+        
+        .table-actions {
+            padding: var(--spacing-lg);
+            background: var(--gris-claro);
+            border-bottom: 1px solid var(--verde-claro);
+            display: flex;
+            gap: var(--spacing-md);
+        }
+        
+        .table-content {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .editable-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .editable-table th {
+            background: var(--verde-claro);
+            color: var(--verde-oscuro);
+            font-weight: 600;
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 2px solid var(--verde-oficial);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .editable-table td {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--verde-claro);
+            vertical-align: middle;
+        }
+        
+        .editable-table tr:hover {
+            background: rgba(11, 107, 58, 0.05);
+        }
+        
+        .editable-cell {
+            padding: 4px 8px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            min-width: 100px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .editable-cell:hover {
+            border-color: var(--gris-medio);
+            background: var(--gris-claro);
+        }
+        
+        .editable-cell:focus {
+            outline: none;
+            border-color: var(--verde-oficial);
+            background: var(--blanco);
+            box-shadow: 0 0 0 2px rgba(11, 107, 58, 0.1);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+        
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-edit {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--azul-informacion);
+        }
+        
+        .btn-edit:hover {
+            background: rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn-delete {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--rojo-alerta);
+        }
+        
+        .btn-delete:hover {
+            background: rgba(231, 76, 60, 0.2);
+        }
+        
+        .btn-save {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--verde-exito);
+        }
+        
+        .btn-save:hover {
+            background: rgba(39, 174, 96, 0.2);
+        }
+        
+        .btn-cancel {
+            background: rgba(149, 165, 166, 0.1);
+            color: var(--gris-medio);
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(149, 165, 166, 0.2);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            background: var(--blanco);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            padding: var(--spacing-xl);
+            border-bottom: 1px solid var(--verde-claro);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: var(--spacing-xl);
+        }
+        
+        .modal-footer {
+            padding: var(--spacing-xl);
+            border-top: 1px solid var(--verde-claro);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-md);
+        }
+        
+        .user-form {
+            display: grid;
+            gap: var(--spacing-lg);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+        }
+        
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xxl);
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: var(--spacing-xxl);
+            color: var(--gris-medio);
+        }
+        
+        .search-container {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .search-input {
+            flex: 1;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-lg);
+            border-top: 1px solid var(--verde-claro);
+        }
+        
+        .page-button {
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--verde-claro);
+            background: var(--blanco);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        
+        .page-button.active {
+            background: var(--verde-oficial);
+            color: var(--blanco);
+            border-color: var(--verde-oficial);
+        }
+        
+        .page-button:hover:not(.active) {
+            background: var(--gris-claro);
+        }
+        
+        /* Responsive para admin */
+        @media (max-width: 1024px) {
+            .admin-sidebar {
+                width: 70px;
+            }
+            
+            .admin-main {
+                margin-left: 70px;
+            }
+            
+            .nav-text {
+                display: none;
+            }
+            
+            .sidebar-header {
+                padding: var(--spacing-lg);
+                text-align: center;
+            }
+            
+            .nav-item {
+                justify-content: center;
+                padding: var(--spacing-md);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                display: none;
+            }
+            
+            .admin-main {
+                margin-left: 0;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-actions {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 4px;">🔧 SICOF</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8;">Panel Administrativo</div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="servicios">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Servicios</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="cuarteles">
+                    <span class="nav-icon">🏢</span>
+                    <span class="nav-text">Estado Cuarteles</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="usuarios">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Usuarios</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="auditoria">
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-text">Auditoría</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="exportar">
+                    <span class="nav-icon">📤</span>
+                    <span class="nav-text">Exportar Datos</span>
+                </a>
+            </nav>
+            
+            <div style="padding: var(--spacing-xl); margin-top: auto;">
+                <button onclick="logout()" class="btn btn-outline" style="width: 100%;">
+                    🚪 Cerrar Sesión
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Contenido Principal -->
+        <main class="admin-main">
+            <!-- Header -->
+            <div class="admin-header">
+                <div>
+                    <h1 style="margin-bottom: var(--spacing-xs);" id="tabTitle">Dashboard Administrativo</h1>
+                    <p style="color: var(--gris-medio); font-size: 0.875rem;" id="tabDescription">
+                        Panel de control y gestión completa del sistema
+                    </p>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                    <div style="text-align: right;">
+                        <div style="font-weight: 600;" id="userName">Administrador</div>
+                        <div style="font-size: 0.875rem; color: var(--gris-medio);" id="userEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2342474e4a4d6340425142414a4d46514c500d404f">[email&#160;protected]</a></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contenido Dinámico -->
+            <div id="adminContent">
+                <!-- Se cargará dinámicamente según la pestaña -->
+                <div class="loading-container">
+                    <div class="loading-spinner" style="width: 60px; height: 60px;"></div>
+                    <div style="margin-top: var(--spacing-md);">Cargando panel administrativo...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para edición -->
+    <div id="editModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="margin: 0;" id="modalTitle">Editar Registro</h2>
+                <button class="btn-close" onclick="cerrarModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Contenido dinámico -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn btn-primary" id="modalSaveBtn">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para confirmación -->
+    <div id="confirmModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="margin: 0;" id="confirmTitle">Confirmar Acción</h2>
+                <button class="btn-close" onclick="cerrarConfirmModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">¿Está seguro de realizar esta acción?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cerrarConfirmModal()">Cancelar</button>
+                <button class="btn btn-danger" id="confirmActionBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script>
+        // Variables globales
+        let userData = {};
+        let currentTab = 'dashboard';
+        let currentData = {};
+        let editingRecord = null;
+        let confirmCallback = null;
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', async () => {
+            userData = JSON.parse(localStorage.getItem('sicof_user'));
+            
+            if (!userData || userData.rol !== 'admin') {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Mostrar información del usuario
+            document.getElementById('userName').textContent = 'Administrador del Sistema';
+            document.getElementById('userEmail').textContent = userData.email;
+            
+            // Configurar navegación
+            configurarNavegacion();
+            
+            // Cargar dashboard inicial
+            await cargarDashboard();
+        });
+        
+        function configurarNavegacion() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remover activo de todos
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    
+                    // Activar este item
+                    this.classList.add('active');
+                    
+                    // Cambiar pestaña
+                    const tab = this.dataset.tab;
+                    cambiarTab(tab);
+                });
+            });
+        }
+        
+        async function cambiarTab(tab) {
+            currentTab = tab;
+            
+            // Actualizar título
+            const titulos = {
+                'dashboard': 'Dashboard Administrativo',
+                'servicios': 'Gestión de Servicios',
+                'cuarteles': 'Estado de Cuarteles',
+                'usuarios': 'Gestión de Usuarios',
+                'auditoria': 'Registro de Auditoría',
+                'exportar': 'Exportación de Datos'
+            };
+            
+            const descripciones = {
+                'dashboard': 'Panel de control y gestión completa del sistema',
+                'servicios': 'Administre y edite los servicios policiales registrados',
+                'cuarteles': 'Gestione los reportes de estado de los cuarteles',
+                'usuarios': 'Administre usuarios, roles y permisos del sistema',
+                'auditoria': 'Revise el historial completo de acciones en el sistema',
+                'exportar': 'Exporte datos en diferentes formatos para análisis'
+            };
+            
+            document.getElementById('tabTitle').textContent = titulos[tab];
+            document.getElementById('tabDescription').textContent = descripciones[tab];
+            
+            // Cargar contenido según pestaña
+            switch(tab) {
+                case 'dashboard':
+                    await cargarDashboard();
+                    break;
+                case 'servicios':
+                    await cargarTablaServicios();
+                    break;
+                case 'cuarteles':
+                    await cargarTablaCuarteles();
+                    break;
+                case 'usuarios':
+                    await cargarTablaUsuarios();
+                    break;
+                case 'auditoria':
+                    await cargarTablaAuditoria();
+                    break;
+                case 'exportar':
+                    cargarExportacion();
+                    break;
+            }
+        }
+        
+        async function cargarDashboard() {
+            const container = document.getElementById('adminContent');
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner" style="width: 60px; height: 60px;"></div>
+                    <div style="margin-top: var(--spacing-md);">Cargando estadísticas...</div>
+                </div>
+            `;
+            
+            try {
+                // Obtener estadísticas
+                const [
+                    serviciosCount,
+                    cuartelesCount,
+                    usuariosCount,
+                    auditoriaCount
+                ] = await Promise.all([
+                    contarRegistros('servicios'),
+                    contarRegistros('estado_cuarteles'),
+                    contarRegistros('usuarios'),
+                    contarRegistros('auditoria')
+                ]);
+                
+                // Obtener últimos registros
+                const { data: ultimosServicios } = await window.supabase
+                    .from('servicios')
+                    .select(`
+                        *,
+                        cuarteles!inner(nombre),
+                        usuarios!inner(email)
+                    `)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                const { data: ultimosCuarteles } = await window.supabase
+                    .from('estado_cuarteles')
+                    .select(`
+                        *,
+                        cuarteles!inner(nombre),
+                        usuarios!inner(email)
+                    `)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                container.innerHTML = `
+                    <!-- Estadísticas -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-value">${serviciosCount}</div>
+                            <div class="stat-label">Servicios Registrados</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">🏢</div>
+                            <div class="stat-value">${cuartelesCount}</div>
+                            <div class="stat-label">Reportes de Cuarteles</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-value">${usuariosCount}</div>
+                            <div class="stat-label">Usuarios Activos</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">📝</div>
+                            <div class="stat-value">${auditoriaCount}</div>
+                            <div class="stat-label">Registros de Auditoría</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Últimos Servicios -->
+                    <div class="data-table-container" style="margin-bottom: var(--spacing-xl);">
+                        <div style="padding: var(--spacing-lg); border-bottom: 1px solid var(--verde-claro);">
+                            <h3 style="margin: 0; display: flex; align-items: center; gap: var(--spacing-sm);">
+                                <span>📋</span>
+                                Últimos Servicios Registrados
+                            </h3>
+                        </div>
+                        
+                        <div class="table-content">
+                            <table class="editable-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Cuartel</th>
+                                        <th>Servicio</th>
+                                        <th>Usuario</th>
+                                        <th>Controles</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${ultimosServicios && ultimosServicios.length > 0 ? ultimosServicios.map(servicio => `
+                                        <tr>
+                                            <td>${new Date(servicio.fecha).toLocaleDateString('es-CL')}</td>
+                                            <td>${servicio.cuarteles?.nombre || servicio.cuartel_codigo}</td>
+                                            <td>
+                                                <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                    ${servicio.nombre_servicio}
+                                                </div>
+                                            </td>
+                                            <td>${servicio.usuarios?.email || 'N/A'}</td>
+                                            <td>${servicio.total_controles?.toLocaleString() || 0}</td>
+                                            <td>
+                                                <span style="color: ${servicio.is_locked ? 'var(--verde-exito)' : 'var(--naranja-advertencia)'}; font-weight: 600;">
+                                                    ${servicio.is_locked ? '🔒 Bloqueado' : '✏️ Editable'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-icon btn-edit" onclick="editarServicio('${servicio.id}')" title="Editar">
+                                                        ✏️
+                                                    </button>
+                                                    ${!servicio.is_locked ? `
+                                                    <button class="btn-icon btn-delete" onclick="eliminarRegistro('servicios', '${servicio.id}')" title="Eliminar">
+                                                        🗑️
+                                                    </button>
+                                                    ` : ''}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('') : `
+                                        <tr>
+                                            <td colspan="7" class="no-data">
+                                                No hay servicios registrados
+                                            </td>
+                                        </tr>
+                                    `}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Últimos Reportes de Cuarteles -->
+                    <div class="data-table-container">
+                        <div style="padding: var(--spacing-lg); border-bottom: 1px solid var(--verde-claro);">
+                            <h3 style="margin: 0; display: flex; align-items: center; gap: var(--spacing-sm);">
+                                <span>🏢</span>
+                                Últimos Reportes de Cuarteles
+                            </h3>
+                        </div>
+                        
+                        <div class="table-content">
+                            <table class="editable-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Cuartel</th>
+                                        <th>Jefe Responsable</th>
+                                        <th>Vehículos</th>
+                                        <th>Electricidad</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${ultimosCuarteles && ultimosCuarteles.length > 0 ? ultimosCuarteles.map(cuartel => `
+                                        <tr>
+                                            <td>${new Date(cuartel.fecha).toLocaleDateString('es-CL')}</td>
+                                            <td>${cuartel.cuarteles?.nombre || cuartel.cuartel_codigo}</td>
+                                            <td>${cuartel.nombre_jefe}</td>
+                                            <td>${cuartel.vehiculos_operativos}/${cuartel.vehiculos_totales}</td>
+                                            <td>
+                                                <span style="color: ${cuartel.tiene_electricidad ? 'var(--verde-exito)' : 'var(--rojo-alerta)'}; font-weight: 600;">
+                                                    ${cuartel.tiene_electricidad ? '✅ Sí' : '❌ No'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span style="color: ${cuartel.is_locked ? 'var(--verde-exito)' : 'var(--naranja-advertencia)'}; font-weight: 600;">
+                                                    ${cuartel.is_locked ? '🔒 Bloqueado' : '✏️ Editable'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-icon btn-edit" onclick="editarEstadoCuartel('${cuartel.id}')" title="Editar">
+                                                        ✏️
+                                                    </button>
+                                                    ${!cuartel.is_locked ? `
+                                                    <button class="btn-icon btn-delete" onclick="eliminarRegistro('estado_cuarteles', '${cuartel.id}')" title="Eliminar">
+                                                        🗑️
+                                                    </button>
+                                                    ` : ''}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('') : `
+                                        <tr>
+                                            <td colspan="7" class="no-data">
+                                                No hay reportes de cuarteles
+                                            </td>
+                                        </tr>
+                                    `}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error al cargar dashboard:', error);
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error al cargar dashboard</strong>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function contarRegistros(tabla) {
+            const { count, error } = await window.supabase
+                .from(tabla)
+                .select('*', { count: 'exact', head: true });
+            
+            if (error) throw error;
+            return count || 0;
+        }
+        
+        async function cargarTablaServicios() {
+            const container = document.getElementById('adminContent');
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner" style="width: 60px; height: 60px;"></div>
+                    <div style="margin-top: var(--spacing-md);">Cargando servicios...</div>
+                </div>
+            `;
+            
+            try {
+                // Obtener todos los servicios
+                const { data: servicios, error } = await window.supabase
+                    .from('servicios')
+                    .select(`
+                        *,
+                        cuarteles!inner(nombre),
+                        usuarios!inner(email, full_name)
+                    `)
+                    .order('fecha', { ascending: false });
+                
+                if (error) throw error;
+                
+                currentData.servicios = servicios || [];
+                
+                container.innerHTML = `
+                    <div class="data-table-container">
+                        <div class="table-tabs">
+                            <button class="table-tab active" onclick="filtrarServicios('todos')">Todos (${servicios.length})</button>
+                            <button class="table-tab" onclick="filtrarServicios('bloqueados')">Bloqueados</button>
+                            <button class="table-tab" onclick="filtrarServicios('editables')">Editables</button>
+                        </div>
+                        
+                        <div class="table-actions">
+                            <div class="search-container">
+                                <input type="text" id="searchServicios" class="form-control search-input" placeholder="Buscar por cuartel, servicio o usuario..." onkeyup="buscarServicios()">
+                                <select id="filterCuartel" class="form-control" onchange="filtrarServicios()" style="min-width: 200px;">
+                                    <option value="">Todos los cuarteles</option>
+                                    ${window.SICOF_CONFIG.cuarteles.map(c => `<option value="${c.codigo}">${c.nombre}</option>`).join('')}
+                                </select>
+                                <input type="date" id="filterFecha" class="form-control" onchange="filtrarServicios()">
+                            </div>
+                        </div>
+                        
+                        <div class="table-content">
+                            <table class="editable-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fecha</th>
+                                        <th>Cuartel</th>
+                                        <th>Servicio</th>
+                                        <th>Usuario</th>
+                                        <th>Controles</th>
+                                        <th>Detenidos</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="serviciosTableBody">
+                                    <!-- Se llenará dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination" id="serviciosPagination">
+                            <!-- Paginación dinámica -->
+                        </div>
+                    </div>
+                `;
+                
+                // Mostrar servicios
+                mostrarServicios(servicios);
+                
+            } catch (error) {
+                console.error('Error al cargar servicios:', error);
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error al cargar servicios</strong>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function mostrarServicios(servicios, pagina = 1, itemsPorPagina = 20) {
+            const tbody = document.getElementById('serviciosTableBody');
+            const pagination = document.getElementById('serviciosPagination');
+            
+            if (!servicios || servicios.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="no-data">
+                            No hay servicios registrados
+                        </td>
+                    </tr>
+                `;
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            // Calcular paginación
+            const totalPaginas = Math.ceil(servicios.length / itemsPorPagina);
+            const inicio = (pagina - 1) * itemsPorPagina;
+            const fin = inicio + itemsPorPagina;
+            const serviciosPagina = servicios.slice(inicio, fin);
+            
+            // Mostrar servicios de la página
+            tbody.innerHTML = serviciosPagina.map(servicio => `
+                <tr>
+                    <td>
+                        <div style="font-size: 0.75rem; color: var(--gris-medio);">
+                            ${servicio.id.substring(0, 8)}...
+                        </div>
+                    </td>
+                    <td>${new Date(servicio.fecha).toLocaleDateString('es-CL')}</td>
+                    <td>${servicio.cuarteles?.nombre || servicio.cuartel_codigo}</td>
+                    <td>
+                        <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${servicio.nombre_servicio}">
+                            ${servicio.nombre_servicio}
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.875rem;">
+                            ${servicio.usuarios?.full_name || servicio.usuarios?.email || 'N/A'}
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--gris-medio);">
+                            ${servicio.usuarios?.email || ''}
+                        </div>
+                    </td>
+                    <td>${servicio.total_controles?.toLocaleString() || 0}</td>
+                    <td>${servicio.detenidos_cantidad || 0}</td>
+                    <td>
+                        <span style="color: ${servicio.is_locked ? 'var(--verde-exito)' : 'var(--naranja-advertencia)'}; font-weight: 600;">
+                            ${servicio.is_locked ? '🔒 Bloqueado' : '✏️ Editable'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-icon btn-edit" onclick="editarServicio('${servicio.id}')" title="Editar">
+                                ✏️
+                            </button>
+                            ${!servicio.is_locked ? `
+                            <button class="btn-icon btn-delete" onclick="eliminarRegistro('servicios', '${servicio.id}')" title="Eliminar">
+                                🗑️
+                            </button>
+                            ` : ''}
+                            <button class="btn-icon" onclick="verDetallesServicio('${servicio.id}')" title="Ver detalles" style="background: rgba(52, 152, 219, 0.1); color: var(--azul-informacion);">
+                                👁️
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Mostrar paginación
+            let paginacionHTML = '';
+            if (totalPaginas > 1) {
+                paginacionHTML = `
+                    <button class="page-button" onclick="cambiarPaginaServicios(${pagina - 1})" ${pagina === 1 ? 'disabled' : ''}>
+                        ←
+                    </button>
+                `;
+                
+                // Mostrar números de página (máximo 5)
+                const inicioPag = Math.max(1, pagina - 2);
+                const finPag = Math.min(totalPaginas, inicioPag + 4);
+                
+                for (let i = inicioPag; i <= finPag; i++) {
+                    paginacionHTML += `
+                        <button class="page-button ${i === pagina ? 'active' : ''}" onclick="cambiarPaginaServicios(${i})">
+                            ${i}
+                        </button>
+                    `;
+                }
+                
+                paginacionHTML += `
+                    <button class="page-button" onclick="cambiarPaginaServicios(${pagina + 1})" ${pagina === totalPaginas ? 'disabled' : ''}>
+                        →
+                    </button>
+                `;
+            }
+            
+            pagination.innerHTML = paginacionHTML;
+        }
+        
+        function cambiarPaginaServicios(pagina) {
+            mostrarServicios(currentData.servicios, pagina);
+        }
+        
+        function filtrarServicios(filtro = 'todos') {
+            let serviciosFiltrados = [...currentData.servicios];
+            
+            // Aplicar filtro de estado
+            if (filtro === 'bloqueados') {
+                serviciosFiltrados = serviciosFiltrados.filter(s => s.is_locked);
+            } else if (filtro === 'editables') {
+                serviciosFiltrados = serviciosFiltrados.filter(s => !s.is_locked);
+            }
+            
+            // Aplicar filtro de cuartel
+            const filtroCuartel = document.getElementById('filterCuartel').value;
+            if (filtroCuartel) {
+                serviciosFiltrados = serviciosFiltrados.filter(s => s.cuartel_codigo === filtroCuartel);
+            }
+            
+            // Aplicar filtro de fecha
+            const filtroFecha = document.getElementById('filterFecha').value;
+            if (filtroFecha) {
+                serviciosFiltrados = serviciosFiltrados.filter(s => s.fecha === filtroFecha);
+            }
+            
+            // Aplicar búsqueda
+            const busqueda = document.getElementById('searchServicios').value.toLowerCase();
+            if (busqueda) {
+                serviciosFiltrados = serviciosFiltrados.filter(s => 
+                    (s.cuarteles?.nombre?.toLowerCase().includes(busqueda)) ||
+                    (s.nombre_servicio?.toLowerCase().includes(busqueda)) ||
+                    (s.usuarios?.email?.toLowerCase().includes(busqueda)) ||
+                    (s.usuarios?.full_name?.toLowerCase().includes(busqueda))
+                );
+            }
+            
+            // Actualizar pestañas activas
+            document.querySelectorAll('.table-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Mostrar servicios filtrados
+            mostrarServicios(serviciosFiltrados);
+        }
+        
+        function buscarServicios() {
+            filtrarServicios();
+        }
+        
+        async function editarServicio(id) {
+            try {
+                // Obtener servicio
+                const { data: servicio, error } = await window.supabase
+                    .from('servicios')
+                    .select(`
+                        *,
+                        cuarteles!inner(nombre),
+                        usuarios!inner(email, full_name)
+                    `)
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                
+                if (servicio.is_locked) {
+                    alert('Este servicio está bloqueado y no puede ser editado. Debe eliminarlo y crear uno nuevo.');
+                    return;
+                }
+                
+                editingRecord = { tabla: 'servicios', id, data: servicio };
+                
+                // Mostrar modal de edición
+                document.getElementById('modalTitle').textContent = 'Editar Servicio';
+                document.getElementById('modalSaveBtn').onclick = () => guardarEdicion();
+                
+                document.getElementById('modalBody').innerHTML = `
+                    <div class="user-form">
+                        <div class="form-group">
+                            <label class="form-label">FECHA</label>
+                            <input type="date" id="editFecha" class="form-control" value="${servicio.fecha}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">CUARTEL</label>
+                            <select id="editCuartel" class="form-control">
+                                ${window.SICOF_CONFIG.cuarteles.map(c => 
+                                    `<option value="${c.codigo}" ${c.codigo === servicio.cuartel_codigo ? 'selected' : ''}>${c.nombre}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">NOMBRE DEL SERVICIO</label>
+                            <input type="text" id="editNombreServicio" class="form-control" value="${servicio.nombre_servicio}">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">JEFE DEL SERVICIO</label>
+                                <input type="text" id="editJefeServicio" class="form-control" value="${servicio.jefe_servicio}">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">HORARIO</label>
+                                <div style="display: flex; gap: var(--spacing-sm);">
+                                    <input type="time" id="editHorarioInicio" class="form-control" value="${servicio.horario_inicio}">
+                                    <span style="align-self: center;">-</span>
+                                    <input type="time" id="editHorarioTermino" class="form-control" value="${servicio.horario_termino}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">CONTROLES INVESTIGATIVOS</label>
+                                <input type="number" id="editControlesInvestigativos" class="form-control" value="${servicio.controles_investigativos || 0}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">CONTROLES PREVENTIVOS</label>
+                                <input type="number" id="editControlesPreventivos" class="form-control" value="${servicio.controles_preventivos || 0}">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">CONTROLES MIGRATORIOS</label>
+                                <input type="number" id="editControlesMigratorios" class="form-control" value="${servicio.controles_migratorios || 0}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">CONTROLES VEHICULARES</label>
+                                <input type="number" id="editControlesVehiculares" class="form-control" value="${servicio.controles_vehiculares || 0}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('editModal').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error al editar servicio:', error);
+                alert(`Error al cargar servicio: ${error.message}`);
+            }
+        }
+        
+        async function guardarEdicion() {
+            try {
+                if (!editingRecord) return;
+                
+                // Recopilar datos del formulario
+                const datosActualizados = {
+                    fecha: document.getElementById('editFecha').value,
+                    cuartel_codigo: document.getElementById('editCuartel').value,
+                    nombre_servicio: document.getElementById('editNombreServicio').value,
+                    jefe_servicio: document.getElementById('editJefeServicio').value,
+                    horario_inicio: document.getElementById('editHorarioInicio').value,
+                    horario_termino: document.getElementById('editHorarioTermino').value,
+                    controles_investigativos: parseInt(document.getElementById('editControlesInvestigativos').value) || 0,
+                    controles_preventivos: parseInt(document.getElementById('editControlesPreventivos').value) || 0,
+                    controles_migratorios: parseInt(document.getElementById('editControlesMigratorios').value) || 0,
+                    controles_vehiculares: parseInt(document.getElementById('editControlesVehiculares').value) || 0,
+                    updated_at: new Date().toISOString()
+                };
+                
+                // Validaciones básicas
+                if (datosActualizados.horario_inicio >= datosActualizados.horario_termino) {
+                    alert('El horario de término debe ser posterior al de inicio');
+                    return;
+                }
+                
+                // Actualizar en Supabase
+                const { error } = await window.supabase
+                    .from(editingRecord.tabla)
+                    .update(datosActualizados)
+                    .eq('id', editingRecord.id);
+                
+                if (error) throw error;
+                
+                alert('✅ Servicio actualizado correctamente');
+                cerrarModal();
+                
+                // Recargar datos según la pestaña actual
+                switch(currentTab) {
+                    case 'dashboard':
+                        await cargarDashboard();
+                        break;
+                    case 'servicios':
+                        await cargarTablaServicios();
+                        break;
+                }
+                
+            } catch (error) {
+                console.error('Error al guardar edición:', error);
+                alert(`Error al guardar: ${error.message}`);
+            }
+        }
+        
+        async function eliminarRegistro(tabla, id) {
+            const confirmacion = confirm(`¿Está seguro de eliminar este registro?\n\nEsta acción no se puede deshacer.`);
+            
+            if (!confirmacion) return;
+            
+            try {
+                const { error } = await window.supabase
+                    .from(tabla)
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                alert('✅ Registro eliminado correctamente');
+                
+                // Recargar datos según la pestaña actual
+                switch(currentTab) {
+                    case 'dashboard':
+                        await cargarDashboard();
+                        break;
+                    case 'servicios':
+                        await cargarTablaServicios();
+                        break;
+                    case 'cuarteles':
+                        await cargarTablaCuarteles();
+                        break;
+                    case 'usuarios':
+                        await cargarTablaUsuarios();
+                        break;
+                }
+                
+            } catch (error) {
+                console.error('Error al eliminar:', error);
+                alert(`Error al eliminar: ${error.message}`);
+            }
+        }
+        
+        function cerrarModal() {
+            document.getElementById('editModal').style.display = 'none';
+            editingRecord = null;
+        }
+        
+        function cerrarConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            confirmCallback = null;
+        }
+        
+        async function cargarTablaCuarteles() {
+            // Implementación similar a cargarTablaServicios
+            const container = document.getElementById('adminContent');
+            container.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Función en desarrollo</strong>
+                    <p>La gestión de estado de cuarteles se implementará en la siguiente versión.</p>
+                </div>
+            `;
+        }
+        
+        async function cargarTablaUsuarios() {
+            // Implementación similar
+            const container = document.getElementById('adminContent');
+            container.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Función en desarrollo</strong>
+                    <p>La gestión de usuarios se implementará en la siguiente versión.</p>
+                </div>
+            `;
+        }
+        
+        async function cargarTablaAuditoria() {
+            // Implementación similar
+            const container = document.getElementById('adminContent');
+            container.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Función en desarrollo</strong>
+                    <p>El registro de auditoría se implementará en la siguiente versión.</p>
+                </div>
+            `;
+        }
+        
+        function cargarExportacion() {
+            const container = document.getElementById('adminContent');
+            container.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Función en desarrollo</strong>
+                    <p>La exportación de datos se implementará en la siguiente versión.</p>
+                </div>
+            `;
+        }
+        
+        function verDetallesServicio(id) {
+            alert('Función de ver detalles en desarrollo.');
+            // En una implementación completa, mostraría un modal con todos los detalles
+        }
+        
+        function editarEstadoCuartel(id) {
+            alert('Función de editar es

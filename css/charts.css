@@ -1,0 +1,985 @@
+/* ============================================
+   charts.css
+   Estilos específicos para gráficos y visualizaciones
+   Carabineros de Chile - SICOF
+============================================ */
+
+/* ====================
+   CONTENEDORES DE GRÁFICOS
+==================== */
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: var(--spacing-xl);
+}
+
+.chart-wrapper {
+    background: var(--blanco);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-xl);
+    border: 1px solid var(--verde-claro);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+}
+
+.chart-wrapper:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--verde-claro);
+}
+
+.chart-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--verde-oscuro);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.chart-title-icon {
+    font-size: 1.5rem;
+    opacity: 0.8;
+}
+
+.chart-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.chart-action-btn {
+    background: none;
+    border: 1px solid var(--verde-claro);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm);
+    cursor: pointer;
+    color: var(--gris-medio);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+}
+
+.chart-action-btn:hover {
+    background: var(--verde-claro);
+    color: var(--verde-oficial);
+    border-color: var(--verde-oficial);
+}
+
+.chart-body {
+    position: relative;
+    min-height: 200px;
+}
+
+.chart-footer {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--verde-claro);
+    font-size: 0.875rem;
+    color: var(--gris-medio);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ====================
+   TIPOS DE GRÁFICOS
+==================== */
+
+/* Gráfico de barras */
+.chart-bar {
+    height: 300px;
+}
+
+.chart-bar-horizontal {
+    height: 400px;
+}
+
+/* Gráfico de líneas */
+.chart-line {
+    height: 250px;
+}
+
+/* Gráfico de torta/dona */
+.chart-pie {
+    height: 300px;
+}
+
+.chart-doughnut {
+    height: 300px;
+}
+
+/* Gráfico de radar */
+.chart-radar {
+    height: 350px;
+}
+
+/* Gráfico de dispersión */
+.chart-scatter {
+    height: 300px;
+}
+
+/* Gráfico de área */
+.chart-area {
+    height: 250px;
+}
+
+/* ====================
+   LEYENDAS PERSONALIZADAS
+==================== */
+
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: var(--gris-claro);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--verde-claro);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.875rem;
+    color: var(--gris-profesional);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.legend-text {
+    font-weight: 500;
+}
+
+.legend-value {
+    font-weight: 600;
+    color: var(--verde-oficial);
+    margin-left: var(--spacing-xs);
+}
+
+/* ====================
+   TOOLTIPS PERSONALIZADOS
+==================== */
+
+.chart-tooltip {
+    background: var(--blanco) !important;
+    border: 1px solid var(--verde-claro) !important;
+    border-radius: var(--border-radius-sm) !important;
+    box-shadow: var(--shadow-md) !important;
+    padding: var(--spacing-md) !important;
+    font-family: var(--font-primary) !important;
+    font-size: 0.875rem !important;
+}
+
+.tooltip-header {
+    font-weight: 600;
+    color: var(--verde-oscuro);
+    margin-bottom: var(--spacing-xs);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--verde-claro);
+}
+
+.tooltip-body {
+    color: var(--gris-profesional);
+}
+
+.tooltip-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.tooltip-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.tooltip-label {
+    min-width: 80px;
+}
+
+.tooltip-value {
+    font-weight: 600;
+    color: var(--verde-oficial);
+}
+
+/* ====================
+   ANOTACIONES Y LÍNEAS DE REFERENCIA
+==================== */
+
+.chart-annotation {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--verde-oficial);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.75rem;
+    color: var(--verde-oscuro);
+    z-index: 10;
+    pointer-events: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.chart-annotation::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+}
+
+.annotation-top {
+    top: -10px;
+    transform: translateX(-50%);
+}
+
+.annotation-top::before {
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px 6px 0 6px;
+    border-color: var(--verde-oficial) transparent transparent transparent;
+}
+
+.annotation-right {
+    right: -10px;
+    transform: translateY(-50%);
+}
+
+.annotation-right::before {
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 6px 8px 6px 0;
+    border-color: transparent var(--verde-oficial) transparent transparent;
+}
+
+.reference-line {
+    position: absolute;
+    border-left: 2px dashed var(--naranja-advertencia);
+    height: 100%;
+    top: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.reference-label {
+    position: absolute;
+    background: var(--naranja-advertencia);
+    color: var(--blanco);
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+/* ====================
+   INDICADORES EN GRÁFICOS
+==================== */
+
+.chart-indicator {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.indicator-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--verde-oficial);
+    margin-bottom: var(--spacing-xs);
+}
+
+.indicator-label {
+    font-size: 0.875rem;
+    color: var(--gris-medio);
+    background: var(--blanco);
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--verde-claro);
+}
+
+/* ====================
+   GRÁFICOS DE KPI
+==================== */
+
+.kpi-chart-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.kpi-chart {
+    background: var(--blanco);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--verde-claro);
+    text-align: center;
+}
+
+.kpi-chart-main {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--verde-oficial);
+    margin: var(--spacing-md) 0;
+    line-height: 1;
+}
+
+.kpi-chart-label {
+    font-size: 0.875rem;
+    color: var(--gris-medio);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.kpi-chart-change {
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+}
+
+.change-positive {
+    color: var(--verde-exito);
+}
+
+.change-negative {
+    color: var(--rojo-alerta);
+}
+
+.change-neutral {
+    color: var(--gris-medio);
+}
+
+/* ====================
+   GRÁFICOS DE COMPARACIÓN
+==================== */
+
+.comparison-chart {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.comparison-item {
+    background: var(--blanco);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--verde-claro);
+}
+
+.comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.comparison-title {
+    font-weight: 600;
+    color: var(--verde-oscuro);
+}
+
+.comparison-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--verde-oficial);
+    text-align: center;
+    margin: var(--spacing-lg) 0;
+}
+
+.comparison-diff {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--gris-medio);
+}
+
+/* ====================
+   GRÁFICOS DE EVOLUCIÓN
+==================== */
+
+.timeline-chart {
+    position: relative;
+    padding-left: 60px;
+}
+
+.timeline-axis {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 50px;
+    border-right: 2px solid var(--verde-claro);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.timeline-tick {
+    position: relative;
+    font-size: 0.75rem;
+    color: var(--gris-medio);
+    text-align: right;
+    padding-right: var(--spacing-sm);
+}
+
+.timeline-tick::after {
+    content: '';
+    position: absolute;
+    right: -7px;
+    top: 50%;
+    width: 5px;
+    height: 1px;
+    background: var(--gris-medio);
+}
+
+.timeline-content {
+    height: 200px;
+    position: relative;
+}
+
+.timeline-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--verde-oficial);
+    border: 2px solid var(--blanco);
+    box-shadow: var(--shadow-sm);
+    transform: translate(-50%, 50%);
+    z-index: 2;
+}
+
+.timeline-line {
+    position: absolute;
+    height: 2px;
+    background: var(--verde-oficial);
+    opacity: 0.5;
+    z-index: 1;
+}
+
+/* ====================
+   GRÁFICOS DE DISTRIBUCIÓN
+==================== */
+
+.distribution-chart {
+    display: flex;
+    align-items: flex-end;
+    height: 200px;
+    gap: 2px;
+    margin-bottom: var(--spacing-lg);
+}
+
+.distribution-bar {
+    flex: 1;
+    background: linear-gradient(to top, var(--verde-oficial), var(--verde-oscuro));
+    border-radius: 3px 3px 0 0;
+    position: relative;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.distribution-bar:hover {
+    opacity: 0.8;
+    transform: translateY(-2px);
+}
+
+.distribution-label {
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--gris-medio);
+    transform: rotate(-45deg);
+    transform-origin: top left;
+    white-space: nowrap;
+}
+
+.distribution-value {
+    position: absolute;
+    top: -25px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--verde-oficial);
+}
+
+/* ====================
+   GRÁFICOS DE CALOR
+==================== */
+
+.heatmap-container {
+    display: grid;
+    gap: 2px;
+    margin-bottom: var(--spacing-lg);
+}
+
+.heatmap-cell {
+    background: var(--verde-claro);
+    border-radius: 2px;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    position: relative;
+}
+
+.heatmap-cell:hover {
+    transform: scale(1.1);
+    z-index: 2;
+    box-shadow: var(--shadow-sm);
+}
+
+.heatmap-cell-tooltip {
+    position: absolute;
+    background: var(--blanco);
+    border: 1px solid var(--verde-claro);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 10;
+    display: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.heatmap-cell:hover .heatmap-cell-tooltip {
+    display: block;
+}
+
+/* Niveles de intensidad */
+.heatmap-level-0 { background: #e6f2ec; }
+.heatmap-level-1 { background: #b8dfcc; }
+.heatmap-level-2 { background: #8accac; }
+.heatmap-level-3 { background: #5cb98c; }
+.heatmap-level-4 { background: #2ea66c; }
+.heatmap-level-5 { background: #00934c; }
+
+/* ====================
+   GRÁFICOS DE BURBUJAS
+==================== */
+
+.bubble-chart {
+    position: relative;
+    height: 300px;
+}
+
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--verde-oficial);
+    opacity: 0.7;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blanco);
+    font-weight: 600;
+}
+
+.bubble:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+.bubble-label {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--gris-medio);
+    white-space: nowrap;
+}
+
+/* ====================
+   GRÁFICOS INTERACTIVOS
+==================== */
+
+.interactive-chart {
+    position: relative;
+}
+
+.chart-zoom {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    display: flex;
+    gap: var(--spacing-xs);
+    z-index: 10;
+}
+
+.zoom-btn {
+    background: var(--blanco);
+    border: 1px solid var(--verde-claro);
+    border-radius: var(--border-radius-sm);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gris-medio);
+    transition: all var(--transition-fast);
+}
+
+.zoom-btn:hover {
+    background: var(--verde-claro);
+    color: var(--verde-oficial);
+    border-color: var(--verde-oficial);
+}
+
+.chart-brush {
+    position: absolute;
+    background: rgba(11, 107, 58, 0.1);
+    border: 1px dashed var(--verde-oficial);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* ====================
+   GRÁFICOS RESPONSIVOS
+==================== */
+
+@media (max-width: 768px) {
+    .chart-wrapper {
+        padding: var(--spacing-lg);
+    }
+    
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+    
+    .chart-actions {
+        align-self: flex-end;
+    }
+    
+    .comparison-chart {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+    
+    .kpi-chart-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-bar,
+    .chart-line,
+    .chart-pie,
+    .chart-doughnut {
+        height: 250px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .kpi-chart-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .chart-bar,
+    .chart-line {
+        height: 250px;
+    }
+    
+    .chart-pie,
+    .chart-doughnut {
+        height: 280px;
+    }
+}
+
+@media (min-width: 1025px) {
+    .kpi-chart-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .chart-bar,
+    .chart-line {
+        height: 300px;
+    }
+    
+    .chart-pie,
+    .chart-doughnut {
+        height: 320px;
+    }
+}
+
+/* ====================
+   ANIMACIONES DE GRÁFICOS
+==================== */
+
+@keyframes chartAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chart-wrapper {
+    animation: chartAppear 0.5s ease-out;
+}
+
+@keyframes barGrow {
+    from {
+        transform: scaleY(0);
+        transform-origin: bottom;
+    }
+    to {
+        transform: scaleY(1);
+        transform-origin: bottom;
+    }
+}
+
+.chart-bar .chartjs-render-monitor {
+    animation: barGrow 0.8s ease-out;
+}
+
+@keyframes pieDraw {
+    from {
+        stroke-dasharray: 0 100;
+    }
+}
+
+.chart-pie .chartjs-render-monitor,
+.chart-doughnut .chartjs-render-monitor {
+    animation: pieDraw 1s ease-out;
+}
+
+/* ====================
+   TEMAS DE COLOR PARA GRÁFICOS
+==================== */
+
+.chart-theme-institucional {
+    /* Verde institucional */
+    --chart-color-1: #0b6b3a;
+    --chart-color-2: #084c2a;
+    --chart-color-3: #e6f2ec;
+    --chart-color-4: #d4af37;
+    --chart-color-5: #2c3e50;
+}
+
+.chart-theme-analitico {
+    /* Colores para análisis */
+    --chart-color-1: #2ecc71;
+    --chart-color-2: #3498db;
+    --chart-color-3: #9b59b6;
+    --chart-color-4: #e74c3c;
+    --chart-color-5: #f39c12;
+}
+
+.chart-theme-secuencial {
+    /* Secuencial para valores */
+    --chart-color-1: #e6f2ec;
+    --chart-color-2: #b8dfcc;
+    --chart-color-3: #8accac;
+    --chart-color-4: #5cb98c;
+    --chart-color-5: #2ea66c;
+    --chart-color-6: #00934c;
+}
+
+/* ====================
+   ESTADOS DE CARGA
+==================== */
+
+.chart-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    border-radius: var(--border-radius-md);
+    backdrop-filter: blur(2px);
+}
+
+.chart-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--verde-claro);
+    border-top-color: var(--verde-oficial);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.chart-loading-text {
+    margin-top: var(--spacing-md);
+    color: var(--gris-medio);
+    font-size: 0.875rem;
+}
+
+.chart-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    border-radius: var(--border-radius-md);
+    color: var(--rojo-alerta);
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.chart-error-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.chart-error-message {
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.chart-error-retry {
+    background: var(--rojo-alerta);
+    color: var(--blanco);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: background var(--transition-fast);
+}
+
+.chart-error-retry:hover {
+    background: #c0392b;
+}
+
+/* ====================
+   ACCESIBILIDAD
+==================== */
+
+.chart-high-contrast {
+    filter: contrast(1.2);
+}
+
+.chart-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    margin-top: var(--spacing-lg);
+    display: none; /* Oculto por defecto, se muestra con toggle */
+}
+
+.chart-data-table th {
+    background: var(--verde-claro);
+    color: var(--verde-oscuro);
+    padding: var(--spacing-sm);
+    text-align: left;
+    border: 1px solid var(--verde-claro);
+}
+
+.chart-data-table td {
+    padding: var(--spacing-sm);
+    border: 1px solid var(--verde-claro);
+}
+
+.chart-data-table tr:nth-child(even) {
+    background: var(--gris-claro);
+}
+
+.screen-reader-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ====================
+   EXPORTACIÓN
+==================== */
+
+.chart-export-options {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    background: var(--blanco);
+    border: 1px solid var(--verde-claro);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm);
+    box-shadow: var(--shadow-md);
+    z-index: 30;
+    display: none;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    min-width: 120px;
+}
+
+.chart-export-options.show {
+    display: flex;
+}
+
+.export-option {
+    background: none;
+    border: none;
+    padding: var(--spacing-sm);
+    text-align: left;
+    cursor: pointer;
+    color: var(--gris-profesional);
+    font-size: 0.875rem;
+    border-radius: var(--border-radius-xs);
+    transition: background var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.export-option:hover {
+    background: var(--verde-claro);
+    color: var(--verde-oficial);
+}

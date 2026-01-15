@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICOF - Resumen y Confirmación</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <link rel="stylesheet" href="../css/tablet.css">
+    <link rel="stylesheet" href="../css/desktop.css">
+    <link rel="icon" href="../assets/logos/favicon.ico">
+    <style>
+        .paso-indicador {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+        }
+        
+        .paso-indicador::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--verde-claro);
+            z-index: 1;
+        }
+        
+        .paso {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .paso-numero {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--verde-claro);
+            color: var(--gris-medio);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin-bottom: var(--spacing-sm);
+            border: 4px solid var(--blanco);
+            transition: all 0.3s ease;
+        }
+        
+        .paso.activo .paso-numero {
+            background-color: var(--verde-oficial);
+            color: var(--blanco);
+            transform: scale(1.1);
+        }
+        
+        .paso.completado .paso-numero {
+            background-color: var(--verde-exito);
+            color: var(--blanco);
+        }
+        
+        .paso-texto {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gris-medio);
+            text-align: center;
+            max-width: 100px;
+        }
+        
+        .paso.activo .paso-texto {
+            color: var(--verde-oficial);
+        }
+        
+        .resumen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .resumen-card {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-xl);
+            border: 1px solid var(--verde-claro);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .resumen-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--verde-claro);
+        }
+        
+        .resumen-icon {
+            font-size: 1.5rem;
+        }
+        
+        .resumen-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--verde-oscuro);
+        }
+        
+        .resumen-item {
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--gris-claro);
+        }
+        
+        .resumen-label {
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+            margin-bottom: 4px;
+        }
+        
+        .resumen-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gris-profesional);
+        }
+        
+        .indicadores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .indicador-card {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            text-align: center;
+            border: 2px solid var(--verde-claro);
+            transition: transform 0.3s ease;
+        }
+        
+        .indicador-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .indicador-valor {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .indicador-titulo {
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .indicador-descripcion {
+            font-size: 0.75rem;
+            color: var(--gris-medio);
+        }
+        
+        .alta { color: var(--verde-exito); }
+        .media { color: var(--naranja-advertencia); }
+        .baja { color: var(--rojo-alerta); }
+        
+        .alerta-confirmacion {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border: 2px solid #ff9800;
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            text-align: center;
+        }
+        
+        .alerta-icono {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .alerta-titulo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e65100;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .alerta-mensaje {
+            color: #5d4037;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .alerta-destacado {
+            background: #ff5722;
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            display: inline-block;
+            margin-top: var(--spacing-sm);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .loading-text {
+            margin-top: var(--spacing-md);
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--verde-oficial);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Institucional -->
+    <header class="header-institucional">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="../assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
+                <div class="logo-text">
+                    <div class="logo-title">SICOF - Sistema Integrado</div>
+                    <div class="logo-subtitle">Control Operativo Fronterizo</div>
+                </div>
+            </div>
+            <div class="user-info" style="color: var(--blanco); text-align: right;">
+                <div id="cuartelNombre" style="font-weight: 600;">Cargando...</div>
+                <div style="font-size: 0.875rem; opacity: 0.9;" id="userInfo">Digitador</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner" style="width: 60px; height: 60px;"></div>
+        <div class="loading-text">Guardando registro...</div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="container" style="padding: var(--spacing-xl) 0;">
+        <!-- Indicador de Pasos -->
+        <div class="paso-indicador">
+            <div class="paso completado">
+                <div class="paso-numero">✓</div>
+                <div class="paso-texto">Datos del Servicio</div>
+            </div>
+            <div class="paso completado">
+                <div class="paso-numero">✓</div>
+                <div class="paso-texto">Demanda Ciudadana</div>
+            </div>
+            <div class="paso completado">
+                <div class="paso-numero">✓</div>
+                <div class="paso-texto">Demanda Preventiva</div>
+            </div>
+            <div class="paso activo">
+                <div class="paso-numero">4</div>
+                <div class="paso-texto">Confirmación</div>
+            </div>
+        </div>
+        
+        <!-- Mensajes -->
+        <div id="message" class="alert" style="display: none;"></div>
+        
+        <!-- Resumen del Servicio -->
+        <h2 style="margin-bottom: var(--spacing-xl); color: var(--verde-oscuro);">
+            📊 RESUMEN DEL SERVICIO
+        </h2>
+        
+        <!-- Datos Básicos -->
+        <div class="resumen-grid">
+            <div class="resumen-card">
+                <div class="resumen-header">
+                    <span class="resumen-icon">📋</span>
+                    <span class="resumen-title">DATOS DEL SERVICIO</span>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">FECHA</div>
+                    <div class="resumen-value" id="resFecha"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">CUARTEL</div>
+                    <div class="resumen-value" id="resCuartel"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">SERVICIO</div>
+                    <div class="resumen-value" id="resServicio"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">JEFE DEL SERVICIO</div>
+                    <div class="resumen-value" id="resJefe"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">HORARIO</div>
+                    <div class="resumen-value" id="resHorario"></div>
+                </div>
+            </div>
+            
+            <!-- Demanda Ciudadana -->
+            <div class="resumen-card">
+                <div class="resumen-header">
+                    <span class="resumen-icon">👥</span>
+                    <span class="resumen-title">DEMANDA CIUDADANA</span>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">CONTROLES TOTALES</div>
+                    <div class="resumen-value" id="resControles"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">INFRACCIONES</div>
+                    <div class="resumen-value" id="resInfracciones"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">DETENIDOS</div>
+                    <div class="resumen-value" id="resDetenidos"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">MOTIVO DETENCIÓN</div>
+                    <div class="resumen-value" id="resMotivo"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">DENUNCIAS</div>
+                    <div class="resumen-value" id="resDenuncias"></div>
+                </div>
+            </div>
+            
+            <!-- Demanda Preventiva -->
+            <div class="resumen-card">
+                <div class="resumen-header">
+                    <span class="resumen-icon">🗺️</span>
+                    <span class="resumen-title">DEMANDA PREVENTIVA</span>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">HITOS (Real/Plan)</div>
+                    <div class="resumen-value" id="resHitos"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">PNH (Real/Plan)</div>
+                    <div class="resumen-value" id="resPNH"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">SITIOS (Real/Plan)</div>
+                    <div class="resumen-value" id="resSitios"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">CUMPLIMIENTO TOTAL</div>
+                    <div class="resumen-value" id="resCumplimiento"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Indicadores Clave -->
+        <h3 style="margin: var(--spacing-xl) 0 var(--spacing-lg); color: var(--verde-oscuro);">
+            🎯 INDICADORES CLAVE CALCULADOS
+        </h3>
+        
+        <div class="indicadores-grid" id="indicadoresContainer">
+            <!-- Los indicadores se cargarán dinámicamente -->
+        </div>
+        
+        <!-- Alerta de Confirmación -->
+        <div class="alerta-confirmacion">
+            <div class="alerta-icono">⚠️</div>
+            <div class="alerta-titulo">IMPORTANTE: CONFIRMACIÓN FINAL</div>
+            <div class="alerta-mensaje">
+                Una vez que confirme este registro, los datos quedarán <strong>BLOQUEADOS PERMANENTEMENTE</strong> 
+                y no podrán ser modificados. Esta acción es irreversible.
+            </div>
+            <div class="alerta-mensaje">
+                Solo el administrador del sistema podrá eliminar registros en caso de error, 
+                manteniendo un registro de auditoría completo.
+            </div>
+            <div class="alerta-destacado">
+                ¿Está seguro de que todos los datos son correctos?
+            </div>
+        </div>
+        
+        <!-- Botones de Acción -->
+        <div style="display: flex; justify-content: space-between; margin-top: var(--spacing-xl);">
+            <button type="button" class="btn btn-outline" onclick="window.location.href='demanda-preventiva.html'">
+                ← CORREGIR DATOS
+            </button>
+            
+            <div style="display: flex; gap: var(--spacing-md);">
+                <button type="button" class="btn btn-outline" onclick="window.location.href='../index.html'">
+                    🚪 Salir
+                </button>
+                <button type="button" class="btn btn-primary" id="btnConfirmar" style="min-width: 200px;">
+                    ✅ CONFIRMAR Y GUARDAR
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        // Variables globales
+        let datosCompletos = {};
+        let userData = {};
+        let indicadores = {};
+        
+        // Verificar autenticación y cargar datos
+        document.addEventListener('DOMContentLoaded', async () => {
+            userData = JSON.parse(localStorage.getItem('sicof_user'));
+            
+            if (!userData || userData.rol !== 'digitador') {
+                window.location.href = '../index.html';
+                return;
+            }
+            
+            // Verificar que tenga todos los datos
+            const paso1 = localStorage.getItem('servicio_paso1');
+            const paso2 = localStorage.getItem('servicio_paso2');
+            const paso3 = localStorage.getItem('servicio_paso3');
+            
+            if (!paso1 || !paso2 || !paso3) {
+                mostrarMensaje('Datos incompletos. Por favor complete todos los pasos.', 'danger');
+                setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
+                return;
+            }
+            
+            // Combinar todos los datos
+            datosCompletos = {
+                ...JSON.parse(paso1),
+                ...JSON.parse(paso2),
+                ...JSON.parse(paso3)
+            };
+            
+            // Mostrar información del usuario
+            document.getElementById('userInfo').textContent = `${userData.rol.toUpperCase()} - ${userData.email}`;
+            
+            // Mostrar cuartel
+            const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === userData.cuartel_codigo);
+            if (cuartel) {
+                document.getElementById('cuartelNombre').textContent = cuartel.nombre;
+                document.getElementById('resCuartel').textContent = cuartel.nombre;
+            }
+            
+            // Mostrar resumen
+            mostrarResumen();
+            
+            // Calcular y mostrar indicadores
+            calcularIndicadores();
+            
+            // Configurar botón de confirmación
+            document.getElementById('btnConfirmar').addEventListener('click', confirmarRegistro);
+        });
+        
+        function mostrarResumen() {
+            // Datos básicos
+            document.getElementById('resFecha').textContent = formatearFecha(datosCompletos.fecha);
+            document.getElementById('resServicio').textContent = datosCompletos.nombre_servicio;
+            document.getElementById('resJefe').textContent = datosCompletos.jefe_servicio;
+            document.getElementById('resHorario').textContent = `${datosCompletos.horario_inicio} - ${datosCompletos.horario_termino}`;
+            
+            // Demanda ciudadana
+            const totalControles = 
+                (datosCompletos.controles_investigativos || 0) +
+                (datosCompletos.controles_preventivos || 0) +
+                (datosCompletos.controles_migratorios || 0) +
+                (datosCompletos.controles_vehiculares || 0);
+            
+            const totalInfracciones = 
+                (datosCompletos.infracciones_transito || 0) +
+                (datosCompletos.otras_infracciones || 0);
+            
+            document.getElementById('resControles').textContent = totalControles.toLocaleString();
+            document.getElementById('resInfracciones').textContent = totalInfracciones.toLocaleString();
+            document.getElementById('resDetenidos').textContent = (datosCompletos.detenidos_cantidad || 0).toLocaleString();
+            
+            // Motivo de detención
+            const motivoMap = {
+                'robo_hurto': 'Robo/Hurto',
+                'drogas': 'Drogas',
+                'contrabando': 'Contrabando',
+                'ley_control_armas': 'Ley Control de Armas',
+                'trafico_migrantes': 'Tráfico de Migrantes',
+                'receptacion_vehiculos': 'Receptación de Vehículos',
+                'otros': 'Otros'
+            };
+            document.getElementById('resMotivo').textContent = 
+                datosCompletos.motivo_detencion ? motivoMap[datosCompletos.motivo_detencion] : 'N/A';
+            
+            // Denuncias
+            const totalDenuncias = 
+                (datosCompletos.denuncias_vulneracion || 0) +
+                (datosCompletos.participantes_nna || 0) +
+                (datosCompletos.participantes_adultos || 0);
+            document.getElementById('resDenuncias').textContent = totalDenuncias.toLocaleString();
+            
+            // Demanda preventiva
+            document.getElementById('resHitos').textContent = 
+                `${datosCompletos.hitos_realizados || 0}/${datosCompletos.hitos_planificados || 0}`;
+            document.getElementById('resPNH').textContent = 
+                `${datosCompletos.pnh_realizados || 0}/${datosCompletos.pnh_planificados || 0}`;
+            document.getElementById('resSitios').textContent = 
+                `${datosCompletos.sitios_realizados || 0}/${datosCompletos.sitios_planificados || 0}`;
+        }
+        
+        function calcularIndicadores() {
+            const totalControles = 
+                (datosCompletos.controles_investigativos || 0) +
+                (datosCompletos.controles_preventivos || 0) +
+                (datosCompletos.controles_migratorios || 0) +
+                (datosCompletos.controles_vehiculares || 0);
+            
+            const totalInfracciones = 
+                (datosCompletos.infracciones_transito || 0) +
+                (datosCompletos.otras_infracciones || 0);
+            
+            const totalPlanificados = 
+                (datosCompletos.hitos_planificados || 0) +
+                (datosCompletos.pnh_planificados || 0) +
+                (datosCompletos.sitios_planificados || 0);
+            
+            const totalRealizados = 
+                (datosCompletos.hitos_realizados || 0) +
+                (datosCompletos.pnh_realizados || 0) +
+                (datosCompletos.sitios_realizados || 0);
+            
+            // Cálculos
+            const efectividadVehicular = datosCompletos.controles_vehiculares > 0 
+                ? Math.round((datosCompletos.infracciones_transito / datosCompletos.controles_vehiculares) * 100)
+                : 0;
+            
+            const cumplimientoDemanda = totalPlanificados > 0
+                ? Math.round((totalRealizados / totalPlanificados) * 100)
+                : 0;
+            
+            const tasaDetencion = totalControles > 0
+                ? Math.round((datosCompletos.detenidos_cantidad / totalControles) * 1000) / 10
+                : 0;
+            
+            // Guardar indicadores
+            indicadores = {
+                totalControles,
+                efectividadVehicular,
+                cumplimientoDemanda,
+                tasaDetencion
+            };
+            
+            // Mostrar indicadores
+            const container = document.getElementById('indicadoresContainer');
+            container.innerHTML = `
+                <div class="indicador-card">
+                    <div class="indicador-valor ${clasificarEfectividad(efectividadVehicular)}">
+                        ${efectividadVehicular}%
+                    </div>
+                    <div class="indicador-titulo">EFECTIVIDAD CONTROLES VEHICULARES</div>
+                    <div class="indicador-descripcion">
+                        ${datosCompletos.infracciones_transito || 0} infracciones de ${datosCompletos.controles_vehiculares || 0} controles
+                    </div>
+                </div>
+                
+                <div class="indicador-card">
+                    <div class="indicador-valor ${clasificarCumplimiento(cumplimientoDemanda)}">
+                        ${cumplimientoDemanda}%
+                    </div>
+                    <div class="indicador-titulo">CUMPLIMIENTO DEMANDA FRONTERIZA</div>
+                    <div class="indicador-descripcion">
+                        ${totalRealizados} de ${totalPlanificados} actividades realizadas
+                    </div>
+                </div>
+                
+                <div class="indicador-card">
+                    <div class="indicador-valor">
+                        ${tasaDetencion}%
+                    </div>
+                    <div class="indicador-titulo">TASA DE DETENCIÓN</div>
+                    <div class="indicador-descripcion">
+                        ${datosCompletos.detenidos_cantidad || 0} detenidos de ${totalControles} controles
+                    </div>
+                </div>
+                
+                <div class="indicador-card">
+                    <div class="indicador-valor">
+                        ${totalControles.toLocaleString()}
+                    </div>
+                    <div class="indicador-titulo">TOTAL CONTROLES</div>
+                    <div class="indicador-descripcion">
+                        Controles investigativos, preventivos, migratorios y vehiculares
+                    </div>
+                </div>
+            `;
+            
+            // Actualizar cumplimiento en resumen
+            document.getElementById('resCumplimiento').textContent = `${cumplimientoDemanda}%`;
+        }
+        
+        function clasificarEfectividad(porcentaje) {
+            if (porcentaje >= 80) return 'alta';
+            if (porcentaje >= 50) return 'media';
+            return 'baja';
+        }
+        
+        function clasificarCumplimiento(porcentaje) {
+            if (porcentaje >= 90) return 'alta';
+            if (porcentaje >= 70) return 'media';
+            return 'baja';
+        }
+        
+        function formatearFecha(fechaStr) {
+            const fecha = new Date(fechaStr);
+            return fecha.toLocaleDateString('es-CL', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        
+        async function confirmarRegistro() {
+            const confirmacion = confirm(`¿Está seguro de confirmar este registro?\n\nUna vez confirmado, NO podrá modificar los datos.`);
+            
+            if (!confirmacion) return;
+            
+            // Mostrar loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('btnConfirmar').disabled = true;
+            
+            try {
+                // Obtener usuario actual
+                const { data: { user } } = await window.supabase.auth.getUser();
+                if (!user) throw new Error('Usuario no autenticado');
+                
+                // Obtener ID del usuario en tabla usuarios
+                const { data: usuarioData } = await window.supabase
+                    .from('usuarios')
+                    .select('id')
+                    .eq('email', user.email)
+                    .single();
+                
+                if (!usuarioData) throw new Error('Usuario no encontrado en el sistema');
+                
+                // Preparar datos para insertar
+                const datosInsertar = {
+                    ...datosCompletos,
+                    usuario_id: usuarioData.id,
+                    is_locked: true, // Se bloquea automáticamente al guardar
+                    locked_at: new Date().toISOString()
+                };
+                
+                // Insertar en base de datos
+                const { data, error } = await window.supabase
+                    .from('servicios')
+                    .insert([datosInsertar])
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                
+                // Mostrar mensaje de éxito
+                mostrarMensaje('✅ Registro guardado exitosamente. Los datos han sido bloqueados.', 'success');
+                
+                // Limpiar localStorage
+                localStorage.removeItem('servicio_paso1');
+                localStorage.removeItem('servicio_paso2');
+                localStorage.removeItem('servicio_paso3');
+                
+                // Redirigir después de 3 segundos
+                setTimeout(() => {
+                    window.location.href = 'datos-servicio.html';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error al guardar:', error);
+                mostrarMensaje(`❌ Error al guardar: ${error.message}`, 'danger');
+                
+                // Ocultar loading
+                document.getElementById('loadingOverlay').style.display = 'none';
+                document.getElementById('btnConfirmar').disabled = false;
+            }
+        }
+        
+        function mostrarMensaje(texto, tipo = 'info') {
+            const messageEl = document.getElementById('message');
+            messageEl.innerHTML = texto;
+            messageEl.className = `alert alert-${tipo}`;
+            messageEl.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

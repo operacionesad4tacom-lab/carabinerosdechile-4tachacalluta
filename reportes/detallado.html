@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICOF - Reporte Detallado</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <link rel="stylesheet" href="../css/tablet.css">
+    <link rel="stylesheet" href="../css/desktop.css">
+    <link rel="stylesheet" href="../css/print.css">
+    <link rel="icon" href="../assets/logos/favicon.ico">
+    <style>
+        .search-bar {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            border: 1px solid var(--verde-claro);
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+            align-items: end;
+        }
+        
+        .search-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .servicio-card {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-xl);
+            border: 1px solid var(--verde-claro);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .servicio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--verde-claro);
+        }
+        
+        .servicio-info h3 {
+            color: var(--verde-oscuro);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .servicio-meta {
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+        }
+        
+        .servicio-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+        
+        .servicio-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+        
+        .data-section {
+            background: var(--gris-claro);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius-sm);
+        }
+        
+        .data-section h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--verde-oscuro);
+            margin-bottom: var(--spacing-md);
+            text-transform: uppercase;
+        }
+        
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--spacing-sm) 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .data-item:last-child {
+            border-bottom: none;
+        }
+        
+        .data-label {
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+        }
+        
+        .data-value {
+            font-weight: 600;
+            color: var(--gris-profesional);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-xl);
+        }
+        
+        .pagination button {
+            min-width: 40px;
+        }
+        
+        .stats-summary {
+            background: var(--blanco);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            border: 1px solid var(--verde-claro);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-md);
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: var(--spacing-md);
+            border-right: 1px solid var(--verde-claro);
+        }
+        
+        .stat-item:last-child {
+            border-right: none;
+        }
+        
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--verde-oficial);
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gris-medio);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Institucional -->
+    <header class="header-institucional no-print">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="../assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
+                <div class="logo-text">
+                    <div class="logo-title">SICOF - Sistema Integrado</div>
+                    <div class="logo-subtitle">Control Operativo Fronterizo</div>
+                </div>
+            </div>
+            <div class="user-info" style="color: var(--blanco); text-align: right;">
+                <div style="font-weight: 600;">REPORTES JEFATURA</div>
+                <div style="font-size: 0.875rem; opacity: 0.9;" id="userInfo">Cargando...</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="container" style="padding: var(--spacing-xl) 0;">
+        <!-- Título -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
+            <div>
+                <h1 style="margin-bottom: var(--spacing-xs);">📋 Reporte Detallado de Servicios</h1>
+                <p style="color: var(--gris-medio);">Visualización detallada de todos los servicios registrados</p>
+            </div>
+            <div style="display: flex; gap: var(--spacing-sm);" class="no-print">
+                <button onclick="window.print()" class="btn btn-outline">
+                    🖨️ Imprimir
+                </button>
+                <button onclick="exportarDetallado()" class="btn btn-primary">
+                    📥 Exportar CSV
+                </button>
+            </div>
+        </div>
+        
+        <!-- Filtros de búsqueda -->
+        <div class="search-bar no-print">
+            <div class="search-group">
+                <label for="busqueda" class="form-label">Buscar</label>
+                <input 
+                    type="text" 
+                    id="busqueda" 
+                    class="form-control" 
+                    placeholder="Buscar por nombre, jefe..."
+                    oninput="filtrarServicios()"
+                >
+            </div>
+            
+            <div class="search-group">
+                <label for="cuartelBusqueda" class="form-label">Cuartel</label>
+                <select id="cuartelBusqueda" class="form-control" onchange="filtrarServicios()">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            
+            <div class="search-group">
+                <label for="fechaDesde" class="form-label">Desde</label>
+                <input 
+                    type="date" 
+                    id="fechaDesde" 
+                    class="form-control"
+                    onchange="filtrarServicios()"
+                >
+            </div>
+            
+            <div class="search-group">
+                <label for="fechaHasta" class="form-label">Hasta</label>
+                <input 
+                    type="date" 
+                    id="fechaHasta" 
+                    class="form-control"
+                    onchange="filtrarServicios()"
+                >
+            </div>
+            
+            <div style="align-self: end;">
+                <button onclick="limpiarFiltros()" class="btn btn-outline">
+                    🔄 Limpiar
+                </button>
+            </div>
+        </div>
+        
+        <!-- Resumen de estadísticas -->
+        <div class="stats-summary" id="statsSummary">
+            <div class="stat-item">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Total Servicios</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statControles">0</div>
+                <div class="stat-label">Controles</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statDetenidos">0</div>
+                <div class="stat-label">Detenidos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statInfracciones">0</div>
+                <div class="stat-label">Infracciones</div>
+            </div>
+        </div>
+        
+        <!-- Mensaje de carga -->
+        <div id="loadingMessage" class="alert alert-info" style="display: none;">
+            <div class="loading-spinner" style="display: inline-block; margin-right: 10px;"></div>
+            Cargando servicios...
+        </div>
+        
+        <!-- Listado de servicios -->
+        <div id="serviciosContainer">
+            <!-- Se llenarán dinámicamente -->
+        </div>
+        
+        <!-- Paginación -->
+        <div class="pagination no-print" id="paginationContainer" style="display: none;">
+            <!-- Se llenará dinámicamente -->
+        </div>
+        
+        <!-- Mensaje sin resultados -->
+        <div id="noResults" style="display: none; text-align: center; padding: var(--spacing-xxl);">
+            <div style="font-size: 3rem; margin-bottom: var(--spacing-md);">🔍</div>
+            <h3>No se encontraron servicios</h3>
+            <p style="color: var(--gris-medio);">Intenta ajustar los filtros de búsqueda</p>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        let todosLosServicios = [];
+        let serviciosFiltrados = [];
+        let paginaActual = 1;
+        const serviciosPorPagina = 10;
+        
+        // Verificar autenticación
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await protectPage('jefatura');
+            
+            if (!user) return;
+            
+            updateUserInfo(user);
+            cargarCuarteles();
+            await cargarServicios();
+            
+            // Establecer fechas por defecto (último mes)
+            const fechas = getDateRange('mes');
+            document.getElementById('fechaDesde').value = fechas.start;
+            document.getElementById('fechaHasta').value = fechas.end;
+        });
+        
+        // Cargar cuarteles
+        function cargarCuarteles() {
+            const select = document.getElementById('cuartelBusqueda');
+            window.SICOF_CONFIG.cuarteles.forEach(cuartel => {
+                const option = document.createElement('option');
+                option.value = cuartel.codigo;
+                option.textContent = cuartel.nombre;
+                select.appendChild(option);
+            });
+        }
+        
+        // Cargar todos los servicios
+        async function cargarServicios() {
+            try {
+                document.getElementById('loadingMessage').style.display = 'block';
+                document.getElementById('serviciosContainer').style.display = 'none';
+                
+                const { data, error } = await window.supabase
+                    .from('servicios')
+                    .select('*')
+                    .order('fecha', { ascending: false })
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                todosLosServicios = data;
+                filtrarServicios();
+                
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('serviciosContainer').style.display = 'block';
+            } catch (error) {
+                console.error('Error cargando servicios:', error);
+                showToast('Error al cargar los servicios', 'danger');
+                document.getElementById('loadingMessage').style.display = 'none';
+            }
+        }
+        
+        // Filtrar servicios
+        function filtrarServicios() {
+            const busqueda = document.getElementById('busqueda').value.toLowerCase();
+            const cuartel = document.getElementById('cuartelBusqueda').value;
+            const fechaDesde = document.getElementById('fechaDesde').value;
+            const fechaHasta = document.getElementById('fechaHasta').value;
+            
+            serviciosFiltrados = todosLosServicios.filter(servicio => {
+                // Filtro de búsqueda
+                if (busqueda) {
+                    const coincide = 
+                        servicio.nombre_servicio?.toLowerCase().includes(busqueda) ||
+                        servicio.jefe_servicio?.toLowerCase().includes(busqueda) ||
+                        servicio.cuartel_codigo?.toLowerCase().includes(busqueda);
+                    if (!coincide) return false;
+                }
+                
+                // Filtro de cuartel
+                if (cuartel && servicio.cuartel_codigo !== cuartel) {
+                    return false;
+                }
+                
+                // Filtro de fechas
+                if (fechaDesde && servicio.fecha < fechaDesde) {
+                    return false;
+                }
+                if (fechaHasta && servicio.fecha > fechaHasta) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            paginaActual = 1;
+            actualizarEstadisticas();
+            mostrarServicios();
+        }
+        
+        // Actualizar estadísticas
+        function actualizarEstadisticas() {
+            const total = serviciosFiltrados.length;
+            const controles = serviciosFiltrados.reduce((sum, s) => 
+                sum + (s.controles_investigativos || 0) + 
+                (s.controles_preventivos || 0) + 
+                (s.controles_migratorios || 0) + 
+                (s.controles_vehiculares || 0), 0
+            );
+            const detenidos = serviciosFiltrados.reduce((sum, s) => sum + (s.detenidos_cantidad || 0), 0);
+            const infracciones = serviciosFiltrados.reduce((sum, s) => 
+                sum + (s.infracciones_transito || 0) + (s.otras_infracciones || 0), 0
+            );
+            
+            document.getElementById('statTotal').textContent = formatNumber(total);
+            document.getElementById('statControles').textContent = formatNumber(controles);
+            document.getElementById('statDetenidos').textContent = formatNumber(detenidos);
+            document.getElementById('statInfracciones').textContent = formatNumber(infracciones);
+        }
+        
+        // Mostrar servicios paginados
+        function mostrarServicios() {
+            const container = document.getElementById('serviciosContainer');
+            const noResults = document.getElementById('noResults');
+            
+            if (serviciosFiltrados.length === 0) {
+                container.innerHTML = '';
+                noResults.style.display = 'block';
+                document.getElementById('paginationContainer').style.display = 'none';
+                return;
+            }
+            
+            noResults.style.display = 'none';
+            
+            const inicio = (paginaActual - 1) * serviciosPorPagina;
+            const fin = inicio + serviciosPorPagina;
+            const serviciosPagina = serviciosFiltrados.slice(inicio, fin);
+            
+            container.innerHTML = serviciosPagina.map(servicio => crearCardServicio(servicio)).join('');
+            
+            // Actualizar paginación
+            mostrarPaginacion();
+        }
+        
+        // Crear card de servicio
+        function crearCardServicio(servicio) {
+            const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === servicio.cuartel_codigo);
+            const totalControles = 
+                (servicio.controles_investigativos || 0) + 
+                (servicio.controles_preventivos || 0) + 
+                (servicio.controles_migratorios || 0) + 
+                (servicio.controles_vehiculares || 0);
+            
+            const cumplimientoHitos = servicio.hitos_planificados > 0 
+                ? Math.round((servicio.hitos_realizados / servicio.hitos_planificados) * 100) 
+                : 0;
+            
+            return `
+                <div class="servicio-card">
+                    <div class="servicio-header">
+                        <div class="servicio-info">
+                            <h3>${servicio.nombre_servicio}</h3>
+                            <div class="servicio-meta">
+                                🏛️ ${cuartel ? cuartel.nombre : servicio.cuartel_codigo} • 
+                                📅 ${formatFecha(servicio.fecha)} • 
+                                🕐 ${formatHora(servicio.horario_inicio)} - ${formatHora(servicio.horario_termino)} • 
+                                👮 ${servicio.jefe_servicio}
+                            </div>
+                        </div>
+                        <div class="servicio-actions no-print">
+                            <button onclick="verDetalle('${servicio.id}')" class="btn btn-outline btn-sm">
+                                👁️ Ver más
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="servicio-body">
+                        <div class="data-section">
+                            <h4>🔍 Demanda Ciudadana</h4>
+                            <div class="data-item">
+                                <span class="data-label">Controles Totales</span>
+                                <span class="data-value">${formatNumber(totalControles)}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Investigativos</span>
+                                <span class="data-value">${formatNumber(servicio.controles_investigativos || 0)}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Preventivos</span>
+                                <span class="data-value">${formatNumber(servicio.controles_preventivos || 0)}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Migratorios</span>
+                                <span class="data-value">${formatNumber(servicio.controles_migratorios || 0)}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Vehiculares</span>
+                                <span class="data-value">${formatNumber(servicio.controles_vehiculares || 0)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="data-section">
+                            <h4>🚨 Detenciones e Infracciones</h4>
+                            <div class="data-item">
+                                <span class="data-label">Personas Detenidas</span>
+                                <span class="data-value">${formatNumber(servicio.detenidos_cantidad || 0)}</span>
+                            </div>
+                            ${servicio.motivo_detencion ? `
+                            <div class="data-item">
+                                <span class="data-label">Motivo</span>
+                                <span class="data-value">${servicio.motivo_detencion}</span>
+                            </div>` : ''}
+                            <div class="data-item">
+                                <span class="data-label">Infracciones Tránsito</span>
+                                <span class="data-value">${formatNumber(servicio.infracciones_transito || 0)}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Otras Infracciones</span>
+                                <span class="data-value">${formatNumber(servicio.otras_infracciones || 0)}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Denuncias Vulneración</span>
+                                <span class="data-value">${formatNumber(servicio.denuncias_vulneracion || 0)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="data-section">
+                            <h4>🎯 Planificación Preventiva</h4>
+                            <div class="data-item">
+                                <span class="data-label">Hitos (Plan/Real)</span>
+                                <span class="data-value">${servicio.hitos_planificados || 0} / ${servicio.hitos_realizados || 0}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">PNH (Plan/Real)</span>
+                                <span class="data-value">${servicio.pnh_planificados || 0} / ${servicio.pnh_realizados || 0}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Sitios (Plan/Real)</span>
+                                <span class="data-value">${servicio.sitios_planificados || 0} / ${servicio.sitios_realizados || 0}</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Cumplimiento</span>
+                                <span class="data-value">
+                                    <span class="badge ${getBadgeByPercentage(cumplimientoHitos)}">
+                                        ${formatPorcentaje(cumplimientoHitos)}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${servicio.observaciones ? `
+                    <div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--verde-claro);">
+                        <strong>📝 Observaciones:</strong>
+                        <p style="margin-top: var(--spacing-xs); color: var(--gris-medio);">${servicio.observaciones}</p>
+                    </div>` : ''}
+                </div>
+            `;
+        }
+        
+        // Mostrar paginación
+        function mostrarPaginacion() {
+            const container = document.getElementById('paginationContainer');
+            const totalPaginas = Math.ceil(serviciosFiltrados.length / serviciosPorPagina);
+            
+            if (totalPaginas <= 1) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'flex';
+            
+            let html = '';
+            
+            // Botón anterior
+            html += `<button onclick="cambiarPagina(${paginaActual - 1})" 
+                class="btn btn-outline" ${paginaActual === 1 ? 'disabled' : ''}>
+                ← Anterior
+            </button>`;
+            
+            // Números de página
+            for (let i = 1; i <= totalPaginas; i++) {
+                if (i === 1 || i === totalPaginas || (i >= paginaActual - 2 && i <= paginaActual + 2)) {
+                    html += `<button onclick="cambiarPagina(${i})" 
+                        class="btn ${i === paginaActual ? 'btn-primary' : 'btn-outline'}">
+                        ${i}
+                    </button>`;
+                } else if (i === paginaActual - 3 || i === paginaActual + 3) {
+                    html += `<span style="padding: 0 var(--spacing-sm);">...</span>`;
+                }
+            }
+            
+            // Botón siguiente
+            html += `<button onclick="cambiarPagina(${paginaActual + 1})" 
+                class="btn btn-outline" ${paginaActual === totalPaginas ? 'disabled' : ''}>
+                Siguiente →
+            </button>`;
+            
+            container.innerHTML = html;
+        }
+        
+        // Cambiar página
+        function cambiarPagina(pagina) {
+            const totalPaginas = Math.ceil(serviciosFiltrados.length / serviciosPorPagina);
+            if (pagina < 1 || pagina > totalPaginas) return;
+            
+            paginaActual = pagina;
+            mostrarServicios();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Ver detalle de servicio
+        function verDetalle(id) {
+            const servicio = serviciosFiltrados.find(s => s.id === id);
+            if (servicio) {
+                alert('Funcionalidad de detalle completo en desarrollo');
+                console.log('Servicio:', servicio);
+            }
+        }
+        
+        // Limpiar filtros
+        function limpiarFiltros() {
+            document.getElementById('busqueda').value = '';
+            document.getElementById('cuartelBusqueda').value = '';
+            const fechas = getDateRange('mes');
+            document.getElementById('fechaDesde').value = fechas.start;
+            document.getElementById('fechaHasta').value = fechas.end;
+            filtrarServicios();
+        }
+        
+        // Exportar a CSV
+        function exportarDetallado() {
+            const data = serviciosFiltrados.map(s => ({
+                Fecha: s.fecha,
+                Cuartel: s.cuartel_codigo,
+                Servicio: s.nombre_servicio,
+                Jefe: s.jefe_servicio,
+                Controles_Total: (s.controles_investigativos || 0) + (s.controles_preventivos || 0) + 
+                    (s.controles_migratorios || 0) + (s.controles_vehiculares || 0),
+                Detenidos: s.detenidos_cantidad || 0,
+                Infracciones: (s.infracciones_transito || 0) + (s.otras_infracciones || 0),
+                Hitos_Plan: s.hitos_planificados || 0,
+                Hitos_Real: s.hitos_realizados || 0
+            }));
+            
+            const filename = `reporte_detallado_${new Date().toISOString().split('T')[0]}.csv`;
+            downloadCSV(data, filename);
+            showToast('Reporte exportado exitosamente', 'success');
+        }
+    </script>
+</body>
+</html>
