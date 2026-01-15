@@ -105,6 +105,22 @@
             cursor: not-allowed;
         }
         
+        .logout-btn {
+            width: 100%;
+            padding: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .logout-btn:hover {
+            background: #c82333;
+        }
+        
         .footer {
             text-align: center;
             padding: 15px;
@@ -125,6 +141,15 @@
         <div class="login-form">
             <div id="message"></div>
             
+            <!-- Mostrar mensaje si ya está logueado -->
+            <div id="loggedInMessage" style="display: none;">
+                <h3 style="color: #084c2a; margin-bottom: 15px;">Ya tienes sesión activa</h3>
+                <p id="userInfo" style="margin-bottom: 20px;"></p>
+                <button class="logout-btn" id="logoutBtn">CERRAR SESIÓN</button>
+                <button class="btn-login" id="continueBtn" style="margin-top: 10px;">CONTINUAR AL SISTEMA</button>
+            </div>
+            
+            <!-- Formulario (oculto si ya está logueado) -->
             <form id="loginForm">
                 <div class="form-group">
                     <label>Usuario</label>
@@ -137,6 +162,11 @@
                 </div>
                 
                 <button type="submit" class="btn-login" id="loginBtn">INICIAR SESIÓN</button>
+                
+                <!-- Botón para forzar logout -->
+                <button type="button" class="logout-btn" id="forceLogoutBtn" style="display: none;">
+                    CERRAR SESIÓN Y MOSTRAR LOGIN
+                </button>
             </form>
         </div>
         
@@ -153,8 +183,8 @@
         const SUPABASE_URL = "https://rytpgbfbeeuqzcgeujzy.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dHBnYmZiZWV1cXpjZ2V1anp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NjUwMDcsImV4cCI6MjA4NDA0MTAwN30.dQ2WlMBAVqLg8hUWUPxpLMMw3XO7-PRTn9gxf9Bslac";
         
-        // Inicializar Supabase (SOLO UNA VEZ)
-        const clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inicializar Supabase
+        const sicofSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         // Configuración del sistema
         const SICOF_CONFIG = {
@@ -167,26 +197,45 @@
             }
         };
         
+        // FUNCIÓN PARA CERRAR SESIÓN COMPLETA
+        async function cerrarSesionCompleta() {
+            try {
+                // 1. Cerrar sesión en Supabase
+                await sicofSupabase.auth.signOut();
+                
+                // 2. Limpiar localStorage completamente
+                localStorage.clear();
+                
+                // 3. Limpiar sessionStorage
+                sessionStorage.clear();
+                
+                // 4. Forzar recarga sin caché
+                console.log('✅ Sesión cerrada completamente');
+                
+                // Recargar mostrando el formulario
+                location.reload();
+                
+            } catch (error) {
+                console.error('Error cerrando sesión:', error);
+                localStorage.clear();
+                location.reload();
+            }
+        }
+        
         // FUNCIÓN DE LOGIN
         async function loginUsuario(email, password) {
             try {
-                console.log('Intentando login con:', email);
-                
-                const { data, error } = await clientSupabase.auth.signInWithPassword({
+                const { data, error } = await sicofSupabase.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
                 
                 if (error) {
-                    console.error('Error Supabase:', error.message);
-                    
                     if (error.message.includes('Email logins are disabled')) {
                         throw new Error('ERROR: Login por email deshabilitado. Contacte al administrador.');
                     }
                     throw new Error('Usuario o contraseña incorrectos');
                 }
-                
-                console.log('Login exitoso');
                 
                 const user = data.user;
                 const metadata = user.user_metadata || {};
@@ -200,65 +249,104 @@
                 };
                 
             } catch (error) {
-                console.error('Error en loginUsuario:', error);
                 throw error;
             }
         }
         
-        // VERIFICAR SESIÓN
-        async function verificarSesion() {
+        // VERIFICAR SESIÓN (SIN REDIRIGIR)
+        async function verificarSesion(silent = false) {
             try {
-                const { data: { session } } = await clientSupabase.auth.getSession();
+                const { data: { session }, error } = await sicofSupabase.auth.getSession();
+                
+                if (error) {
+                    if (!silent) console.error('Error obteniendo sesión:', error);
+                    return null;
+                }
                 
                 if (session?.user) {
                     const metadata = session.user.user_metadata || {};
-                    return {
+                    const usuario = {
                         id: session.user.id,
                         email: session.user.email,
                         nombre: metadata.nombre || session.user.email.split('@')[0],
-                        rol: metadata.rol || 'usuario'
+                        rol: metadata.rol || 'usuario',
+                        session: session
                     };
+                    
+                    // Guardar en localStorage
+                    localStorage.setItem('sicof_user', JSON.stringify(usuario));
+                    
+                    return usuario;
                 }
                 return null;
                 
             } catch (error) {
-                console.error('Error en verificarSesion:', error);
+                if (!silent) console.error('Error en verificarSesion:', error);
                 return null;
             }
         }
         
         // MANEJO DEL FORMULARIO
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('SICOF Login inicializado');
+            console.log('🚀 SICOF Login inicializado');
             
-            // Verificar si ya está logueado
-            const user = await verificarSesion();
-            if (user) {
-                console.log('Usuario ya autenticado:', user.email);
-                mostrarMensaje(`Bienvenido de vuelta, ${user.nombre}`, 'success');
+            // Elementos del DOM
+            const loginForm = document.getElementById('loginForm');
+            const loggedInMessage = document.getElementById('loggedInMessage');
+            const userInfo = document.getElementById('userInfo');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const continueBtn = document.getElementById('continueBtn');
+            const forceLogoutBtn = document.getElementById('forceLogoutBtn');
+            
+            // Verificar si hay sesión activa
+            const usuario = await verificarSesion(true);
+            
+            if (usuario) {
+                // MOSTRAR MENSAJE DE SESIÓN ACTIVA
+                console.log('⚠️ Sesión activa detectada:', usuario.email);
                 
-                setTimeout(() => {
-                    const destino = SICOF_CONFIG.redirectUrls[user.rol];
+                // Ocultar formulario de login
+                loginForm.style.display = 'none';
+                
+                // Mostrar mensaje de sesión activa
+                loggedInMessage.style.display = 'block';
+                userInfo.textContent = `Estás logueado como: ${usuario.nombre} (${usuario.email})`;
+                
+                // Configurar botón de continuar
+                continueBtn.addEventListener('click', function() {
+                    const destino = SICOF_CONFIG.redirectUrls[usuario.rol];
                     if (destino) {
                         window.location.href = destino;
                     } else {
                         window.location.href = 'dashboard.html';
                     }
-                }, 1500);
+                });
+                
+                // Configurar botón de cerrar sesión
+                logoutBtn.addEventListener('click', cerrarSesionCompleta);
+                
+                // Mostrar botón para forzar logout
+                forceLogoutBtn.style.display = 'block';
+                forceLogoutBtn.addEventListener('click', cerrarSesionCompleta);
+                
+            } else {
+                // NO hay sesión activa, mostrar formulario normal
+                console.log('📭 No hay sesión activa, mostrando formulario');
+                loginForm.style.display = 'block';
+                loggedInMessage.style.display = 'none';
             }
             
-            // Configurar formulario
-            const form = document.getElementById('loginForm');
-            const btn = document.getElementById('loginBtn');
+            // Configurar formulario de login
             let procesando = false;
             
-            form.addEventListener('submit', async function(e) {
+            loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 if (procesando) return;
                 
                 const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
+                const btn = document.getElementById('loginBtn');
                 
                 // Validación básica
                 if (!email) {
@@ -323,9 +411,31 @@
             }
         }
         
-        // FUNCIONES DE DEBUG (para consola)
+        // ============================================
+        // FUNCIONES DE DEBUG PARA CONSOLA
+        // ============================================
+        
+        // Forzar logout desde consola
+        window.forzarLogout = function() {
+            console.log('🔓 Forzando logout...');
+            cerrarSesionCompleta();
+        };
+        
+        // Ver estado actual
+        window.verEstado = async function() {
+            console.log('📊 Estado actual:');
+            console.log('- localStorage sicof_user:', localStorage.getItem('sicof_user'));
+            
+            const usuario = await verificarSesion();
+            console.log('- Supabase session:', usuario ? '✅ Activa' : '❌ Inactiva');
+            if (usuario) {
+                console.log('- Usuario:', usuario.email);
+                console.log('- Rol:', usuario.rol);
+            }
+        };
+        
+        // Probar login desde consola
         window.probarLogin = async function(email = 'admin@carabineros.cl') {
-            console.log('Probando login con:', email);
             try {
                 const usuario = await loginUsuario(email, 'Montañaofrontera2026');
                 console.log('✅ Login exitoso:', usuario);
@@ -336,18 +446,33 @@
             }
         };
         
-        window.limpiarSesion = function() {
+        // Limpiar TODO
+        window.limpiarTodo = function() {
+            console.log('🧹 Limpiando TODO...');
             localStorage.clear();
-            clientSupabase.auth.signOut();
-            console.log('🧹 Sesión limpiada');
+            sessionStorage.clear();
+            
+            // Eliminar cookies relacionadas con Supabase
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "")
+                    .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            console.log('✅ Todo limpiado. Recargando...');
             location.reload();
         };
         
-        window.mostrarEstado = function() {
-            console.log('Estado actual:');
-            console.log('- URL Supabase:', SUPABASE_URL);
-            console.log('- Usuario en localStorage:', localStorage.getItem('sicof_user'));
+        // Mostrar ayuda
+        window.ayudaLogin = function() {
+            console.log('🆘 COMANDOS DISPONIBLES:');
+            console.log('forzarLogout() - Cierra sesión y muestra formulario');
+            console.log('verEstado() - Muestra estado actual de sesión');
+            console.log('probarLogin("email") - Prueba login desde consola');
+            console.log('limpiarTodo() - Limpia TODO (nuclear option)');
         };
+        
+        // Mostrar comandos disponibles al cargar
+        console.log('💡 Usa ayudaLogin() para ver comandos disponibles');
     </script>
 </body>
 </html>
