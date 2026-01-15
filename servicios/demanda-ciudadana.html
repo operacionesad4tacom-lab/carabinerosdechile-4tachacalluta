@@ -163,6 +163,14 @@
         </div>
     </header>
 
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 2rem; border-radius: 8px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+            <div style="font-size: 1.2rem; font-weight: bold;">Actualizando...</div>
+        </div>
+    </div>
+
     <!-- Contenido Principal -->
     <main class="container" style="padding: var(--spacing-xl) 0;">
         <!-- Indicador de Pasos -->
@@ -433,12 +441,36 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/config.js"></script>
     <script>
-        // Verificar autenticación
+        // Variables globales
+        let servicioId = null;
+        let supabase = null;
+        
+        // Función para mostrar mensajes
+        function mostrarMensaje(texto, tipo = 'info') {
+            const messageEl = document.getElementById('message');
+            messageEl.innerHTML = texto;
+            messageEl.className = `alert alert-${tipo}`;
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Verificar autenticación y cargar datos
         document.addEventListener('DOMContentLoaded', async () => {
             const user = JSON.parse(localStorage.getItem('sicof_user'));
             
             if (!user || user.rol !== 'digitador') {
                 window.location.href = '../index.html';
+                return;
+            }
+            
+            // Obtener ID del servicio
+            servicioId = localStorage.getItem('servicio_id');
+            if (!servicioId) {
+                mostrarMensaje('No se encontró el servicio. Complete el paso 1 primero.', 'danger');
+                setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
                 return;
             }
             
@@ -453,10 +485,19 @@
             document.getElementById('userInfo').textContent = `${user.rol.toUpperCase()} - ${user.email}`;
             
             // Mostrar cuartel
-            const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
-            if (cuartel) {
-                document.getElementById('cuartelNombre').textContent = cuartel.nombre;
+            if (window.SICOF_CONFIG && window.SICOF_CONFIG.cuarteles) {
+                const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
+                if (cuartel) {
+                    document.getElementById('cuartelNombre').textContent = cuartel.nombre;
+                }
             }
+            
+            // Configurar Supabase
+            if (window.SICOF_CONFIG && window.SICOF_CONFIG.supabase) {
+                supabase = window.SICOF_CONFIG.supabase;
+            }
+            
+            console.log('Paso 2 - Servicio ID:', servicioId);
         });
         
         // Manejar envío del formulario
@@ -484,23 +525,61 @@
                 return;
             }
             
-            // Guardar datos en localStorage
-            localStorage.setItem('servicio_paso2', JSON.stringify(formData));
+            // Mostrar loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
             
-            // Redirigir al siguiente paso
-            window.location.href = 'demanda-preventiva.html';
+            try {
+                console.log('Actualizando servicio con datos de demanda ciudadana:', formData);
+                
+                // 1. Guardar en Supabase si está disponible
+                if (supabase && servicioId) {
+                    const { error } = await supabase
+                        .from('servicios')
+                        .update(formData)
+                        .eq('id', servicioId);
+                    
+                    if (error) {
+                        console.error('Error al actualizar en Supabase:', error);
+                        throw new Error(`Error de base de datos: ${error.message}`);
+                    }
+                    
+                    console.log('✓ Datos de demanda ciudadana actualizados en Supabase');
+                } else {
+                    console.warn('⚠ No se pudo actualizar en Supabase (modo offline)');
+                }
+                
+                // 2. Guardar datos en localStorage
+                localStorage.setItem('servicio_paso2', JSON.stringify(formData));
+                
+                // 3. Mostrar mensaje de éxito
+                mostrarMensaje('✅ Datos guardados correctamente. Redirigiendo al siguiente paso...', 'success');
+                
+                // 4. Pequeña pausa
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // 5. Redirigir al siguiente paso
+                window.location.href = 'demanda-preventiva.html';
+                
+            } catch (error) {
+                console.error('Error guardando datos:', error);
+                mostrarMensaje('❌ Error al guardar los datos: ' + error.message, 'danger');
+                
+                // Guardar en localStorage como fallback
+                try {
+                    localStorage.setItem('servicio_paso2', JSON.stringify(formData));
+                    localStorage.setItem('servicio_offline', 'true');
+                    console.warn('✓ Datos guardados en localStorage (modo offline)');
+                    mostrarMensaje('⚠ Datos guardados localmente. Redirigiendo al siguiente paso...', 'warning');
+                    
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    window.location.href = 'demanda-preventiva.html';
+                } catch (localError) {
+                    console.error('Error guardando en localStorage:', localError);
+                }
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
         });
-        
-        function mostrarMensaje(texto, tipo = 'info') {
-            const messageEl = document.getElementById('message');
-            messageEl.innerHTML = texto;
-            messageEl.className = `alert alert-${tipo}`;
-            messageEl.style.display = 'block';
-            
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 5000);
-        }
         
         // Validar números positivos
         document.querySelectorAll('input[type="number"]').forEach(input => {
