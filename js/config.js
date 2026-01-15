@@ -1,141 +1,97 @@
 // ============================================
-// SICOF - CONFIGURACIÓN CON SUPABASE AUTH
+// CONFIGURACIÓN TEMPORAL PARA PRUEBAS
 // ============================================
 
-// 🔐 CLAVES SUPABASE ACTUALIZADAS
 const SUPABASE_URL = "https://rytpgbfbeeuqzcgeujzy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dHBnYmZiZWV1cXpjZ2V1anp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NjUwMDcsImV4cCI6MjA4NDA0MTAwN30.dQ2WlMBAVqLg8hUWUPxpLMMw3XO7-PRTn9gxf9Bslac";
 
 window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ============================================
-// CONFIGURACIÓN GENERAL
-// ============================================
-
-const PASSWORD_GENERICA = 'Montañaofrontera2026';
-
-window.SICOF_CONFIG = {
-    version: '2.0.0',
-
-    redirectUrls: {
-        digitador: 'servicios/datos-servicio.html',
-        jefe: 'cuarteles/estado-operativo.html',
-        admin: 'admin/admin-panel.html',
-        jefatura: 'dashboard.html'
-    }
-};
+// CONTRASEÑA DE PRUEBA (usa la misma para todos)
+const PASSWORD_PRUEBA = 'Montañaofrontera2026';
 
 // ============================================
-// USUARIOS AUTORIZADOS EN SICOF
-// ============================================
-
-const USUARIOS_METADATA = {
-    'digitador.chacalluta@carabineros.cl': { nombre: 'Digitador Chacalluta', rol: 'digitador', cuartel_codigo: 'CHA' },
-    'digitador.visviri@carabineros.cl': { nombre: 'Digitador Visviri', rol: 'digitador', cuartel_codigo: 'VIS' },
-    'digitador.chungara@carabineros.cl': { nombre: 'Digitador Chungara', rol: 'digitador', cuartel_codigo: 'CHU' },
-
-    'jefe.chacalluta@carabineros.cl': { nombre: 'Jefe Chacalluta', rol: 'jefe', cuartel_codigo: 'CHA' },
-    'jefe.visviri@carabineros.cl': { nombre: 'Jefe Visviri', rol: 'jefe', cuartel_codigo: 'VIS' },
-    'jefe.chungara@carabineros.cl': { nombre: 'Jefe Chungara', rol: 'jefe', cuartel_codigo: 'CHU' },
-
-    'jefatura@carabineros.cl': { nombre: 'Jefatura Regional', rol: 'jefatura', cuartel_codigo: null },
-    'admin@carabineros.cl': { nombre: 'Administrador', rol: 'admin', cuartel_codigo: null }
-};
-
-// ============================================
-// LOGIN CON ALERTAS OBLIGATORIAS
+// FUNCIÓN DE LOGIN SIMPLIFICADA (SOLO PARA PRUEBAS)
 // ============================================
 
 window.loginUsuario = async function (email, password) {
-    email = email.toLowerCase().trim();
-
+    console.log('Intentando login con:', email);
+    
     try {
+        // 1. Intentar autenticación en Supabase
         const { data, error } = await window.supabase.auth.signInWithPassword({
-            email,
-            password
+            email: email.toLowerCase().trim(),
+            password: password
         });
 
-        // ❌ Error de autenticación
+        // 2. Si hay error, mostrar específico
         if (error) {
-            alert('El correo no está registrado o la contraseña es incorrecta');
+            console.error('Error Supabase:', error);
+            
+            if (error.message.includes('Invalid login credentials')) {
+                alert('❌ ERROR: El usuario existe pero NO tiene contraseña configurada.\n\nVe a Supabase Dashboard → Users → Reset Password para cada usuario.');
+            } else {
+                alert('Error: ' + error.message);
+            }
             return null;
         }
 
-        // 🔒 Usuario existe en Supabase pero NO autorizado en SICOF
-        const metadata = USUARIOS_METADATA[email];
-        if (!metadata) {
-            await window.supabase.auth.signOut();
-            alert('Usuario no autorizado para ingresar al sistema SICOF');
-            return null;
-        }
-
-        const usuario = {
+        // 3. Si login es exitoso
+        console.log('Login exitoso:', data.user);
+        
+        // 4. Definir roles manualmente (temporal)
+        let usuarioInfo = {
             id: data.user.id,
             email: data.user.email,
-            nombre: metadata.nombre,
-            rol: metadata.rol,
-            cuartel_codigo: metadata.cuartel_codigo,
             session: data.session
         };
 
-        localStorage.setItem('sicof_user', JSON.stringify(usuario));
-        return usuario;
+        // Asignar rol según email
+        if (email.includes('admin@')) {
+            usuarioInfo.nombre = 'Administrador';
+            usuarioInfo.rol = 'admin';
+            usuarioInfo.cuartel_codigo = null;
+        } else if (email.includes('digitador.')) {
+            usuarioInfo.nombre = 'Digitador Chacalluta';
+            usuarioInfo.rol = 'digitador';
+            usuarioInfo.cuartel_codigo = 'CHA';
+        } else if (email.includes('jefe.')) {
+            usuarioInfo.nombre = 'Jefe Chacalluta';
+            usuarioInfo.rol = 'jefe';
+            usuarioInfo.cuartel_codigo = 'CHA';
+        }
+
+        // 5. Guardar en localStorage
+        localStorage.setItem('sicof_user', JSON.stringify(usuarioInfo));
+        
+        alert(`✅ Login exitoso!\nBienvenido: ${usuarioInfo.nombre}`);
+        
+        // 6. Redirigir según rol
+        setTimeout(() => {
+            if (usuarioInfo.rol === 'admin') {
+                window.location.href = 'admin/admin-panel.html';
+            } else if (usuarioInfo.rol === 'digitador') {
+                window.location.href = 'servicios/datos-servicio.html';
+            } else if (usuarioInfo.rol === 'jefe') {
+                window.location.href = 'cuarteles/estado-operativo.html';
+            }
+        }, 1000);
+
+        return usuarioInfo;
 
     } catch (err) {
-        console.error('Error login:', err);
-        alert('Error inesperado al iniciar sesión');
+        console.error('Error catch:', err);
+        alert('Error inesperado: ' + err.message);
         return null;
     }
 };
 
 // ============================================
-// VERIFICAR SESIÓN
+// PRUEBA DIRECTA DESDE CONSOLA
 // ============================================
 
-window.verificarSesion = async function () {
-    const { data: { session } } = await window.supabase.auth.getSession();
-    if (!session || !session.user) return null;
-
-    const metadata = USUARIOS_METADATA[session.user.email.toLowerCase()];
-    if (!metadata) return null;
-
-    return {
-        id: session.user.id,
-        email: session.user.email,
-        nombre: metadata.nombre,
-        rol: metadata.rol,
-        cuartel_codigo: metadata.cuartel_codigo,
-        session
-    };
-};
-
-// ============================================
-// PROTEGER PÁGINAS POR ROL
-// ============================================
-
-window.protegerPagina = async function (rolRequerido = null) {
-    const user = await window.verificarSesion();
-
-    if (!user) {
-        window.location.href = '/index.html';
-        return null;
-    }
-
-    if (rolRequerido && user.rol !== rolRequerido) {
-        alert('No tienes permisos para acceder a esta sección');
-        window.location.href = '/index.html';
-        return null;
-    }
-
-    return user;
-};
-
-// ============================================
-// LOGOUT
-// ============================================
-
-window.logout = async function () {
-    await window.supabase.auth.signOut();
-    localStorage.clear();
-    window.location.href = '/index.html';
+// Para probar inmediatamente, ejecuta en la consola del navegador:
+window.probarLogin = async function() {
+    console.log('Probando login con admin...');
+    await window.loginUsuario('admin@carabineros.cl', 'Montañaofrontera2026');
 };
