@@ -592,21 +592,20 @@
             }
         }
 
-        // Manejar envío del formulario - ESTA ES LA PARTE MÁS IMPORTANTE
+        // Reemplazar TODO el event listener del submit con este código:
         document.getElementById('servicioForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Validar que se haya seleccionado un cuartel
-            const cuartelSelect = document.getElementById('cuartel_codigo');
-            const cuartel = cuartelSelect.value;
+            console.log('=== INICIANDO PASO 1 ===');
             
+            // Validar cuartel
+            const cuartel = document.getElementById('cuartel_codigo').value;
             if (!cuartel) {
                 mostrarMensaje('Debe seleccionar un cuartel', 'danger');
-                cuartelSelect.focus();
                 return;
             }
             
-            // Obtener datos del usuario
+            // Obtener usuario
             const user = JSON.parse(localStorage.getItem('sicof_user'));
             if (!user || !user.email) {
                 mostrarMensaje('Error: Usuario no autenticado', 'danger');
@@ -614,103 +613,164 @@
                 return;
             }
             
-            // Preparar datos para enviar a Supabase
+            // Validar horarios
+            const horarioInicio = document.getElementById('horario_inicio').value;
+            const horarioTermino = document.getElementById('horario_termino').value;
+            if (horarioInicio >= horarioTermino) {
+                mostrarMensaje('El horario de término debe ser posterior al de inicio', 'danger');
+                return;
+            }
+            
+            // Validar nombre y jefe
+            if (!document.getElementById('nombre_servicio').value.trim()) {
+                mostrarMensaje('El nombre del servicio es requerido', 'danger');
+                return;
+            }
+            
+            if (!document.getElementById('jefe_servicio').value.trim()) {
+                mostrarMensaje('El jefe del servicio es requerido', 'danger');
+                return;
+            }
+            
+            // Preparar datos EXACTAMENTE como la tabla
             const formData = {
                 fecha: document.getElementById('fecha').value,
                 cuartel_codigo: cuartel,
-                nombre_servicio: document.getElementById('nombre_servicio').value,
-                jefe_servicio: document.getElementById('jefe_servicio').value,
-                horario_inicio: document.getElementById('horario_inicio').value,
-                horario_termino: document.getElementById('horario_termino').value,
-                
-                // Campos meteorológicos
+                nombre_servicio: document.getElementById('nombre_servicio').value.trim(),
+                jefe_servicio: document.getElementById('jefe_servicio').value.trim(),
+                horario_inicio: horarioInicio,
+                horario_termino: horarioTermino,
                 condicion_meteo: document.getElementById('condicion_meteo').value,
                 temperatura: document.getElementById('temperatura').value || null,
                 visibilidad: document.getElementById('visibilidad').value || null,
                 viento_velocidad: document.getElementById('viento_velocidad').value || null,
-                observaciones_clima: document.getElementById('observaciones_clima').value || null,
-                
-                // Información del digitador
+                observaciones_clima: document.getElementById('observaciones_clima').value.trim() || null,
                 digitador_email: user.email
             };
             
-            // Validaciones básicas
-            if (formData.horario_inicio >= formData.horario_termino) {
-                mostrarMensaje('El horario de término debe ser posterior al de inicio', 'danger');
-                document.getElementById('horario_termino').focus();
-                return;
-            }
-            
-            if (!formData.nombre_servicio.trim()) {
-                mostrarMensaje('El nombre del servicio es requerido', 'danger');
-                document.getElementById('nombre_servicio').focus();
-                return;
-            }
-            
-            if (!formData.jefe_servicio.trim()) {
-                mostrarMensaje('El jefe del servicio es requerido', 'danger');
-                document.getElementById('jefe_servicio').focus();
-                return;
-            }
+            console.log('Datos a enviar a Supabase:', formData);
             
             // Mostrar loading
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             try {
-                console.log('Guardando datos del servicio:', formData);
-                
-                // Verificar que Supabase esté configurado
+                // 1. VERIFICAR QUE SUPABASE ESTÉ CONFIGURADO
+                console.log('Verificando configuración de Supabase...');
                 if (!window.SICOF_CONFIG || !window.SICOF_CONFIG.supabase) {
-                    throw new Error('Configuración de Supabase no encontrada');
+                    console.error('SICOF_CONFIG no encontrado:', window.SICOF_CONFIG);
+                    throw new Error('Configuración de Supabase no encontrada. Verifica config.js');
                 }
                 
                 const supabase = window.SICOF_CONFIG.supabase;
+                console.log('Supabase configurado correctamente');
                 
-                // 1. Crear registro en Supabase (solo con datos del paso 1)
+                // 2. HACER EL INSERT EN SUPABASE
+                console.log('Insertando en tabla "servicios"...');
                 const { data, error } = await supabase
                     .from('servicios')
                     .insert([formData])
-                    .select()
-                    .single(); // Importante: .single() para obtener un solo registro
+                    .select()  // IMPORTANTE: .select() para obtener los datos insertados
+                    .single(); // .single() para obtener un solo objeto
                 
                 if (error) {
-                    console.error('Error al guardar en Supabase:', error);
+                    console.error('ERROR de Supabase:', error);
+                    console.error('Código:', error.code);
+                    console.error('Mensaje:', error.message);
+                    console.error('Detalles:', error.details);
+                    
+                    // Verificar si es error de clave foránea
+                    if (error.code === '23503') {
+                        throw new Error('El cuartel no existe en la tabla "cuarteles". Verifica la base de datos.');
+                    }
+                    
                     throw new Error(`Error de base de datos: ${error.message}`);
                 }
                 
-                console.log('✓ Servicio creado en Supabase:', data.id);
+                console.log('RESPUESTA de Supabase:', data);
                 
-                // 2. Guardar el ID del servicio en localStorage para los siguientes pasos
+                // 3. VERIFICAR QUE SE RECIBIÓ EL ID
+                if (!data || !data.id) {
+                    console.error('No se recibió ID en la respuesta:', data);
+                    throw new Error('No se recibió ID del registro. La respuesta fue: ' + JSON.stringify(data));
+                }
+                
+                console.log('✅ REGISTRO CREADO EXITOSAMENTE');
+                console.log('ID generado:', data.id);
+                console.log('Datos completos recibidos:', data);
+                
+                // 4. GUARDAR EL ID EN localStorage (CRÍTICO)
                 localStorage.setItem('servicio_id', data.id);
                 localStorage.setItem('servicio_paso1', JSON.stringify(formData));
                 
-                // 3. Mostrar mensaje de éxito
-                mostrarMensaje('✅ Servicio creado correctamente. Redirigiendo al siguiente paso...', 'success');
+                console.log('localStorage actualizado:');
+                console.log('- servicio_id:', localStorage.getItem('servicio_id'));
+                console.log('- servicio_paso1:', localStorage.getItem('servicio_paso1'));
                 
-                // 4. Pequeña pausa para mostrar el mensaje
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                // 5. MOSTRAR CONFIRMACIÓN DETALLADA
+                mostrarMensaje(`
+                    ✅ <strong>REGISTRO CREADO CORRECTAMENTE</strong><br>
+                    • ID: ${data.id.substring(0, 8)}...<br>
+                    • Fecha: ${formData.fecha}<br>
+                    • Cuartel: ${formData.cuartel_codigo}<br>
+                    • Redirigiendo al paso 2...
+                `, 'success');
                 
-                // 5. Redirigir al siguiente paso
-                console.log('Redirigiendo a demanda-ciudadana.html');
+                // 6. PAUSA PARA QUE SE VEA EL MENSAJE
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // 7. REDIRIGIR A PASO 2
+                console.log('Redirigiendo a demanda-ciudadana.html...');
                 window.location.href = 'demanda-ciudadana.html';
                 
             } catch (error) {
-                console.error('Error guardando servicio:', error);
-                mostrarMensaje('❌ Error al guardar el servicio: ' + error.message, 'danger');
+                console.error('❌ ERROR COMPLETO en paso 1:', error);
                 
-                // Intentar guardar solo en localStorage como fallback
-                try {
+                let mensajeError = error.message;
+                
+                // Modo offline
+                if (error.message.includes('Supabase') || error.message.includes('configuración')) {
+                    console.warn('Intentando modo offline...');
+                    
+                    // Generar ID temporal
+                    const tempId = 'offline_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    
+                    localStorage.setItem('servicio_id', tempId);
                     localStorage.setItem('servicio_paso1', JSON.stringify(formData));
                     localStorage.setItem('servicio_offline', 'true');
-                    console.warn('✓ Datos guardados en localStorage (modo offline)');
-                    mostrarMensaje('⚠ Datos guardados localmente. Redirigiendo al siguiente paso...', 'warning');
                     
-                    // Esperar y redirigir de todos modos
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    window.location.href = 'demanda-ciudadana.html';
-                } catch (localError) {
-                    console.error('Error guardando en localStorage:', localError);
+                    console.log('✓ Datos guardados en modo offline. ID temporal:', tempId);
+                    
+                    mostrarMensaje(`
+                        ⚠️ <strong>MODO OFFLINE ACTIVADO</strong><br>
+                        • Los datos se guardaron localmente<br>
+                        • ID temporal: ${tempId}<br>
+                        • Se sincronizará cuando haya conexión<br>
+                        • Redirigiendo al paso 2...
+                    `, 'warning');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'demanda-ciudadana.html';
+                    }, 2000);
+                    return;
                 }
+                
+                mostrarMensaje(`❌ ERROR: ${mensajeError}`, 'danger');
+                
+                // Botón para debug
+                const debugBtn = document.createElement('button');
+                debugBtn.textContent = '📋 Ver detalles del error';
+                debugBtn.className = 'btn btn-outline btn-sm mt-2';
+                debugBtn.onclick = () => {
+                    console.log('=== DEBUG COMPLETO ===');
+                    console.log('1. Datos enviados:', formData);
+                    console.log('2. Configuración:', window.SICOF_CONFIG);
+                    console.log('3. Error completo:', error);
+                    console.log('4. localStorage servicio_id:', localStorage.getItem('servicio_id'));
+                    alert('Revisa la consola (F12) para ver los detalles del error');
+                };
+                
+                document.getElementById('message').appendChild(debugBtn);
+                
             } finally {
                 document.getElementById('loadingOverlay').style.display = 'none';
             }
