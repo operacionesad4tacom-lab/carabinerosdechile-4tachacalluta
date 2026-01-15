@@ -4,228 +4,264 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SICOF - Login</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/mobile.css">
-    <link rel="stylesheet" href="css/tablet.css">
-    <link rel="stylesheet" href="css/desktop.css">
-    <link rel="icon" href="assets/logos/favicon.ico">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e6f2ec 100%);
+            background: linear-gradient(135deg, #084c2a, #0b6b3a);
+            font-family: Arial, sans-serif;
         }
         
         .login-box {
-            width: 100%;
-            max-width: 450px;
+            width: 90%;
+            max-width: 400px;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            border-top: 6px solid #0b6b3a;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         
-        .login-header {
-            background: linear-gradient(135deg, #084c2a, #0b6b3a);
-            color: white;
-            padding: 2rem;
+        .logo {
             text-align: center;
+            margin-bottom: 20px;
         }
         
-        .login-logo {
-            height: 70px;
-            margin-bottom: 1rem;
+        .logo img {
+            height: 60px;
         }
         
-        .login-body {
-            padding: 2rem;
-        }
-        
-        .info-box {
-            background: #e6f2ec;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1.5rem;
-            border-left: 4px solid #0b6b3a;
-        }
-        
-        .password-display {
-            background: white;
-            padding: 0.75rem;
-            border-radius: 4px;
-            font-family: monospace;
-            font-weight: bold;
-            color: #0b6b3a;
+        h2 {
             text-align: center;
-            margin-top: 0.5rem;
-            font-size: 1rem;
+            color: #084c2a;
+            margin-bottom: 20px;
         }
         
-        .user-btn {
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
             display: block;
-            width: 100%;
-            padding: 0.5rem;
-            margin: 0.25rem 0;
-            background: white;
-            border: 1px solid #0b6b3a;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.875rem;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
         }
         
-        .user-btn:hover {
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        input:focus {
+            border-color: #0b6b3a;
+            outline: none;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
             background: #0b6b3a;
             color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
         }
         
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+        button:hover {
+            background: #084c2a;
         }
         
-        .alert-success {
-            background: rgba(39, 174, 96, 0.1);
-            border-left: 4px solid #27ae60;
-            color: #27ae60;
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
         }
         
-        .alert-danger {
-            background: rgba(231, 76, 60, 0.1);
-            border-left: 4px solid #e74c3c;
-            color: #e74c3c;
+        .error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        
+        .test-users {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
         
-        .alert-warning {
-            background: rgba(230, 126, 34, 0.1);
-            border-left: 4px solid #e67e22;
-            color: #e67e22;
+        .test-btn {
+            background: #f0f0f0;
+            color: #333;
+            margin: 5px 0;
+        }
+        
+        .test-btn:hover {
+            background: #e0e0e0;
         }
     </style>
 </head>
 <body>
     <div class="login-box">
-        <div class="login-header">
-            <img src="assets/logos/escudo-carabineros.png" alt="Logo" class="login-logo">
-            <h1 style="margin: 0; font-size: 1.5rem;">CARABINEROS DE CHILE</h1>
-            <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 0.9rem;">Sistema Integrado de Control Fronterizo</p>
+        <div class="logo">
+            <img src="assets/logos/escudo-carabineros.png" alt="Carabineros">
         </div>
         
-        <div class="login-body">
-            <div id="message" style="display: none;"></div>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <label class="form-label">📧 Correo Institucional</label>
-                    <input type="email" id="email" class="form-control" required 
-                           placeholder="usuario@carabineros.cl">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">🔒 Contraseña</label>
-                    <input type="password" id="password" class="form-control" required
-                           placeholder="Montañaofrontera2026">
-                </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%;" id="loginBtn">
-                    🚪 INGRESAR
-                </button>
-            </form>
-            
-            <div class="info-box">
-                <strong style="color: #084c2a; display: block; margin-bottom: 0.5rem;">🔑 Contraseña del Sistema:</strong>
-                <div class="password-display">Montañaofrontera2026</div>
-                
-                <details style="margin-top: 1rem;">
-                    <summary style="cursor: pointer; font-weight: 600; color: #084c2a;">
-                        👤 Acceso rápido (click para ver)
-                    </summary>
-                    <div style="margin-top: 1rem;">
-                        <button type="button" class="user-btn" onclick="autoLogin('digitador.chacalluta@carabineros.cl')">
-                            Digitador Chacalluta
-                        </button>
-                        <button type="button" class="user-btn" onclick="autoLogin('jefe.chacalluta@carabineros.cl')">
-                            Jefe Chacalluta
-                        </button>
-                        <button type="button" class="user-btn" onclick="autoLogin('jefatura@carabineros.cl')">
-                            Jefatura
-                        </button>
-                        <button type="button" class="user-btn" onclick="autoLogin('admin@carabineros.cl')">
-                            Administrador
-                        </button>
-                    </div>
-                </details>
-                
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(11,107,58,0.2);">
-                    <small style="color: #666;">
-                        ℹ️ Los usuarios deben estar creados en Supabase Auth con esta contraseña.
-                    </small>
-                </div>
+        <h2>SICOF - Login</h2>
+        
+        <div id="message" class="message"></div>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Correo:</label>
+                <input type="email" id="email" required placeholder="usuario@carabineros.cl">
             </div>
+            
+            <div class="input-group">
+                <label>Contraseña:</label>
+                <input type="password" id="password" required value="Montañaofrontera2026">
+            </div>
+            
+            <button type="submit" id="loginBtn">INGRESAR</button>
+        </form>
+        
+        <div class="test-users">
+            <p style="text-align: center; margin-bottom: 10px; color: #666;">Usuarios de prueba:</p>
+            <button class="test-btn" onclick="testLogin('digitador.chacalluta@carabineros.cl')">Digitador Chacalluta</button>
+            <button class="test-btn" onclick="testLogin('jefe.chacalluta@carabineros.cl')">Jefe Chacalluta</button>
+            <button class="test-btn" onclick="testLogin('admin@carabineros.cl')">Administrador</button>
         </div>
+        
+        <p style="margin-top: 15px; text-align: center; color: #888; font-size: 12px;">
+            Contraseña: Montañaofrontera2026
+        </p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/config.js"></script>
     <script>
+        // CONFIGURACIÓN SIMPLE
+        const SUPABASE_URL = "https://rytpgbfbeeuqzcgeujzy.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5dHBnYmZiZWV1cXpjZ2V1anp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NjUwMDcsImV4cCI6MjA4NDA0MTAwN30.dQ2WlMBAVqLg8hUWUPxpLMMw3XO7-PRTn9gxf9Bslac";
+        
+        const supabase = window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // USUARIOS PERMITIDOS
+        const USUARIOS = {
+            'digitador.chacalluta@carabineros.cl': { nombre: 'Digitador Chacalluta', rol: 'digitador' },
+            'jefe.chacalluta@carabineros.cl': { nombre: 'Jefe Chacalluta', rol: 'jefe' },
+            'admin@carabineros.cl': { nombre: 'Administrador', rol: 'admin' }
+        };
+        
+        // FUNCIÓN DE LOGIN SIMPLIFICADA
+        async function login(email, password) {
+            try {
+                console.log('Intentando login con:', email);
+                
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) {
+                    console.error('Error Supabase:', error);
+                    throw new Error(error.message);
+                }
+                
+                console.log('Login exitoso:', data.user);
+                
+                const usuario = USUARIOS[email.toLowerCase()];
+                if (!usuario) {
+                    throw new Error('Usuario no autorizado en el sistema');
+                }
+                
+                return {
+                    ...usuario,
+                    email: data.user.email,
+                    session: data.session
+                };
+                
+            } catch (error) {
+                console.error('Error completo:', error);
+                throw error;
+            }
+        }
+        
+        // MANEJADOR DEL FORMULARIO
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
+            const btn = document.getElementById('loginBtn');
             const msg = document.getElementById('message');
-            const loginBtn = document.getElementById('loginBtn');
             
-            // Deshabilitar botón
-            loginBtn.disabled = true;
-            loginBtn.textContent = '⏳ Verificando...';
+            btn.disabled = true;
+            btn.textContent = 'VERIFICANDO...';
+            msg.style.display = 'none';
             
             try {
-                const usuario = await window.loginUsuario(email, password);
+                const usuario = await login(email, password);
                 
-                // Guardar en localStorage
+                msg.textContent = `✅ Bienvenido ${usuario.nombre}`;
+                msg.className = 'message success';
+                msg.style.display = 'block';
+                
+                // Guardar usuario
                 localStorage.setItem('sicof_user', JSON.stringify(usuario));
                 
-                msg.innerHTML = `<strong>✅ Bienvenido ${usuario.nombre}</strong>`;
-                msg.className = 'alert alert-success';
-                msg.style.display = 'block';
-                
+                // Redirigir según rol
                 setTimeout(() => {
-                    window.location.href = window.SICOF_CONFIG.redirectUrls[usuario.rol];
-                }, 800);
+                    if (usuario.rol === 'digitador') window.location.href = 'servicios/datos-servicio.html';
+                    else if (usuario.rol === 'jefe') window.location.href = 'cuarteles/estado-operativo.html';
+                    else if (usuario.rol === 'admin') window.location.href = 'admin/admin-panel.html';
+                    else window.location.href = 'dashboard.html';
+                }, 1000);
                 
             } catch (error) {
-                msg.innerHTML = `
-                    <strong>❌ ${error.message}</strong><br>
-                    <small>Verifica que el usuario exista en Supabase Auth con la contraseña: Montañaofrontera2026</small>
-                `;
-                msg.className = 'alert alert-danger';
+                msg.textContent = `❌ Error: ${error.message}`;
+                msg.className = 'message error';
                 msg.style.display = 'block';
                 
-                loginBtn.disabled = false;
-                loginBtn.textContent = '🚪 INGRESAR';
-                
-                setTimeout(() => msg.style.display = 'none', 8000);
+                btn.disabled = false;
+                btn.textContent = 'INGRESAR';
             }
         });
         
-        function autoLogin(email) {
+        // FUNCIÓN PARA PRUEBAS
+        function testLogin(email) {
             document.getElementById('email').value = email;
             document.getElementById('password').value = 'Montañaofrontera2026';
             document.getElementById('loginForm').dispatchEvent(new Event('submit'));
         }
         
-        // Verificar si ya está logueado
-        (async () => {
-            const user = await window.verificarSesion();
-            if (user) {
-                window.location.href = window.SICOF_CONFIG.redirectUrls[user.rol];
+        // VERIFICAR SI YA ESTÁ LOGUEADO
+        async function verificarSesion() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session && session.user) {
+                    const usuario = USUARIOS[session.user.email.toLowerCase()];
+                    if (usuario) {
+                        localStorage.setItem('sicof_user', JSON.stringify(usuario));
+                        // Redirigir según rol
+                        if (usuario.rol === 'digitador') window.location.href = 'servicios/datos-servicio.html';
+                        else if (usuario.rol === 'jefe') window.location.href = 'cuarteles/estado-operativo.html';
+                        else if (usuario.rol === 'admin') window.location.href = 'admin/admin-panel.html';
+                    }
+                }
+            } catch (error) {
+                console.log('No hay sesión activa');
             }
-        })();
+        }
+        
+        // Ejecutar al cargar
+        verificarSesion();
     </script>
 </body>
 </html>
