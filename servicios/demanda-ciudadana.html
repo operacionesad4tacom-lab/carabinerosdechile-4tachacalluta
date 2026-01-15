@@ -443,7 +443,7 @@
     <script>
         // Variables globales
         let servicioId = null;
-        let supabase = null;
+        // ELIMINAR ESTA LÍNEA: let supabase = null; // <-- ESTO CAUSABA EL ERROR
         
         // Función para mostrar mensajes
         function mostrarMensaje(texto, tipo = 'info') {
@@ -492,11 +492,6 @@
                 }
             }
             
-            // Configurar Supabase
-            if (window.SICOF_CONFIG && window.SICOF_CONFIG.supabase) {
-                supabase = window.SICOF_CONFIG.supabase;
-            }
-            
             console.log('Paso 2 - Servicio ID:', servicioId);
         });
         
@@ -531,33 +526,37 @@
             try {
                 console.log('Actualizando servicio con datos de demanda ciudadana:', formData);
                 
-                // 1. Guardar en Supabase si está disponible
-                if (supabase && servicioId) {
-                    const { error } = await supabase
-                        .from('servicios')
-                        .update(formData)
-                        .eq('id', servicioId);
-                    
-                    if (error) {
-                        console.error('Error al actualizar en Supabase:', error);
-                        throw new Error(`Error de base de datos: ${error.message}`);
-                    }
-                    
-                    console.log('✓ Datos de demanda ciudadana actualizados en Supabase');
-                } else {
-                    console.warn('⚠ No se pudo actualizar en Supabase (modo offline)');
+                // 1. Verificar que Supabase esté configurado
+                if (!window.SICOF_CONFIG || !window.SICOF_CONFIG.supabase) {
+                    throw new Error('Configuración de Supabase no encontrada');
                 }
                 
-                // 2. Guardar datos en localStorage
+                // 2. Acceder a supabase desde SICOF_CONFIG (que viene de config.js)
+                const supabase = window.SICOF_CONFIG.supabase;
+                
+                // 3. Actualizar en Supabase
+                const { error } = await supabase
+                    .from('servicios')
+                    .update(formData)
+                    .eq('id', servicioId);
+                
+                if (error) {
+                    console.error('Error al actualizar en Supabase:', error);
+                    throw new Error(`Error de base de datos: ${error.message}`);
+                }
+                
+                console.log('✓ Datos de demanda ciudadana actualizados en Supabase');
+                
+                // 4. Guardar datos en localStorage
                 localStorage.setItem('servicio_paso2', JSON.stringify(formData));
                 
-                // 3. Mostrar mensaje de éxito
+                // 5. Mostrar mensaje de éxito
                 mostrarMensaje('✅ Datos guardados correctamente. Redirigiendo al siguiente paso...', 'success');
                 
-                // 4. Pequeña pausa
+                // 6. Pequeña pausa
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 
-                // 5. Redirigir al siguiente paso
+                // 7. Redirigir al siguiente paso
                 window.location.href = 'demanda-preventiva.html';
                 
             } catch (error) {
