@@ -415,9 +415,6 @@
     <script src="../js/config.js"></script>
     <script src="../js/modules/alertas-tempranas.js"></script>
     <script>
-        // Inicialización de Supabase
-        let supabase = null;
-        
         function logout() {
             localStorage.clear();
             window.location.href = '../index.html';
@@ -452,9 +449,6 @@
         function configurarCuarteles() {
             const select = document.getElementById('cuartel_codigo');
             const user = JSON.parse(localStorage.getItem('sicof_user'));
-            
-            // Limpiar opciones actuales (excepto la primera)
-            select.innerHTML = '<option value="">Seleccionar cuartel...</option>';
             
             if (!user) {
                 console.error('Usuario no autenticado');
@@ -598,7 +592,7 @@
             }
         }
 
-        // Manejar envío del formulario
+        // Manejar envío del formulario - ESTA ES LA PARTE MÁS IMPORTANTE
         document.getElementById('servicioForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -636,26 +630,6 @@
                 viento_velocidad: document.getElementById('viento_velocidad').value || null,
                 observaciones_clima: document.getElementById('observaciones_clima').value || null,
                 
-                // Campos por defecto para otros pasos
-                controles_investigativos: 0,
-                controles_preventivos: 0,
-                controles_migratorios: 0,
-                controles_vehiculares: 0,
-                infracciones_transito: 0,
-                otras_infracciones: 0,
-                detenidos_cantidad: 0,
-                motivo_detencion: null,
-                denuncias_vulneracion: 0,
-                participantes_nna: 0,
-                participantes_adultos: 0,
-                hitos_planificados: 0,
-                hitos_realizados: 0,
-                pnh_planificados: 0,
-                pnh_realizados: 0,
-                sitios_planificados: 0,
-                sitios_realizados: 0,
-                observaciones: null,
-                
                 // Información del digitador
                 digitador_email: user.email
             };
@@ -690,34 +664,33 @@
                     throw new Error('Configuración de Supabase no encontrada');
                 }
                 
-                // Guardar en Supabase
-                const { data, error } = await window.SICOF_CONFIG.supabase
+                const supabase = window.SICOF_CONFIG.supabase;
+                
+                // 1. Crear registro en Supabase (solo con datos del paso 1)
+                const { data, error } = await supabase
                     .from('servicios')
                     .insert([formData])
-                    .select();
+                    .select()
+                    .single(); // Importante: .single() para obtener un solo registro
                 
                 if (error) {
                     console.error('Error al guardar en Supabase:', error);
                     throw new Error(`Error de base de datos: ${error.message}`);
                 }
                 
-                if (!data || data.length === 0) {
-                    throw new Error('No se recibió confirmación del servidor');
-                }
+                console.log('✓ Servicio creado en Supabase:', data.id);
                 
-                console.log('✓ Servicio guardado en Supabase:', data[0].id);
-                
-                // Guardar el ID del servicio en localStorage para los siguientes pasos
-                localStorage.setItem('servicio_id', data[0].id);
+                // 2. Guardar el ID del servicio en localStorage para los siguientes pasos
+                localStorage.setItem('servicio_id', data.id);
                 localStorage.setItem('servicio_paso1', JSON.stringify(formData));
                 
-                // Mostrar mensaje de éxito
-                mostrarMensaje('✅ Servicio guardado correctamente. Redirigiendo al siguiente paso...', 'success');
+                // 3. Mostrar mensaje de éxito
+                mostrarMensaje('✅ Servicio creado correctamente. Redirigiendo al siguiente paso...', 'success');
                 
-                // Pequeña pausa para mostrar el mensaje
+                // 4. Pequeña pausa para mostrar el mensaje
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 
-                // Redirigir al siguiente paso
+                // 5. Redirigir al siguiente paso
                 console.log('Redirigiendo a demanda-ciudadana.html');
                 window.location.href = 'demanda-ciudadana.html';
                 
@@ -728,9 +701,9 @@
                 // Intentar guardar solo en localStorage como fallback
                 try {
                     localStorage.setItem('servicio_paso1', JSON.stringify(formData));
-                    localStorage.setItem('servicio_paso1_offline', 'true');
+                    localStorage.setItem('servicio_offline', 'true');
                     console.warn('✓ Datos guardados en localStorage (modo offline)');
-                    mostrarMensaje('⚠ Datos guardados localmente. Se intentará sincronizar después.', 'warning');
+                    mostrarMensaje('⚠ Datos guardados localmente. Redirigiendo al siguiente paso...', 'warning');
                     
                     // Esperar y redirigir de todos modos
                     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -750,6 +723,7 @@
             console.log('2. Cuarteles definidos:', CUARTELES);
             console.log('3. Cuartel seleccionado:', document.getElementById('cuartel_codigo').value);
             console.log('4. SICOF_CONFIG disponible:', !!window.SICOF_CONFIG);
+            console.log('5. servicio_id en localStorage:', localStorage.getItem('servicio_id'));
             console.log('=== FIN DEBUG ===');
         };
     </script>
