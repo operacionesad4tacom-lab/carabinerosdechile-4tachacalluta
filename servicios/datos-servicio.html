@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SICOF - Nuevo Servicio</title>
+    <title>SICOF - Nuevo Servicio - Paso 1</title>
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/mobile.css">
     <link rel="stylesheet" href="../css/tablet.css">
     <link rel="stylesheet" href="../css/desktop.css">
-    <link rel="icon" href="../assets/logos/favicon.ico">
     <style>
         .paso-indicador {
             display: flex;
@@ -58,11 +57,6 @@
             transform: scale(1.1);
         }
         
-        .paso.completado .paso-numero {
-            background-color: var(--verde-exito);
-            color: var(--blanco);
-        }
-        
         .paso-texto {
             font-size: 0.75rem;
             font-weight: 600;
@@ -105,31 +99,81 @@
         
         .time-separator {
             font-size: 1.5rem;
-            color: var(--gris-medio);
+            font-weight: bold;
+            color: var(--verde-oficial);
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+        }
+        
+        .panel-riesgo {
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius-md);
+            margin-top: var(--spacing-lg);
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .panel-riesgo.bajo {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .panel-riesgo.medio {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .panel-riesgo.alto {
+            background: #e67e22;
+            color: white;
+        }
+        
+        .panel-riesgo.muy-alto {
+            background: #c0392b;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <!-- Header Institucional -->
-    <header class="header-institucional">
-        <div class="header-content">
-            <div class="logo-container">
-                <img src="../assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: none; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 2rem; border-radius: 8px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+            <div style="font-size: 1.2rem; font-weight: bold;">Guardando...</div>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo">
+                <div class="logo-escudo"></div>
                 <div class="logo-text">
-                    <div class="logo-title">SICOF - Sistema Integrado</div>
-                    <div class="logo-subtitle">Control Operativo Fronterizo</div>
+                    <div class="logo-title">SICOF</div>
+                    <div class="logo-subtitle">Carabineros de Chile</div>
                 </div>
             </div>
-            <div class="user-info" style="color: var(--blanco); text-align: right;">
-                <div id="cuartelNombre" style="font-weight: 600;">Cargando...</div>
-                <div style="font-size: 0.875rem; opacity: 0.9;" id="userInfo">Digitador</div>
+            <div class="user-info">
+                <span id="userInfo"></span>
+                <button class="btn btn-outline btn-sm" onclick="logout()">Cerrar Sesión</button>
             </div>
         </div>
     </header>
 
-    <!-- Contenido Principal -->
-    <main class="container" style="padding: var(--spacing-xl) 0;">
-        <!-- Indicador de Pasos -->
+    <main class="main-content container">
+        <div id="message" class="alert" style="display: none;"></div>
+        
+        <h1 class="page-title">📝 Registrar Nuevo Servicio</h1>
+        
+        <!-- Indicador de pasos -->
         <div class="paso-indicador">
             <div class="paso activo">
                 <div class="paso-numero">1</div>
@@ -145,26 +189,22 @@
             </div>
             <div class="paso">
                 <div class="paso-numero">4</div>
-                <div class="paso-texto">Confirmación</div>
+                <div class="paso-texto">Confirmar</div>
             </div>
         </div>
-        
-        <!-- Mensajes -->
-        <div id="message" class="alert" style="display: none;"></div>
-        
-        <!-- Formulario -->
+
         <form id="servicioForm">
-            <!-- Datos Básicos -->
+            <!-- SECCIÓN 1: Datos Básicos -->
             <div class="form-section">
-                <h3 class="section-title">
+                <h2 class="section-title">
                     <span class="section-icon">📋</span>
-                    DATOS BÁSICOS DEL SERVICIO
-                </h3>
+                    <span>Datos Básicos del Servicio</span>
+                </h2>
                 
-                <div class="grid grid-2">
+                <div class="grid-2">
                     <div class="form-group">
                         <label for="fecha" class="form-label">
-                            📅 FECHA DEL SERVICIO
+                            📅 FECHA
                         </label>
                         <input 
                             type="date" 
@@ -176,11 +216,10 @@
                     
                     <div class="form-group">
                         <label for="cuartel_codigo" class="form-label">
-                            🏛️ CUARTEL POLICIAL
+                            🏢 CUARTEL
                         </label>
                         <select id="cuartel_codigo" class="form-control" required>
                             <option value="">Seleccionar cuartel...</option>
-                            <!-- Opciones se cargarán dinámicamente -->
                         </select>
                     </div>
                 </div>
@@ -197,9 +236,6 @@
                         maxlength="200"
                         required
                     >
-                    <div style="font-size: 0.75rem; color: var(--gris-medio); margin-top: 4px;">
-                        Máximo 200 caracteres
-                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -215,7 +251,7 @@
                     >
                 </div>
                 
-                <div class="grid grid-2">
+                <div class="grid-2">
                     <div class="form-group">
                         <label class="form-label">
                             🕐 HORARIO DEL SERVICIO
@@ -238,6 +274,89 @@
                     </div>
                 </div>
             </div>
+
+            <!-- SECCIÓN 2: Condiciones Meteorológicas -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <span class="section-icon">🌤️</span>
+                    <span>Condiciones Meteorológicas</span>
+                </h2>
+                
+                <div class="form-group">
+                    <label for="condicion_meteo" class="form-label">
+                        ☁️ CONDICIÓN METEOROLÓGICA
+                    </label>
+                    <select id="condicion_meteo" class="form-control" required>
+                        <option value="">Seleccionar condición...</option>
+                        <option value="despejado">☀️ Despejado</option>
+                        <option value="parcialmente_nublado">⛅ Parcialmente Nublado</option>
+                        <option value="nublado">☁️ Nublado</option>
+                        <option value="lluvia_ligera">🌧️ Lluvia Ligera</option>
+                        <option value="lluvia_intensa">⛈️ Lluvia Intensa</option>
+                        <option value="tormenta">⚡ Tormenta Eléctrica</option>
+                        <option value="nieve_ligera">🌨️ Nieve Ligera</option>
+                        <option value="nevada_intensa">❄️ Nevada Intensa</option>
+                        <option value="ventisca">🌬️ Ventisca</option>
+                        <option value="niebla_densa">🌫️ Niebla Densa</option>
+                        <option value="helada">🧊 Helada</option>
+                        <option value="viento_fuerte">💨 Viento Fuerte</option>
+                    </select>
+                </div>
+                
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label for="temperatura" class="form-label">
+                            🌡️ TEMPERATURA (°C)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="temperatura" 
+                            class="form-control"
+                            step="0.1"
+                            placeholder="Ej: -5.5"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="visibilidad" class="form-label">
+                            👁️ VISIBILIDAD (metros)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="visibilidad" 
+                            class="form-control"
+                            placeholder="Ej: 1000"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="viento_velocidad" class="form-label">
+                            💨 VIENTO (km/h)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="viento_velocidad" 
+                            class="form-control"
+                            placeholder="Ej: 25"
+                        >
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observaciones_clima" class="form-label">
+                        📝 OBSERVACIONES CLIMÁTICAS
+                    </label>
+                    <textarea 
+                        id="observaciones_clima" 
+                        class="form-control"
+                        rows="3"
+                        placeholder="Describa condiciones especiales del clima..."
+                    ></textarea>
+                </div>
+                
+                <!-- Panel de Riesgo (se actualiza automáticamente) -->
+                <div id="panelRiesgo" style="display: none;"></div>
+            </div>
             
             <!-- Botones de Navegación -->
             <div style="display: flex; justify-content: flex-end; gap: var(--spacing-md);">
@@ -254,10 +373,14 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/config.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/modules/digitador.js"></script>
+    <script src="../js/modules/alertas-tempranas.js"></script>
     <script>
-        // Verificar autenticación y cargar datos
+        function logout() {
+            localStorage.clear();
+            window.location.href = '../index.html';
+        }
+
+        // Verificar autenticación
         document.addEventListener('DOMContentLoaded', async () => {
             const user = JSON.parse(localStorage.getItem('sicof_user'));
             
@@ -266,48 +389,96 @@
                 return;
             }
             
-            // Mostrar información del usuario
             document.getElementById('userInfo').textContent = `${user.rol.toUpperCase()} - ${user.email}`;
             
-            // Cargar cuarteles disponibles
+            // Cargar cuarteles
             await cargarCuarteles();
             
             // Si el usuario tiene cuartel asignado, seleccionarlo automáticamente
             if (user.cuartel_codigo) {
                 const select = document.getElementById('cuartel_codigo');
                 select.value = user.cuartel_codigo;
-                
-                // Obtener nombre del cuartel
-                const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
-                if (cuartel) {
-                    document.getElementById('cuartelNombre').textContent = cuartel.nombre;
-                }
             }
             
             // Establecer fecha por defecto (hoy)
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('fecha').value = hoy;
+            
+            // Listener para actualizar panel de riesgo
+            document.getElementById('condicion_meteo').addEventListener('change', actualizarPanelRiesgo);
+            document.getElementById('temperatura').addEventListener('input', actualizarPanelRiesgo);
+            document.getElementById('visibilidad').addEventListener('input', actualizarPanelRiesgo);
         });
         
         async function cargarCuarteles() {
             const select = document.getElementById('cuartel_codigo');
             const user = JSON.parse(localStorage.getItem('sicof_user'));
             
-            // Si es digitador, mostrar solo su cuartel
             if (user.rol === 'digitador' && user.cuartel_codigo) {
                 const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
                 if (cuartel) {
-                    select.innerHTML = `
-                        <option value="${cuartel.codigo}">${cuartel.nombre}</option>
-                    `;
+                    select.innerHTML = `<option value="${cuartel.codigo}">${cuartel.nombre}</option>`;
                     select.disabled = true;
                 }
             } else {
-                // Para otros roles, mostrar todos los cuarteles
-                select.innerHTML = window.SICOF_CONFIG.cuarteles.map(cuartel => 
-                    `<option value="${cuartel.codigo}">${cuartel.nombre}</option>`
-                ).join('');
+                select.innerHTML = '<option value="">Seleccionar cuartel...</option>' +
+                    window.SICOF_CONFIG.cuarteles.map(cuartel => 
+                        `<option value="${cuartel.codigo}">${cuartel.nombre}</option>`
+                    ).join('');
             }
+        }
+        
+        function actualizarPanelRiesgo() {
+            const condicion = document.getElementById('condicion_meteo').value;
+            const temperatura = parseFloat(document.getElementById('temperatura').value);
+            const visibilidad = parseInt(document.getElementById('visibilidad').value);
+            
+            if (!condicion) {
+                document.getElementById('panelRiesgo').style.display = 'none';
+                return;
+            }
+            
+            // Usar módulo de alertas tempranas
+            const riesgo = window.AlertasTempranasModule.evaluarRiesgoOperacional(
+                condicion, 
+                0, // detenidos
+                0  // controles
+            );
+            
+            const recomendaciones = window.AlertasTempranasModule.generarRecomendaciones(
+                condicion,
+                temperatura,
+                visibilidad
+            );
+            
+            let html = `
+                <div class="panel-riesgo ${riesgo.label.toLowerCase().replace(' ', '-')}">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">${riesgo.icon}</div>
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">
+                        Riesgo ${riesgo.label}
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">
+                        ${riesgo.recomendacion}
+                    </div>
+            `;
+            
+            if (recomendaciones.length > 0) {
+                html += `
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.3); text-align: left;">
+                        <strong>⚠️ Recomendaciones:</strong>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                `;
+                recomendaciones.slice(0, 3).forEach(rec => {
+                    html += `<li style="margin-bottom: 0.3rem;">${rec}</li>`;
+                });
+                html += `</ul></div>`;
+            }
+            
+            html += `</div>`;
+            
+            const panel = document.getElementById('panelRiesgo');
+            panel.innerHTML = html;
+            panel.style.display = 'block';
         }
         
         // Manejar envío del formulario
@@ -320,19 +491,26 @@
                 nombre_servicio: document.getElementById('nombre_servicio').value,
                 jefe_servicio: document.getElementById('jefe_servicio').value,
                 horario_inicio: document.getElementById('horario_inicio').value,
-                horario_termino: document.getElementById('horario_termino').value
+                horario_termino: document.getElementById('horario_termino').value,
+                
+                // Campos meteorológicos
+                condicion_meteo: document.getElementById('condicion_meteo').value,
+                temperatura: document.getElementById('temperatura').value || null,
+                visibilidad: document.getElementById('visibilidad').value || null,
+                viento_velocidad: document.getElementById('viento_velocidad').value || null,
+                observaciones_clima: document.getElementById('observaciones_clima').value || null
             };
             
-            // Validaciones básicas
+            // Validaciones
             if (formData.horario_inicio >= formData.horario_termino) {
                 mostrarMensaje('El horario de término debe ser posterior al de inicio', 'danger');
                 return;
             }
             
-            // Guardar datos en localStorage para pasos siguientes
+            // Guardar en localStorage
             localStorage.setItem('servicio_paso1', JSON.stringify(formData));
             
-            // Redirigir al siguiente paso
+            // Redirigir
             window.location.href = 'demanda-ciudadana.html';
         });
         
