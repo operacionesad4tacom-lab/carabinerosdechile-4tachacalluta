@@ -1,78 +1,564 @@
-<script>
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const msg = document.getElementById('message');
-    const loginBtn = document.getElementById('loginBtn');
-    
-    // Validación básica
-    if (!email || !password) {
-        mostrarError('Por favor completa todos los campos');
-        return;
-    }
-    
-    // Deshabilitar botón
-    loginBtn.disabled = true;
-    loginBtn.textContent = '⏳ Autenticando...';
-    msg.style.display = 'none';
-    
-    try {
-        // SOLO LLAMAMOS A SUPABASE
-        const usuario = await window.loginUsuario(email, password);
-        
-        // Mostrar éxito
-        msg.innerHTML = `
-            <strong>✅ Autenticación exitosa</strong><br>
-            <small>Bienvenido ${usuario.nombre} (${usuario.rol})</small>
-        `;
-        msg.className = 'alert alert-success';
-        msg.style.display = 'block';
-        
-        // Redirigir según el rol que viene de Supabase
-        setTimeout(() => {
-            const destino = window.SICOF_CONFIG.redirectUrls[usuario.rol] || 'dashboard.html';
-            window.location.href = destino;
-        }, 1000);
-        
-    } catch (error) {
-        // Mostrar error
-        mostrarError(error.message);
-        
-        // Rehabilitar botón
-        loginBtn.disabled = false;
-        loginBtn.textContent = '🚪 INGRESAR';
-    }
-});
-
-function mostrarError(mensaje) {
-    const msg = document.getElementById('message');
-    msg.innerHTML = `<strong>❌ ${mensaje}</strong>`;
-    msg.className = 'alert alert-danger';
-    msg.style.display = 'block';
-    
-    setTimeout(() => msg.style.display = 'none', 5000);
-}
-
-// Función para pruebas rápidas
-function autoLogin(email) {
-    document.getElementById('email').value = email;
-    document.getElementById('password').value = 'Montañaofrontera2026';
-    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-}
-
-// Verificar si ya está logueado
-(async () => {
-    try {
-        const user = await window.verificarSesion();
-        if (user) {
-            console.log('Redirigiendo usuario autenticado:', user.rol);
-            const destino = window.SICOF_CONFIG.redirectUrls[user.rol] || 'dashboard.html';
-            window.location.href = destino;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICOF - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    } catch (error) {
-        console.log('No hay sesión activa');
-    }
-})();
-</script>
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #084c2a 0%, #0b6b3a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .login-box {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, #084c2a, #0b6b3a);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.1;
+        }
+        
+        .login-logo {
+            height: 80px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        .login-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .login-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .login-body {
+            padding: 30px;
+        }
+        
+        #message {
+            display: none;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .alert-success {
+            background-color: rgba(39, 174, 96, 0.1);
+            border-left: 4px solid #27ae60;
+            color: #27ae60;
+        }
+        
+        .alert-danger {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid #e74c3c;
+            color: #e74c3c;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #fafafa;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #0b6b3a;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(11, 107, 58, 0.1);
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+        }
+        
+        .toggle-password:hover {
+            color: #0b6b3a;
+        }
+        
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #0b6b3a, #084c2a);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #084c2a, #06321c);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(11, 107, 58, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .quick-access {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .quick-access h3 {
+            color: #084c2a;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .user-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .user-btn {
+            padding: 10px;
+            background: white;
+            border: 1px solid #0b6b3a;
+            border-radius: 6px;
+            color: #0b6b3a;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .user-btn:hover {
+            background: #0b6b3a;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .password-display {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px dashed #0b6b3a;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #084c2a;
+            margin: 15px 0;
+            font-size: 1rem;
+        }
+        
+        .info-note {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            color: #666;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        
+        .version {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-body {
+                padding: 20px;
+            }
+            
+            .user-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .login-header {
+                padding: 25px 15px;
+            }
+            
+            .login-logo {
+                height: 60px;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box pulse">
+            <div class="login-header">
+                <img src="assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="login-logo">
+                <h1>CARABINEROS DE CHILE</h1>
+                <p>Sistema Integrado de Control Fronterizo</p>
+            </div>
+            
+            <div class="login-body">
+                <!-- Mensaje de estado -->
+                <div id="message" class=""></div>
+                
+                <!-- Formulario de login -->
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">📧 Correo Institucional</label>
+                        <input type="email" id="email" class="form-control" required 
+                               placeholder="usuario@carabineros.cl"
+                               autocomplete="username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">🔒 Contraseña</label>
+                        <div class="password-container">
+                            <input type="password" id="password" class="form-control" required
+                                   placeholder="Ingresa tu contraseña"
+                                   autocomplete="current-password"
+                                   value="Montañaofrontera2026">
+                            <button type="button" class="toggle-password" onclick="togglePassword()">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="loginBtn">
+                        <span class="btn-text">🚪 INGRESAR AL SISTEMA</span>
+                    </button>
+                </form>
+                
+                <!-- Acceso rápido -->
+                <div class="quick-access">
+                    <h3>👤 ACCESO RÁPIDO</h3>
+                    
+                    <div class="password-display">
+                        Contraseña: Montañaofrontera2026
+                    </div>
+                    
+                    <div class="user-buttons">
+                        <button type="button" class="user-btn" onclick="autoLogin('digitador.chacalluta@carabineros.cl')">
+                            Digitador Chacalluta
+                        </button>
+                        <button type="button" class="user-btn" onclick="autoLogin('jefe.chacalluta@carabineros.cl')">
+                            Jefe Chacalluta
+                        </button>
+                        <button type="button" class="user-btn" onclick="autoLogin('admin@carabineros.cl')">
+                            Administrador
+                        </button>
+                        <button type="button" class="user-btn" onclick="autoLogin('jefatura@carabineros.cl')">
+                            Jefatura Regional
+                        </button>
+                    </div>
+                    
+                    <div class="info-note">
+                        ℹ️ Solo usuarios autorizados con correo @carabineros.cl
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="version">
+            SICOF v2.1.0 | Solo autenticación Supabase
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Configuración SICOF -->
+    <script src="js/config.js"></script>
+    
+    <!-- Script de login -->
+    <script>
+        // Variables globales
+        let isLoggingIn = false;
+        
+        // Inicialización al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 SICOF Login inicializado');
+            
+            // Intentar redirigir si ya hay sesión
+            checkExistingSession();
+            
+            // Configurar formulario
+            setupLoginForm();
+        });
+        
+        // Verificar sesión existente
+        async function checkExistingSession() {
+            try {
+                const user = await window.verificarSesion();
+                if (user) {
+                    console.log('✅ Usuario ya autenticado:', user.email);
+                    showMessage(`Redirigiendo a ${user.nombre}...`, 'success');
+                    
+                    setTimeout(() => {
+                        const destino = window.SICOF_CONFIG.redirectUrls[user.rol] || 'dashboard.html';
+                        window.location.href = destino;
+                    }, 1000);
+                }
+            } catch (error) {
+                console.log('ℹ️ No hay sesión activa');
+            }
+        }
+        
+        // Configurar formulario
+        function setupLoginForm() {
+            const form = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = loginBtn.querySelector('.btn-text');
+            
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                if (isLoggingIn) return;
+                
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                
+                // Validaciones
+                if (!email) {
+                    showMessage('❌ Ingresa tu correo institucional', 'error');
+                    return;
+                }
+                
+                if (!email.endsWith('@carabineros.cl')) {
+                    showMessage('❌ Solo correos @carabineros.cl permitidos', 'error');
+                    return;
+                }
+                
+                if (!password) {
+                    showMessage('❌ Ingresa tu contraseña', 'error');
+                    return;
+                }
+                
+                // Iniciar login
+                isLoggingIn = true;
+                btnText.textContent = '🔐 AUTENTICANDO...';
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<div class="spinner"></div>';
+                
+                try {
+                    console.log('🔄 Intentando login con Supabase...');
+                    
+                    // Usar función de config.js
+                    const usuario = await window.loginUsuario(email, password);
+                    
+                    console.log('🎉 Login exitoso:', usuario);
+                    showMessage(`✅ Bienvenido ${usuario.nombre}`, 'success');
+                    
+                    // Redirigir según rol
+                    setTimeout(() => {
+                        const destino = window.SICOF_CONFIG.redirectUrls[usuario.rol] || 'dashboard.html';
+                        console.log(`➡️ Redirigiendo a: ${destino}`);
+                        window.location.href = destino;
+                    }, 1500);
+                    
+                } catch (error) {
+                    console.error('💥 Error en login:', error);
+                    
+                    let errorMsg = 'Error de autenticación';
+                    if (error.message.includes('Invalid login credentials')) {
+                        errorMsg = 'Usuario o contraseña incorrectos';
+                    } else if (error.message.includes('Email not confirmed')) {
+                        errorMsg = 'Correo no confirmado. Revisa tu bandeja.';
+                    } else {
+                        errorMsg = error.message || 'Error desconocido';
+                    }
+                    
+                    showMessage(`❌ ${errorMsg}`, 'error');
+                    
+                    // Restaurar botón
+                    resetLoginButton();
+                    
+                } finally {
+                    isLoggingIn = false;
+                }
+            });
+        }
+        
+        // Mostrar mensajes
+        function showMessage(text, type = 'info') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = text;
+            messageDiv.className = type === 'error' ? 'alert-danger' : 'alert-success';
+            messageDiv.style.display = 'block';
+            
+            // Ocultar después de 5 segundos si es error
+            if (type === 'error') {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Restaurar botón de login
+        function resetLoginButton() {
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<span class="btn-text">🚪 INGRESAR AL SISTEMA</span>';
+        }
+        
+        // Función para login automático
+        function autoLogin(email) {
+            if (isLoggingIn) return;
+            
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = 'Montañaofrontera2026';
+            
+            showMessage(`🔄 Cargando ${email}...`, 'success');
+            
+            // Disparar el submit después de un breve delay
+            setTimeout(() => {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }, 500);
+        }
+        
+        // Mostrar/ocultar contraseña
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
+            }
+        }
+        
+        // Función de prueba desde consola
+        window.testLogin = async function(email = 'admin@carabineros.cl', password = 'Montañaofrontera2026') {
+            console.log('🧪 Probando login...');
+            try {
+                const usuario = await window.loginUsuario(email, password);
+                console.log('✅ ÉXITO:', usuario);
+                return usuario;
+            } catch (error) {
+                console.error('❌ ERROR:', error.message);
+                return null;
+            }
+        };
+        
+        // Limpiar todo (para desarrollo)
+        window.limpiarTodo = function() {
+            localStorage.clear();
+            window.supabase.auth.signOut();
+            console.log('🧹 Todo limpiado');
+            showMessage('Sesión limpiada. Recarga la página.', 'success');
+            setTimeout(() => location.reload(), 1000);
+        };
+    </script>
+</body>
+</html>
