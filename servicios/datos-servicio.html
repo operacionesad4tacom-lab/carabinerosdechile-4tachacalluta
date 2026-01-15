@@ -159,6 +159,20 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        .error-text {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        
+        .success-text {
+            color: #28a745;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -239,7 +253,10 @@
                         <select id="cuartel_codigo" class="form-control" required disabled>
                             <option value="">Cargando cuarteles...</option>
                         </select>
-                        <small id="cuartelHelp" class="form-text" style="display: none;"></small>
+                        <span id="cuartelStatus" class="error-text"></span>
+                        <small id="cuartelHelp" class="form-text" style="display: none; font-size: 0.8rem; color: #666;">
+                            Si no ves tu cuartel, verifica la conexión o contacta al administrador
+                        </small>
                     </div>
                 </div>
                 
@@ -382,7 +399,7 @@
                 <button type="button" class="btn btn-outline" onclick="window.location.href='../index.html'">
                     🚪 Salir
                 </button>
-                <button type="submit" class="btn btn-primary" id="btnContinuar">
+                <button type="submit" class="btn btn-primary" id="btnContinuar" disabled>
                     CONTINUAR →
                 </button>
             </div>
@@ -414,93 +431,151 @@
             }, 5000);
         }
 
+        // Función para actualizar estado del cuartel
+        function actualizarEstadoCuartel(mensaje, tipo = 'error') {
+            const statusEl = document.getElementById('cuartelStatus');
+            statusEl.textContent = mensaje;
+            statusEl.className = tipo === 'error' ? 'error-text' : 'success-text';
+            statusEl.style.display = mensaje ? 'block' : 'none';
+        }
+
         // Función para cargar cuarteles desde Supabase
         async function cargarCuartelesDesdeSupabase() {
             const select = document.getElementById('cuartel_codigo');
             const user = JSON.parse(localStorage.getItem('sicof_user'));
             
+            // Mostrar indicador de carga
+            document.getElementById('cuartelLoading').style.display = 'inline-block';
+            select.innerHTML = '<option value="">Cargando cuarteles...</option>';
+            select.disabled = true;
+            actualizarEstadoCuartel('Conectando con la base de datos...', 'error');
+            
             try {
-                // Mostrar indicador de carga
-                document.getElementById('cuartelLoading').style.display = 'inline-block';
+                console.log('=== DEBUG: Iniciando carga de cuarteles ===');
                 
-                // 1. Verificar que Supabase esté inicializado
+                // 1. DEBUG: Verificar que Supabase esté inicializado
+                console.log('DEBUG: Verificando inicialización de Supabase...');
+                
+                // Buscar supabase en diferentes lugares
                 if (!supabase) {
-                    console.error('Error: Supabase no está inicializado');
-                    mostrarMensaje('Error de conexión con la base de datos', 'danger');
-                    return false;
+                    if (window.supabase) {
+                        supabase = window.supabase;
+                        console.log('✓ Encontrado en window.supabase');
+                    } else if (window.supabaseClient) {
+                        supabase = window.supabaseClient;
+                        console.log('✓ Encontrado en window.supabaseClient');
+                    } else if (window.SICOF_CONFIG && window.SICOF_CONFIG.supabase) {
+                        supabase = window.SICOF_CONFIG.supabase;
+                        console.log('✓ Encontrado en SICOF_CONFIG.supabase');
+                    } else {
+                        console.error('✗ No se encontró supabase en ningún lugar');
+                        throw new Error('No se pudo encontrar la configuración de Supabase');
+                    }
                 }
                 
+                console.log('DEBUG: Objeto supabase:', supabase ? '✓ Inicializado' : '✗ No inicializado');
+                
                 // 2. Consultar cuarteles desde Supabase
-                console.log('Consultando cuarteles desde Supabase...');
+                console.log('DEBUG: Consultando tabla "cuarteles" en Supabase...');
+                actualizarEstadoCuartel('Consultando base de datos...', 'error');
+                
                 const { data: cuartelesData, error } = await supabase
                     .from('cuarteles')  // Nombre exacto de la tabla
                     .select('codigo, nombre, activo')
                     .eq('activo', true)
                     .order('nombre');
                 
+                // 3. Manejar respuesta
                 if (error) {
-                    console.error('Error de Supabase:', error);
-                    throw new Error('Error al cargar cuarteles: ' + error.message);
+                    console.error('✗ Error de Supabase:', error);
+                    console.error('Código:', error.code);
+                    console.error('Mensaje:', error.message);
+                    console.error('Detalles:', error.details);
+                    
+                    throw new Error(`Error de conexión: ${error.message}`);
                 }
                 
-                if (!cuartelesData || cuartelesData.length === 0) {
-                    console.warn('No se encontraron cuarteles en la base de datos');
-                    mostrarMensaje('No hay cuarteles disponibles', 'warning');
-                    return false;
+                console.log('✓ Consulta exitosa');
+                console.log('DEBUG: Datos recibidos:', cuartelesData);
+                
+                if (!cuartelesData) {
+                    console.warn('⚠ cuartelesData es null o undefined');
+                    throw new Error('No se recibieron datos de la base de datos');
                 }
                 
-                console.log('Cuarteles cargados:', cuartelesData);
+                if (!Array.isArray(cuartelesData)) {
+                    console.warn('⚠ cuartelesData no es un array:', typeof cuartelesData);
+                    throw new Error('Formato de datos incorrecto');
+                }
                 
-                // 3. Procesar según el rol del usuario
-                if (user.rol === 'digitador' && user.cuartel_codigo) {
+                if (cuartelesData.length === 0) {
+                    console.warn('⚠ No hay cuarteles en la base de datos');
+                    actualizarEstadoCuartel('No hay cuarteles registrados', 'error');
+                    select.innerHTML = '<option value="">No hay cuarteles disponibles</option>';
+                    select.disabled = false;
+                    return;
+                }
+                
+                console.log(`✓ Se encontraron ${cuartelesData.length} cuarteles`);
+                
+                // 4. Procesar según el rol del usuario
+                if (user && user.rol === 'digitador' && user.cuartel_codigo) {
                     // Digitador con cuartel asignado
                     const miCuartel = cuartelesData.find(c => c.codigo === user.cuartel_codigo);
                     
                     if (miCuartel) {
                         select.innerHTML = `<option value="${miCuartel.codigo}">${miCuartel.nombre}</option>`;
                         select.disabled = true;
-                        document.getElementById('cuartelHelp').textContent = 'Cuartel asignado';
-                        document.getElementById('cuartelHelp').style.display = 'block';
-                        document.getElementById('cuartelHelp').style.color = 'var(--verde-oficial)';
-                        console.log('Cuartel asignado al digitador:', miCuartel);
+                        actualizarEstadoCuartel(`Cuartel asignado: ${miCuartel.nombre}`, 'success');
+                        console.log(`✓ Cuartel asignado: ${miCuartel.nombre}`);
                     } else {
                         // Si no encuentra su cuartel, mostrar todas las opciones
                         cargarOpcionesCuarteles(select, cuartelesData);
+                        actualizarEstadoCuartel('Tu cuartel asignado no está disponible', 'error');
                         mostrarMensaje('Tu cuartel asignado no está disponible', 'warning');
                     }
                 } else {
                     // Administrador o usuario sin cuartel asignado
                     cargarOpcionesCuarteles(select, cuartelesData);
+                    actualizarEstadoCuartel(`✓ ${cuartelesData.length} cuarteles cargados`, 'success');
                 }
                 
                 // Habilitar el select
                 select.disabled = false;
-                
+                console.log('✓ Cuarteles cargados exitosamente');
                 return true;
                 
             } catch (error) {
-                console.error('Error cargando cuarteles:', error);
+                console.error('✗ Error en cargarCuartelesDesdeSupabase:', error);
                 
                 // Fallback a datos estáticos de config.js
-                const user = JSON.parse(localStorage.getItem('sicof_user'));
+                console.log('⚠ Intentando fallback a datos estáticos...');
+                actualizarEstadoCuartel('Usando datos locales (modo offline)', 'error');
+                
                 const select = document.getElementById('cuartel_codigo');
                 
-                if (window.SICOF_CONFIG && window.SICOF_CONFIG.cuarteles) {
-                    if (user.rol === 'digitador' && user.cuartel_codigo) {
+                if (window.SICOF_CONFIG && window.SICOF_CONFIG.cuarteles && Array.isArray(window.SICOF_CONFIG.cuarteles)) {
+                    console.log('✓ Datos estáticos encontrados en SICOF_CONFIG');
+                    
+                    if (user && user.rol === 'digitador' && user.cuartel_codigo) {
                         const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
                         if (cuartel) {
-                            select.innerHTML = `<option value="${cuartel.codigo}">${cuartel.nombre}</option>`;
+                            select.innerHTML = `<option value="${cuartel.codigo}">${cuartel.nombre} (local)</option>`;
                             select.disabled = true;
+                            actualizarEstadoCuartel('Usando datos locales', 'error');
                         } else {
-                            cargarOpcionesCuarteles(select, window.SICOF_CONFIG.cuarteles);
+                            cargarOpcionesCuarteles(select, window.SICOF_CONFIG.cuarteles, true);
                         }
                     } else {
-                        cargarOpcionesCuarteles(select, window.SICOF_CONFIG.cuarteles);
+                        cargarOpcionesCuarteles(select, window.SICOF_CONFIG.cuarteles, true);
                     }
-                    mostrarMensaje('Usando datos locales (modo offline)', 'warning');
+                    
+                    mostrarMensaje('Usando datos locales - Verifica la conexión a Internet', 'warning');
                 } else {
-                    select.innerHTML = '<option value="">No hay cuarteles disponibles</option>';
-                    mostrarMensaje('No se pudieron cargar los cuarteles', 'danger');
+                    console.error('✗ No hay datos estáticos disponibles');
+                    select.innerHTML = '<option value="">Error al cargar cuarteles</option>';
+                    actualizarEstadoCuartel('Error: No se pudieron cargar los cuarteles', 'error');
+                    mostrarMensaje('Error crítico: No se pudieron cargar los cuarteles', 'danger');
                 }
                 
                 select.disabled = false;
@@ -509,72 +584,78 @@
             } finally {
                 // Ocultar indicador de carga
                 document.getElementById('cuartelLoading').style.display = 'none';
+                console.log('=== DEBUG: Finalizado carga de cuarteles ===');
             }
         }
 
         // Función auxiliar para cargar opciones en el select
-        function cargarOpcionesCuarteles(select, cuartelesData) {
+        function cargarOpcionesCuarteles(select, cuartelesData, esLocal = false) {
+            console.log('cargarOpcionesCuarteles llamado con:', cuartelesData);
+            
+            if (!cuartelesData || !Array.isArray(cuartelesData)) {
+                console.error('Error: cuartelesData no es un array válido');
+                select.innerHTML = '<option value="">Error en datos</option>';
+                return;
+            }
+            
+            const suffix = esLocal ? ' (local)' : '';
             select.innerHTML = '<option value="">Seleccionar cuartel...</option>' +
                 cuartelesData.map(cuartel => 
-                    `<option value="${cuartel.codigo}">${cuartel.nombre}</option>`
+                    `<option value="${cuartel.codigo}">${cuartel.nombre}${suffix}</option>`
                 ).join('');
+            
+            console.log(`✓ ${cuartelesData.length} opciones cargadas en select`);
         }
 
         // Inicializar la aplicación
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('=== INICIALIZANDO APLICACIÓN ===');
+            
             try {
                 // 1. Verificar autenticación
                 const user = JSON.parse(localStorage.getItem('sicof_user'));
+                console.log('DEBUG: Usuario en localStorage:', user);
                 
                 if (!user) {
+                    console.warn('⚠ Usuario no autenticado, redirigiendo...');
                     window.location.href = '../index.html';
                     return;
                 }
                 
                 // Mostrar información del usuario
-                document.getElementById('userInfo').textContent = `${user.rol.toUpperCase()} - ${user.email}`;
+                document.getElementById('userInfo').textContent = `${user.rol ? user.rol.toUpperCase() : 'USUARIO'} - ${user.email || 'Sin email'}`;
+                console.log(`✓ Usuario autenticado: ${user.email}, Rol: ${user.rol}`);
                 
-                // 2. Inicializar Supabase
-                if (window.SICOF_CONFIG && window.SICOF_CONFIG.supabase) {
-                    supabase = window.supabase = window.SICOF_CONFIG.supabase;
-                    console.log('Supabase inicializado desde config.js');
-                } else {
-                    // Intentar inicializar desde variables globales
-                    if (window.supabaseClient) {
-                        supabase = window.supabase = window.supabaseClient;
-                        console.log('Supabase inicializado desde supabaseClient global');
-                    } else {
-                        console.error('No se pudo inicializar Supabase');
-                        mostrarMensaje('Error de configuración del sistema', 'danger');
-                    }
-                }
-                
-                // 3. Cargar cuarteles
+                // 2. Cargar cuarteles
+                console.log('Iniciando carga de cuarteles...');
                 await cargarCuartelesDesdeSupabase();
                 
-                // 4. Establecer fecha por defecto (hoy)
+                // 3. Establecer fecha por defecto (hoy)
                 const hoy = new Date().toISOString().split('T')[0];
                 document.getElementById('fecha').value = hoy;
+                console.log(`✓ Fecha establecida: ${hoy}`);
                 
-                // 5. Configurar listeners para panel de riesgo
+                // 4. Configurar listeners para panel de riesgo
                 document.getElementById('condicion_meteo').addEventListener('change', actualizarPanelRiesgo);
                 document.getElementById('temperatura').addEventListener('input', actualizarPanelRiesgo);
                 document.getElementById('visibilidad').addEventListener('input', actualizarPanelRiesgo);
+                console.log('✓ Listeners configurados');
                 
-                // 6. Habilitar botón de continuar
+                // 5. Habilitar botón de continuar
                 document.getElementById('btnContinuar').disabled = false;
+                console.log('✓ Botón de continuar habilitado');
+                
+                console.log('=== APLICACIÓN INICIALIZADA CON ÉXITO ===');
                 
             } catch (error) {
-                console.error('Error inicializando la aplicación:', error);
-                mostrarMensaje('Error al inicializar la aplicación', 'danger');
+                console.error('✗ Error inicializando la aplicación:', error);
+                mostrarMensaje('Error al inicializar la aplicación: ' + error.message, 'danger');
             }
         });
 
         // Función para actualizar panel de riesgo
         function actualizarPanelRiesgo() {
             const condicion = document.getElementById('condicion_meteo').value;
-            const temperatura = parseFloat(document.getElementById('temperatura').value);
-            const visibilidad = parseInt(document.getElementById('visibilidad').value);
             
             if (!condicion) {
                 document.getElementById('panelRiesgo').style.display = 'none';
@@ -582,47 +663,55 @@
             }
             
             // Usar módulo de alertas tempranas si está disponible
-            if (window.AlertasTempranasModule) {
-                const riesgo = window.AlertasTempranasModule.evaluarRiesgoOperacional(
-                    condicion, 
-                    0, // detenidos
-                    0  // controles
-                );
-                
-                const recomendaciones = window.AlertasTempranasModule.generarRecomendaciones(
-                    condicion,
-                    temperatura,
-                    visibilidad
-                );
-                
-                let html = `
-                    <div class="panel-riesgo ${riesgo.label.toLowerCase().replace(' ', '-')}">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">${riesgo.icon}</div>
-                        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">
-                            Riesgo ${riesgo.label}
-                        </div>
-                        <div style="font-size: 0.9rem; opacity: 0.9;">
-                            ${riesgo.recomendacion}
-                        </div>
-                `;
-                
-                if (recomendaciones.length > 0) {
-                    html += `
-                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.3); text-align: left;">
-                            <strong>⚠️ Recomendaciones:</strong>
-                            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+            if (window.AlertasTempranasModule && typeof window.AlertasTempranasModule.evaluarRiesgoOperacional === 'function') {
+                try {
+                    const temperatura = parseFloat(document.getElementById('temperatura').value) || 0;
+                    const visibilidad = parseInt(document.getElementById('visibilidad').value) || 1000;
+                    
+                    const riesgo = window.AlertasTempranasModule.evaluarRiesgoOperacional(
+                        condicion, 
+                        0, // detenidos
+                        0  // controles
+                    );
+                    
+                    const recomendaciones = window.AlertasTempranasModule.generarRecomendaciones(
+                        condicion,
+                        temperatura,
+                        visibilidad
+                    );
+                    
+                    let html = `
+                        <div class="panel-riesgo ${riesgo.label.toLowerCase().replace(' ', '-')}">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">${riesgo.icon}</div>
+                            <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">
+                                Riesgo ${riesgo.label}
+                            </div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">
+                                ${riesgo.recomendacion}
+                            </div>
                     `;
-                    recomendaciones.slice(0, 3).forEach(rec => {
-                        html += `<li style="margin-bottom: 0.3rem;">${rec}</li>`;
-                    });
-                    html += `</ul></div>`;
+                    
+                    if (recomendaciones && recomendaciones.length > 0) {
+                        html += `
+                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.3); text-align: left;">
+                                <strong>⚠️ Recomendaciones:</strong>
+                                <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                        `;
+                        recomendaciones.slice(0, 3).forEach(rec => {
+                            html += `<li style="margin-bottom: 0.3rem;">${rec}</li>`;
+                        });
+                        html += `</ul></div>`;
+                    }
+                    
+                    html += `</div>`;
+                    
+                    const panel = document.getElementById('panelRiesgo');
+                    panel.innerHTML = html;
+                    panel.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error en actualizarPanelRiesgo:', error);
                 }
-                
-                html += `</div>`;
-                
-                const panel = document.getElementById('panelRiesgo');
-                panel.innerHTML = html;
-                panel.style.display = 'block';
             }
         }
 
@@ -631,9 +720,12 @@
             e.preventDefault();
             
             // Validar que se haya seleccionado un cuartel
-            const cuartel = document.getElementById('cuartel_codigo').value;
+            const cuartelSelect = document.getElementById('cuartel_codigo');
+            const cuartel = cuartelSelect.value;
+            
             if (!cuartel) {
                 mostrarMensaje('Debe seleccionar un cuartel', 'danger');
+                cuartelSelect.focus();
                 return;
             }
             
@@ -656,6 +748,7 @@
             // Validaciones
             if (formData.horario_inicio >= formData.horario_termino) {
                 mostrarMensaje('El horario de término debe ser posterior al de inicio', 'danger');
+                document.getElementById('horario_termino').focus();
                 return;
             }
             
@@ -663,25 +756,37 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             try {
-                // Aquí puedes agregar código para guardar en Supabase si es necesario
-                // Por ahora solo guardamos en localStorage
+                console.log('Guardando datos del formulario:', formData);
                 
                 // Guardar en localStorage
                 localStorage.setItem('servicio_paso1', JSON.stringify(formData));
+                console.log('✓ Datos guardados en localStorage');
                 
                 // Pequeña pausa para que se vea el loading
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
                 // Redirigir al siguiente paso
+                console.log('Redirigiendo a demanda-ciudadana.html');
                 window.location.href = 'demanda-ciudadana.html';
                 
             } catch (error) {
                 console.error('Error guardando datos:', error);
-                mostrarMensaje('Error al guardar los datos', 'danger');
+                mostrarMensaje('Error al guardar los datos: ' + error.message, 'danger');
             } finally {
                 document.getElementById('loadingOverlay').style.display = 'none';
             }
         });
+        
+        // Función de utilidad para debugging
+        window.debugSupabase = function() {
+            console.log('=== DEBUG SUPABASE ===');
+            console.log('1. window.supabase:', window.supabase);
+            console.log('2. window.supabaseClient:', window.supabaseClient);
+            console.log('3. window.SICOF_CONFIG:', window.SICOF_CONFIG);
+            console.log('4. localStorage user:', localStorage.getItem('sicof_user'));
+            console.log('5. cuartel_codigo select:', document.getElementById('cuartel_codigo').innerHTML);
+            console.log('=== FIN DEBUG ===');
+        };
     </script>
 </body>
 </html>
