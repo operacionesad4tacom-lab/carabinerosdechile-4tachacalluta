@@ -81,6 +81,7 @@
             padding: var(--spacing-xl);
             margin-bottom: var(--spacing-xl);
             border: 1px solid var(--verde-claro);
+            box-shadow: var(--shadow-sm);
         }
         
         .section-title {
@@ -107,7 +108,29 @@
             background: var(--gris-claro);
             padding: var(--spacing-xl);
             border-radius: var(--border-radius-sm);
-            border: 1px solid var(--verde-claro);
+            border: 2px solid var(--verde-claro);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .planificacion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .planificacion-card.completa {
+            border-color: var(--verde-exito);
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.1) 0%, rgba(46, 204, 113, 0.1) 100%);
+        }
+        
+        .planificacion-card.parcial {
+            border-color: var(--naranja-advertencia);
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(241, 196, 15, 0.1) 100%);
+        }
+        
+        .planificacion-card.sin-realizar {
+            border-color: var(--rojo-alerta);
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
         }
         
         .planificacion-header {
@@ -162,6 +185,7 @@
             text-align: center;
             font-family: var(--font-primary);
             background: var(--blanco);
+            transition: all 0.3s ease;
         }
         
         .planificacion-input:focus {
@@ -170,24 +194,184 @@
             box-shadow: 0 0 0 3px rgba(11, 107, 58, 0.1);
         }
         
+        .planificacion-input.error {
+            border-color: var(--rojo-alerta);
+            background: rgba(231, 76, 60, 0.05);
+        }
+        
         .validacion-mensaje {
             font-size: 0.75rem;
             margin-top: var(--spacing-sm);
             padding: var(--spacing-sm);
             border-radius: var(--border-radius-sm);
             text-align: center;
+            display: none;
         }
         
         .validacion-correcta {
             background-color: rgba(39, 174, 96, 0.1);
             color: var(--verde-exito);
             border: 1px solid rgba(39, 174, 96, 0.2);
+            display: block;
         }
         
         .validacion-incorrecta {
             background-color: rgba(231, 76, 60, 0.1);
             color: var(--rojo-alerta);
             border: 1px solid rgba(231, 76, 60, 0.2);
+            display: block;
+        }
+        
+        .validacion-advertencia {
+            background-color: rgba(243, 156, 18, 0.1);
+            color: var(--naranja-advertencia);
+            border: 1px solid rgba(243, 156, 18, 0.2);
+            display: block;
+        }
+        
+        .validacion-info {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--azul-info);
+            border: 1px solid rgba(52, 152, 219, 0.2);
+            display: block;
+        }
+        
+        .estado-cumplimiento {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: none;
+        }
+        
+        .estado-completa {
+            background-color: var(--verde-exito);
+            display: block;
+        }
+        
+        .estado-parcial {
+            background-color: var(--naranja-advertencia);
+            display: block;
+        }
+        
+        .estado-sin-realizar {
+            background-color: var(--rojo-alerta);
+            display: block;
+        }
+        
+        .resumen-general {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-xl);
+            margin-top: var(--spacing-xl);
+            text-align: center;
+            display: none;
+        }
+        
+        .resumen-icono {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .resumen-titulo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .resumen-valor {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .resumen-descripcion {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .error-message {
+            color: var(--rojo-alerta);
+            font-size: 0.875rem;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        .has-error .planificacion-input {
+            border-color: var(--rojo-alerta);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 300px;
+        }
+        
+        .loading-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-message {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .loading-details {
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+        }
+        
+        .step-status {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            min-height: 20px;
+        }
+        
+        .step-success {
+            color: var(--verde-exito);
+        }
+        
+        .step-error {
+            color: var(--rojo-alerta);
+        }
+        
+        .step-processing {
+            color: var(--azul-info);
+        }
+        
+        .observaciones-counter {
+            font-size: 0.75rem;
+            color: var(--gris-medio);
+            text-align: right;
+            margin-top: 4px;
+        }
+        
+        .observaciones-counter.warning {
+            color: var(--naranja-advertencia);
+        }
+        
+        .observaciones-counter.error {
+            color: var(--rojo-alerta);
         }
     </style>
 </head>
@@ -199,7 +383,7 @@
                 <img src="../assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
                 <div class="logo-text">
                     <div class="logo-title">SICOF - Sistema Integrado</div>
-                    <div class="logo-subtitle">Control Operativo Fronterizo</div>
+                    <div class="logo-subtitle">Demanda Preventiva - Paso 3</div>
                 </div>
             </div>
             <div class="user-info" style="color: var(--blanco); text-align: right;">
@@ -210,10 +394,13 @@
     </header>
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 2rem; border-radius: 8px; text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
-            <div style="font-size: 1.2rem; font-weight: bold;">Actualizando...</div>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-icon">⏳</div>
+            <div class="loading-message" id="loadingMessage">Actualizando datos...</div>
+            <div class="loading-details" id="loadingDetails"></div>
+            <div class="step-status" id="step1Status"></div>
+            <div class="step-status" id="step2Status"></div>
         </div>
     </div>
 
@@ -242,6 +429,48 @@
         <!-- Mensajes -->
         <div id="message" class="alert" style="display: none;"></div>
         
+        <!-- Información del Servicio -->
+        <div class="form-section">
+            <h3 class="section-title">
+                <span class="section-icon">📋</span>
+                RESUMEN DE SERVICIO
+            </h3>
+            
+            <div class="grid-3">
+                <div class="form-group">
+                    <div class="form-label">📅 FECHA</div>
+                    <div class="form-control-static" id="infoFecha">Cargando...</div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">🏢 CUARTEL</div>
+                    <div class="form-control-static" id="infoCuartel">Cargando...</div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">🚔 SERVICIO</div>
+                    <div class="form-control-static" id="infoServicio">Cargando...</div>
+                </div>
+            </div>
+            
+            <div class="grid-3">
+                <div class="form-group">
+                    <div class="form-label">🔍 CONTROLES</div>
+                    <div class="form-control-static" id="infoControles">0</div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">⚖️ INFRACCIONES</div>
+                    <div class="form-control-static" id="infoInfracciones">0</div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">🚨 DETENIDOS</div>
+                    <div class="form-control-static" id="infoDetenidos">0</div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Formulario -->
         <form id="preventivaForm">
             <!-- Planificación Carta de Situación -->
@@ -253,7 +482,9 @@
                 
                 <div class="planificacion-grid">
                     <!-- HITOS -->
-                    <div class="planificacion-card">
+                    <div class="planificacion-card" id="cardHitos">
+                        <div class="estado-cumplimiento" id="estadoHitos"></div>
+                        
                         <div class="planificacion-header">
                             <div class="planificacion-icon">📍</div>
                             <div class="planificacion-title">HITOS FRONTERIZOS</div>
@@ -271,6 +502,7 @@
                                     max="999"
                                     value="0"
                                 >
+                                <div class="error-message" id="hitosPlanificadosError"></div>
                             </div>
                             
                             <div class="input-group">
@@ -283,14 +515,17 @@
                                     max="999"
                                     value="0"
                                 >
+                                <div class="error-message" id="hitosRealizadosError"></div>
                             </div>
                         </div>
                         
-                        <div id="hitosValidacion" class="validacion-mensaje" style="display: none;"></div>
+                        <div id="hitosValidacion" class="validacion-mensaje"></div>
                     </div>
                     
                     <!-- PASOS NO HABILITADOS -->
-                    <div class="planificacion-card">
+                    <div class="planificacion-card" id="cardPNH">
+                        <div class="estado-cumplimiento" id="estadoPNH"></div>
+                        
                         <div class="planificacion-header">
                             <div class="planificacion-icon">🚫</div>
                             <div class="planificacion-title">PASOS NO HABILITADOS</div>
@@ -308,6 +543,7 @@
                                     max="999"
                                     value="0"
                                 >
+                                <div class="error-message" id="pnhPlanificadosError"></div>
                             </div>
                             
                             <div class="input-group">
@@ -320,14 +556,17 @@
                                     max="999"
                                     value="0"
                                 >
+                                <div class="error-message" id="pnhRealizadosError"></div>
                             </div>
                         </div>
                         
-                        <div id="pnhValidacion" class="validacion-mensaje" style="display: none;"></div>
+                        <div id="pnhValidacion" class="validacion-mensaje"></div>
                     </div>
                     
                     <!-- SITIOS DE INTERÉS -->
-                    <div class="planificacion-card">
+                    <div class="planificacion-card" id="cardSitios">
+                        <div class="estado-cumplimiento" id="estadoSitios"></div>
+                        
                         <div class="planificacion-header">
                             <div class="planificacion-icon">👁️</div>
                             <div class="planificacion-title">SITIOS DE INTERÉS</div>
@@ -345,6 +584,7 @@
                                     max="999"
                                     value="0"
                                 >
+                                <div class="error-message" id="sitiosPlanificadosError"></div>
                             </div>
                             
                             <div class="input-group">
@@ -357,10 +597,21 @@
                                     max="999"
                                     value="0"
                                 >
+                                <div class="error-message" id="sitiosRealizadosError"></div>
                             </div>
                         </div>
                         
-                        <div id="sitiosValidacion" class="validacion-mensaje" style="display: none;"></div>
+                        <div id="sitiosValidacion" class="validacion-mensaje"></div>
+                    </div>
+                </div>
+                
+                <!-- Resumen General de Cumplimiento -->
+                <div class="resumen-general" id="resumenCumplimiento">
+                    <div class="resumen-icono" id="resumenIcono">📊</div>
+                    <div class="resumen-titulo" id="resumenTitulo">CUMPLIMIENTO GENERAL</div>
+                    <div class="resumen-valor" id="resumenPorcentaje">0%</div>
+                    <div class="resumen-descripcion" id="resumenDescripcion">
+                        <span id="resumenRealizados">0</span> de <span id="resumenPlanificados">0</span> actividades realizadas
                     </div>
                 </div>
                 
@@ -373,27 +624,28 @@
                         id="observaciones" 
                         class="form-control"
                         rows="4"
-                        placeholder="Ingrese observaciones relevantes sobre la demanda preventiva..."
+                        placeholder="Ingrese observaciones relevantes sobre la demanda preventiva: dificultades encontradas, condiciones del terreno, coordinación con otras unidades, etc."
                         maxlength="1000"
                     ></textarea>
-                    <div style="font-size: 0.75rem; color: var(--gris-medio); margin-top: 4px;">
-                        Máximo 1000 caracteres
+                    <div class="observaciones-counter" id="observacionesCounter">
+                        <span id="observacionesCaracteres">0</span> / 1000 caracteres
                     </div>
+                    <div class="error-message" id="observacionesError"></div>
                 </div>
             </div>
             
             <!-- Botones de Navegación -->
             <div style="display: flex; justify-content: space-between;">
                 <button type="button" class="btn btn-outline" onclick="window.location.href='demanda-ciudadana.html'">
-                    ← VOLVER
+                    ← VOLVER AL PASO 2
                 </button>
                 
                 <div style="display: flex; gap: var(--spacing-md);">
                     <button type="button" class="btn btn-outline" onclick="window.location.href='../index.html'">
                         🚪 Salir
                     </button>
-                    <button type="submit" class="btn btn-primary">
-                        VER RESUMEN →
+                    <button type="submit" class="btn btn-primary" id="btnContinuar">
+                        VER RESUMEN COMPLETO →
                     </button>
                 </div>
             </div>
@@ -405,7 +657,11 @@
     <script src="../js/config.js"></script>
     <script>
         // Variables globales
+        let userData = {};
         let servicioId = null;
+        let servicioInfo = {};
+        let datosPaso2 = {};
+        let modoOffline = false;
         
         // Función para mostrar mensajes
         function mostrarMensaje(texto, tipo = 'info') {
@@ -419,284 +675,657 @@
             }, 5000);
         }
         
-        // Verificar autenticación y cargar datos
-        document.addEventListener('DOMContentLoaded', async () => {
-            const user = JSON.parse(localStorage.getItem('sicof_user'));
+        // Función para mostrar error en campo
+        function mostrarErrorCampo(campoId, mensaje) {
+            const campo = document.getElementById(campoId);
+            const errorEl = document.getElementById(campoId + 'Error');
             
-            if (!user || user.rol !== 'digitador') {
-                window.location.href = '../index.html';
-                return;
+            if (errorEl) {
+                errorEl.textContent = mensaje;
+                campo.classList.add('error');
+                errorEl.style.display = 'block';
             }
-            
-            // Obtener ID del servicio
-            servicioId = localStorage.getItem('servicio_id');
-            console.log('Paso 3 - servicio_id encontrado:', servicioId);
-            
-            if (!servicioId) {
-                mostrarMensaje('❌ No se encontró el servicio. Complete el paso 1 primero.', 'danger');
-                setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
-                return;
-            }
-            
-            // Verificar que venga del paso 2
-            const paso2Data = localStorage.getItem('servicio_paso2');
-            if (!paso2Data) {
-                mostrarMensaje('❌ Datos del paso 2 no encontrados', 'danger');
-                setTimeout(() => window.location.href = 'demanda-ciudadana.html', 2000);
-                return;
-            }
-            
-            // Mostrar información del usuario
-            document.getElementById('userInfo').textContent = `${user.rol.toUpperCase()} - ${user.email}`;
-            
-            // Mostrar cuartel
-            if (window.SICOF_CONFIG && window.SICOF_CONFIG.cuarteles) {
-                const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
-                if (cuartel) {
-                    document.getElementById('cuartelNombre').textContent = cuartel.nombre;
-                }
-            }
-            
-            // Configurar validación en tiempo real
-            configurarValidacionTiempoReal();
-            
-            console.log('Paso 3 - Listo para continuar');
-        });
-        
-        function configurarValidacionTiempoReal() {
-            // Validar hitos
-            const hitosPlan = document.getElementById('hitos_planificados');
-            const hitosReal = document.getElementById('hitos_realizados');
-            const hitosValidacion = document.getElementById('hitosValidacion');
-            
-            function validarHitos() {
-                const plan = parseInt(hitosPlan.value) || 0;
-                const real = parseInt(hitosReal.value) || 0;
-                
-                if (real > plan) {
-                    hitosValidacion.textContent = `⚠️ No puede realizar más (${real}) de lo planificado (${plan})`;
-                    hitosValidacion.className = 'validacion-mensaje validacion-incorrecta';
-                    hitosValidacion.style.display = 'block';
-                    return false;
-                } else if (plan > 0 && real === 0) {
-                    hitosValidacion.textContent = 'ℹ️ Planificó visitas pero no realizó ninguna';
-                    hitosValidacion.className = 'validacion-mensaje';
-                    hitosValidacion.style.display = 'block';
-                    return true;
-                } else if (real > 0) {
-                    hitosValidacion.textContent = `✅ Cumplimiento: ${Math.round((real/plan)*100)}%`;
-                    hitosValidacion.className = 'validacion-mensaje validacion-correcta';
-                    hitosValidacion.style.display = 'block';
-                    return true;
-                } else {
-                    hitosValidacion.style.display = 'none';
-                    return true;
-                }
-            }
-            
-            hitosPlan.addEventListener('input', validarHitos);
-            hitosReal.addEventListener('input', validarHitos);
-            
-            // Validar PNH
-            const pnhPlan = document.getElementById('pnh_planificados');
-            const pnhReal = document.getElementById('pnh_realizados');
-            const pnhValidacion = document.getElementById('pnhValidacion');
-            
-            function validarPNH() {
-                const plan = parseInt(pnhPlan.value) || 0;
-                const real = parseInt(pnhReal.value) || 0;
-                
-                if (real > plan) {
-                    pnhValidacion.textContent = `⚠️ No puede realizar más (${real}) de lo planificado (${plan})`;
-                    pnhValidacion.className = 'validacion-mensaje validacion-incorrecta';
-                    pnhValidacion.style.display = 'block';
-                    return false;
-                } else if (plan > 0 && real === 0) {
-                    pnhValidacion.textContent = 'ℹ️ Planificó visitas pero no realizó ninguna';
-                    pnhValidacion.className = 'validacion-mensaje';
-                    pnhValidacion.style.display = 'block';
-                    return true;
-                } else if (real > 0) {
-                    pnhValidacion.textContent = `✅ Cumplimiento: ${Math.round((real/plan)*100)}%`;
-                    pnhValidacion.className = 'validacion-mensaje validacion-correcta';
-                    pnhValidacion.style.display = 'block';
-                    return true;
-                } else {
-                    pnhValidacion.style.display = 'none';
-                    return true;
-                }
-            }
-            
-            pnhPlan.addEventListener('input', validarPNH);
-            pnhReal.addEventListener('input', validarPNH);
-            
-            // Validar sitios
-            const sitiosPlan = document.getElementById('sitios_planificados');
-            const sitiosReal = document.getElementById('sitios_realizados');
-            const sitiosValidacion = document.getElementById('sitiosValidacion');
-            
-            function validarSitios() {
-                const plan = parseInt(sitiosPlan.value) || 0;
-                const real = parseInt(sitiosReal.value) || 0;
-                
-                if (real > plan) {
-                    sitiosValidacion.textContent = `⚠️ No puede realizar más (${real}) de lo planificado (${plan})`;
-                    sitiosValidacion.className = 'validacion-mensaje validacion-incorrecta';
-                    sitiosValidacion.style.display = 'block';
-                    return false;
-                } else if (plan > 0 && real === 0) {
-                    sitiosValidacion.textContent = 'ℹ️ Planificó visitas pero no realizó ninguna';
-                    sitiosValidacion.className = 'validacion-mensaje';
-                    sitiosValidacion.style.display = 'block';
-                    return true;
-                } else if (real > 0) {
-                    sitiosValidacion.textContent = `✅ Cumplimiento: ${Math.round((real/plan)*100)}%`;
-                    sitiosValidacion.className = 'validacion-mensaje validacion-correcta';
-                    sitiosValidacion.style.display = 'block';
-                    return true;
-                } else {
-                    sitiosValidacion.style.display = 'none';
-                    return true;
-                }
-            }
-            
-            sitiosPlan.addEventListener('input', validarSitios);
-            sitiosReal.addEventListener('input', validarSitios);
         }
         
-        // Manejar envío del formulario
-        document.getElementById('preventivaForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Función para limpiar errores
+        function limpiarErrores() {
+            document.querySelectorAll('.error').forEach(el => {
+                el.classList.remove('error');
+            });
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
+        }
+        
+        // Función para actualizar loading
+        function actualizarLoading(mensaje, detalles = '', paso = 1, estado = 'processing') {
+            document.getElementById('loadingMessage').textContent = mensaje;
+            document.getElementById('loadingDetails').textContent = detalles;
             
-            // Validar que no se realice más de lo planificado
+            const stepEl = document.getElementById(`step${paso}Status`);
+            if (stepEl) {
+                stepEl.textContent = detalles;
+                stepEl.className = `step-status step-${estado}`;
+            }
+        }
+        
+        // Función para calcular cumplimiento
+        function calcularCumplimiento() {
+            let totalPlanificados = 0;
+            let totalRealizados = 0;
+            let totalCompletas = 0;
+            
+            // HITOS
             const hitosPlan = parseInt(document.getElementById('hitos_planificados').value) || 0;
             const hitosReal = parseInt(document.getElementById('hitos_realizados').value) || 0;
+            const cardHitos = document.getElementById('cardHitos');
+            const estadoHitos = document.getElementById('estadoHitos');
+            const hitosValidacion = document.getElementById('hitosValidacion');
             
+            totalPlanificados += hitosPlan;
+            totalRealizados += hitosReal;
+            
+            if (hitosPlan > 0) {
+                if (hitosReal > hitosPlan) {
+                    // ERROR: Realizados > Planificados
+                    mostrarErrorCampo('hitos_realizados', `No puede realizar más (${hitosReal}) de lo planificado (${hitosPlan})`);
+                    hitosValidacion.className = 'validacion-mensaje validacion-incorrecta';
+                    hitosValidacion.textContent = `❌ ERROR: Excede lo planificado`;
+                    cardHitos.className = 'planificacion-card sin-realizar';
+                    estadoHitos.className = 'estado-cumplimiento estado-sin-realizar';
+                } else if (hitosReal === 0) {
+                    // ADVERTENCIA: Planificado pero no realizado
+                    hitosValidacion.className = 'validacion-mensaje validacion-advertencia';
+                    hitosValidacion.textContent = `⚠️ Planificó visitas pero no realizó ninguna`;
+                    cardHitos.className = 'planificacion-card sin-realizar';
+                    estadoHitos.className = 'estado-cumplimiento estado-sin-realizar';
+                } else if (hitosReal === hitosPlan) {
+                    // COMPLETO: Realizado = Planificado
+                    const porcentaje = 100;
+                    hitosValidacion.className = 'validacion-mensaje validacion-correcta';
+                    hitosValidacion.textContent = `✅ Cumplimiento: ${porcentaje}%`;
+                    cardHitos.className = 'planificacion-card completa';
+                    estadoHitos.className = 'estado-cumplimiento estado-completa';
+                    totalCompletas++;
+                } else {
+                    // PARCIAL: Realizado < Planificado
+                    const porcentaje = Math.round((hitosReal / hitosPlan) * 100);
+                    hitosValidacion.className = 'validacion-mensaje validacion-info';
+                    hitosValidacion.textContent = `📊 Cumplimiento: ${porcentaje}%`;
+                    cardHitos.className = 'planificacion-card parcial';
+                    estadoHitos.className = 'estado-cumplimiento estado-parcial';
+                }
+            } else {
+                // Sin planificación
+                hitosValidacion.className = 'validacion-mensaje validacion-info';
+                hitosValidacion.textContent = `ℹ️ No se planificaron visitas`;
+                cardHitos.className = 'planificacion-card';
+                estadoHitos.className = 'estado-cumplimiento';
+            }
+            
+            // PNH
             const pnhPlan = parseInt(document.getElementById('pnh_planificados').value) || 0;
             const pnhReal = parseInt(document.getElementById('pnh_realizados').value) || 0;
+            const cardPNH = document.getElementById('cardPNH');
+            const estadoPNH = document.getElementById('estadoPNH');
+            const pnhValidacion = document.getElementById('pnhValidacion');
             
+            totalPlanificados += pnhPlan;
+            totalRealizados += pnhReal;
+            
+            if (pnhPlan > 0) {
+                if (pnhReal > pnhPlan) {
+                    mostrarErrorCampo('pnh_realizados', `No puede realizar más (${pnhReal}) de lo planificado (${pnhPlan})`);
+                    pnhValidacion.className = 'validacion-mensaje validacion-incorrecta';
+                    pnhValidacion.textContent = `❌ ERROR: Excede lo planificado`;
+                    cardPNH.className = 'planificacion-card sin-realizar';
+                    estadoPNH.className = 'estado-cumplimiento estado-sin-realizar';
+                } else if (pnhReal === 0) {
+                    pnhValidacion.className = 'validacion-mensaje validacion-advertencia';
+                    pnhValidacion.textContent = `⚠️ Planificó visitas pero no realizó ninguna`;
+                    cardPNH.className = 'planificacion-card sin-realizar';
+                    estadoPNH.className = 'estado-cumplimiento estado-sin-realizar';
+                } else if (pnhReal === pnhPlan) {
+                    const porcentaje = 100;
+                    pnhValidacion.className = 'validacion-mensaje validacion-correcta';
+                    pnhValidacion.textContent = `✅ Cumplimiento: ${porcentaje}%`;
+                    cardPNH.className = 'planificacion-card completa';
+                    estadoPNH.className = 'estado-cumplimiento estado-completa';
+                    totalCompletas++;
+                } else {
+                    const porcentaje = Math.round((pnhReal / pnhPlan) * 100);
+                    pnhValidacion.className = 'validacion-mensaje validacion-info';
+                    pnhValidacion.textContent = `📊 Cumplimiento: ${porcentaje}%`;
+                    cardPNH.className = 'planificacion-card parcial';
+                    estadoPNH.className = 'estado-cumplimiento estado-parcial';
+                }
+            } else {
+                pnhValidacion.className = 'validacion-mensaje validacion-info';
+                pnhValidacion.textContent = `ℹ️ No se planificaron visitas`;
+                cardPNH.className = 'planificacion-card';
+                estadoPNH.className = 'estado-cumplimiento';
+            }
+            
+            // SITIOS
             const sitiosPlan = parseInt(document.getElementById('sitios_planificados').value) || 0;
             const sitiosReal = parseInt(document.getElementById('sitios_realizados').value) || 0;
+            const cardSitios = document.getElementById('cardSitios');
+            const estadoSitios = document.getElementById('estadoSitios');
+            const sitiosValidacion = document.getElementById('sitiosValidacion');
             
-            if (hitosReal > hitosPlan) {
-                mostrarMensaje('❌ No puede realizar más hitos de los planificados', 'danger');
-                return;
+            totalPlanificados += sitiosPlan;
+            totalRealizados += sitiosReal;
+            
+            if (sitiosPlan > 0) {
+                if (sitiosReal > sitiosPlan) {
+                    mostrarErrorCampo('sitios_realizados', `No puede realizar más (${sitiosReal}) de lo planificado (${sitiosPlan})`);
+                    sitiosValidacion.className = 'validacion-mensaje validacion-incorrecta';
+                    sitiosValidacion.textContent = `❌ ERROR: Excede lo planificado`;
+                    cardSitios.className = 'planificacion-card sin-realizar';
+                    estadoSitios.className = 'estado-cumplimiento estado-sin-realizar';
+                } else if (sitiosReal === 0) {
+                    sitiosValidacion.className = 'validacion-mensaje validacion-advertencia';
+                    sitiosValidacion.textContent = `⚠️ Planificó visitas pero no realizó ninguna`;
+                    cardSitios.className = 'planificacion-card sin-realizar';
+                    estadoSitios.className = 'estado-cumplimiento estado-sin-realizar';
+                } else if (sitiosReal === sitiosPlan) {
+                    const porcentaje = 100;
+                    sitiosValidacion.className = 'validacion-mensaje validacion-correcta';
+                    sitiosValidacion.textContent = `✅ Cumplimiento: ${porcentaje}%`;
+                    cardSitios.className = 'planificacion-card completa';
+                    estadoSitios.className = 'estado-cumplimiento estado-completa';
+                    totalCompletas++;
+                } else {
+                    const porcentaje = Math.round((sitiosReal / sitiosPlan) * 100);
+                    sitiosValidacion.className = 'validacion-mensaje validacion-info';
+                    sitiosValidacion.textContent = `📊 Cumplimiento: ${porcentaje}%`;
+                    cardSitios.className = 'planificacion-card parcial';
+                    estadoSitios.className = 'estado-cumplimiento estado-parcial';
+                }
+            } else {
+                sitiosValidacion.className = 'validacion-mensaje validacion-info';
+                sitiosValidacion.textContent = `ℹ️ No se planificaron visitas`;
+                cardSitios.className = 'planificacion-card';
+                estadoSitios.className = 'estado-cumplimiento';
             }
             
-            if (pnhReal > pnhPlan) {
-                mostrarMensaje('❌ No puede realizar más PNH de los planificados', 'danger');
-                return;
+            // Calcular resumen general
+            const resumenCumplimiento = document.getElementById('resumenCumplimiento');
+            
+            if (totalPlanificados > 0) {
+                const porcentajeGeneral = Math.round((totalRealizados / totalPlanificados) * 100);
+                const actividadesCompletas = totalCompletas;
+                
+                document.getElementById('resumenRealizados').textContent = totalRealizados;
+                document.getElementById('resumenPlanificados').textContent = totalPlanificados;
+                document.getElementById('resumenPorcentaje').textContent = `${porcentajeGeneral}%`;
+                
+                // Determinar icono y título según porcentaje
+                let icono = '📊';
+                let titulo = 'CUMPLIMIENTO GENERAL';
+                
+                if (porcentajeGeneral >= 80) {
+                    icono = '✅';
+                    titulo = 'EXCELENTE CUMPLIMIENTO';
+                } else if (porcentajeGeneral >= 50) {
+                    icono = '⚠️';
+                    titulo = 'CUMPLIMIENTO REGULAR';
+                } else if (porcentajeGeneral > 0) {
+                    icono = '📉';
+                    titulo = 'CUMPLIMIENTO BAJO';
+                } else {
+                    icono = '🚫';
+                    titulo = 'SIN ACTIVIDADES REALIZADAS';
+                }
+                
+                document.getElementById('resumenIcono').textContent = icono;
+                document.getElementById('resumenTitulo').textContent = titulo;
+                resumenCumplimiento.style.display = 'block';
+                
+            } else {
+                resumenCumplimiento.style.display = 'none';
             }
             
-            if (sitiosReal > sitiosPlan) {
-                mostrarMensaje('❌ No puede realizar más sitios de los planificados', 'danger');
-                return;
-            }
-            
-            // Recopilar datos del formulario (EXACTAMENTE como la tabla)
-            const formData = {
-                hitos_planificados: hitosPlan,
-                pnh_planificados: pnhPlan,
-                sitios_planificados: sitiosPlan,
-                hitos_realizados: hitosReal,
-                pnh_realizados: pnhReal,
-                sitios_realizados: sitiosReal,
-                observaciones: document.getElementById('observaciones').value.trim() || null
+            return {
+                totalPlanificados,
+                totalRealizados,
+                tieneErrores: document.querySelectorAll('.validacion-incorrecta').length > 0
             };
+        }
+        
+        // Función para contar caracteres de observaciones
+        function contarCaracteresObservaciones() {
+            const textarea = document.getElementById('observaciones');
+            const counter = document.getElementById('observacionesCounter');
+            const caracteres = document.getElementById('observacionesCaracteres');
+            
+            const longitud = textarea.value.length;
+            caracteres.textContent = longitud;
+            
+            counter.className = 'observaciones-counter';
+            
+            if (longitud > 900) {
+                counter.classList.add('warning');
+            }
+            
+            if (longitud > 990) {
+                counter.classList.add('error');
+            }
+        }
+        
+        // Función para validar formulario
+        function validarFormulario() {
+            let esValido = true;
+            limpiarErrores();
+            
+            // Calcular cumplimiento (esto también valida)
+            const { tieneErrores } = calcularCumplimiento();
+            
+            if (tieneErrores) {
+                esValido = false;
+                mostrarMensaje('❌ Corrija los errores en los campos de planificación', 'danger');
+            }
+            
+            // Validar números positivos
+            const camposNumericos = [
+                'hitos_planificados', 'hitos_realizados',
+                'pnh_planificados', 'pnh_realizados',
+                'sitios_planificados', 'sitios_realizados'
+            ];
+            
+            camposNumericos.forEach(campoId => {
+                const valor = parseInt(document.getElementById(campoId).value) || 0;
+                if (valor < 0) {
+                    mostrarErrorCampo(campoId, 'El valor no puede ser negativo');
+                    esValido = false;
+                }
+                if (valor > 999) {
+                    mostrarErrorCampo(campoId, 'El valor no puede exceder 999');
+                    esValido = false;
+                }
+            });
+            
+            // Validar observaciones (opcional, pero si hay texto, validar longitud)
+            const observaciones = document.getElementById('observaciones').value;
+            if (observaciones.length > 1000) {
+                mostrarErrorCampo('observaciones', 'Las observaciones no pueden exceder los 1000 caracteres');
+                esValido = false;
+            }
+            
+            return esValido;
+        }
+        
+        // Función para cargar información del servicio
+        async function cargarInformacionServicio() {
+            try {
+                // Obtener datos del paso 1 desde localStorage
+                const paso1Data = localStorage.getItem('servicio_paso1');
+                if (!paso1Data) {
+                    throw new Error('No se encontraron datos del paso 1');
+                }
+                
+                servicioInfo = JSON.parse(paso1Data);
+                servicioId = localStorage.getItem('servicio_id');
+                
+                if (!servicioId) {
+                    throw new Error('No se encontró ID del servicio');
+                }
+                
+                // Obtener datos del paso 2
+                const paso2Data = localStorage.getItem('servicio_paso2');
+                if (!paso2Data) {
+                    throw new Error('No se encontraron datos del paso 2');
+                }
+                
+                datosPaso2 = JSON.parse(paso2Data);
+                
+                // Verificar modo offline
+                modoOffline = localStorage.getItem('servicio_offline') === 'true';
+                
+                console.log('📋 Información del servicio cargada:', {
+                    servicioInfo,
+                    datosPaso2,
+                    modoOffline
+                });
+                
+                // Mostrar información en la página
+                document.getElementById('infoFecha').textContent = servicioInfo.fecha;
+                document.getElementById('infoCuartel').textContent = servicioInfo.cuartel_codigo;
+                document.getElementById('infoServicio').textContent = servicioInfo.nombre_servicio;
+                
+                // Calcular totales del paso 2
+                const totalControles = 
+                    (datosPaso2.controles_investigativos || 0) +
+                    (datosPaso2.controles_preventivos || 0) +
+                    (datosPaso2.controles_migratorios || 0) +
+                    (datosPaso2.controles_vehiculares || 0);
+                
+                const totalInfracciones = 
+                    (datosPaso2.infracciones_transito || 0) +
+                    (datosPaso2.otras_infracciones || 0);
+                
+                document.getElementById('infoControles').textContent = totalControles;
+                document.getElementById('infoInfracciones').textContent = totalInfracciones;
+                document.getElementById('infoDetenidos').textContent = datosPaso2.detenidos_cantidad || 0;
+                
+                // Verificar si el servicio existe en Supabase (solo si no está en modo offline)
+                if (!modoOffline) {
+                    actualizarLoading('Verificando servicio...', 'Buscando en base de datos', 1, 'processing');
+                    
+                    const { data: servicioExistente, error } = await SICOF_CONFIG.supabase
+                        .from('servicios')
+                        .select('id, cuartel_codigo, nombre_servicio')
+                        .eq('id', servicioId)
+                        .single();
+                    
+                    if (error) {
+                        if (error.code === 'PGRST116') { // No encontrado
+                            console.warn('⚠️ Servicio no encontrado en Supabase, activando modo offline');
+                            modoOffline = true;
+                            localStorage.setItem('servicio_offline', 'true');
+                            mostrarMensaje('⚠️ Modo offline: Los datos se guardarán localmente', 'warning');
+                        } else {
+                            throw error;
+                        }
+                    } else {
+                        console.log('✅ Servicio verificado en Supabase:', servicioExistente);
+                        actualizarLoading('Servicio verificado', 'Listo para continuar', 1, 'success');
+                    }
+                } else {
+                    console.log('🌐 Modo offline activado');
+                    mostrarMensaje('⚠️ Modo offline: Los datos se guardarán localmente', 'warning');
+                }
+                
+                // Cargar datos guardados del paso 3 si existen
+                const paso3Data = localStorage.getItem('servicio_paso3');
+                if (paso3Data) {
+                    const datosPaso3 = JSON.parse(paso3Data);
+                    console.log('📂 Datos del paso 3 cargados:', datosPaso3);
+                    
+                    // Llenar campos con datos existentes
+                    Object.keys(datosPaso3).forEach(key => {
+                        const elemento = document.getElementById(key);
+                        if (elemento) {
+                            if (elemento.type === 'number') {
+                                elemento.value = datosPaso3[key] || 0;
+                            } else if (elemento.tagName === 'TEXTAREA') {
+                                elemento.value = datosPaso3[key] || '';
+                            }
+                        }
+                    });
+                    
+                    // Calcular cumplimiento inicial
+                    calcularCumplimiento();
+                    contarCaracteresObservaciones();
+                }
+                
+            } catch (error) {
+                console.error('❌ Error cargando información del servicio:', error);
+                throw error;
+            }
+        }
+        
+        // Inicializar aplicación
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Iniciando demanda-preventiva.html');
+            
+            try {
+                // Verificar autenticación
+                userData = await protegerPagina('digitador');
+                if (!userData) return;
+                
+                console.log('✅ Usuario autenticado:', userData);
+                
+                // Mostrar información del usuario
+                document.getElementById('userInfo').textContent = `${userData.rol.toUpperCase()} - ${userData.email}`;
+                
+                // Mostrar cuartel
+                const cuartelInfo = await obtenerCuarteles();
+                const cuartelUsuario = cuartelInfo.find(c => c.codigo === userData.cuartel_codigo);
+                if (cuartelUsuario) {
+                    document.getElementById('cuartelNombre').textContent = cuartelUsuario.nombre;
+                }
+                
+                // Cargar información del servicio
+                await cargarInformacionServicio();
+                
+                // Configurar eventos
+                configurarEventos();
+                
+                console.log('✅ Aplicación inicializada correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error inicializando aplicación:', error);
+                
+                if (error.message.includes('paso 1') || error.message.includes('paso 2')) {
+                    mostrarMensaje('❌ Complete primero los pasos anteriores', 'danger');
+                    setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
+                } else {
+                    mostrarMensaje(`Error inicializando: ${error.message}`, 'danger');
+                }
+            }
+        });
+        
+        function configurarEventos() {
+            // Calcular cumplimiento en tiempo real
+            const camposPlanificacion = [
+                'hitos_planificados', 'hitos_realizados',
+                'pnh_planificados', 'pnh_realizados',
+                'sitios_planificados', 'sitios_realizados'
+            ];
+            
+            camposPlanificacion.forEach(id => {
+                document.getElementById(id).addEventListener('input', calcularCumplimiento);
+            });
+            
+            // Contar caracteres de observaciones
+            document.getElementById('observaciones').addEventListener('input', contarCaracteresObservaciones);
+            
+            // Validar números
+            document.querySelectorAll('.planificacion-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    const value = parseInt(this.value);
+                    if (isNaN(value) || value < 0) {
+                        this.value = 0;
+                    }
+                    if (value > 999) {
+                        this.value = 999;
+                    }
+                });
+            });
+            
+            // Manejar envío del formulario
+            document.getElementById('preventivaForm').addEventListener('submit', guardarPaso3);
+        }
+        
+        async function guardarPaso3(e) {
+            e.preventDefault();
+            
+            console.log('📝 Iniciando guardado del paso 3...');
+            
+            // Validar formulario
+            if (!validarFormulario()) {
+                mostrarMensaje('❌ Por favor corrija los errores en el formulario', 'danger');
+                return;
+            }
             
             // Mostrar loading
             document.getElementById('loadingOverlay').style.display = 'flex';
+            actualizarLoading('Guardando datos de demanda preventiva...', 'Paso 3: Planificación y cumplimiento', 1, 'processing');
             
             try {
-                console.log('Paso 3 - Actualizando servicio ID:', servicioId, 'Datos:', formData);
+                // Preparar datos para actualizar
+                const formData = {
+                    // Planificación
+                    hitos_planificados: parseInt(document.getElementById('hitos_planificados').value) || 0,
+                    hitos_realizados: parseInt(document.getElementById('hitos_realizados').value) || 0,
+                    pnh_planificados: parseInt(document.getElementById('pnh_planificados').value) || 0,
+                    pnh_realizados: parseInt(document.getElementById('pnh_realizados').value) || 0,
+                    sitios_planificados: parseInt(document.getElementById('sitios_planificados').value) || 0,
+                    sitios_realizados: parseInt(document.getElementById('sitios_realizados').value) || 0,
+                    
+                    // Observaciones
+                    observaciones: document.getElementById('observaciones').value.trim() || null
+                };
                 
-                // 1. Verificar que Supabase esté configurado
-                if (!window.SICOF_CONFIG || !window.SICOF_CONFIG.supabase) {
-                    throw new Error('Configuración de Supabase no encontrada');
+                console.log('📦 Datos preparados para actualizar:', formData);
+                
+                // Calcular estadísticas
+                const { totalPlanificados, totalRealizados } = calcularCumplimiento();
+                const porcentajeCumplimiento = totalPlanificados > 0 ? 
+                    Math.round((totalRealizados / totalPlanificados) * 100) : 0;
+                
+                // Verificar si estamos en modo offline
+                if (modoOffline) {
+                    console.log('🌐 Modo offline detectado, guardando localmente');
+                    
+                    // Guardar datos en localStorage
+                    localStorage.setItem('servicio_paso3', JSON.stringify(formData));
+                    
+                    actualizarLoading('✅ Datos guardados localmente', 'Modo offline activado', 2, 'success');
+                    
+                    setTimeout(() => {
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        
+                        mostrarMensaje(`
+                            ✅ <strong>DATOS GUARDADOS LOCALMENTE</strong><br>
+                            • Cumplimiento: ${porcentajeCumplimiento}%<br>
+                            • Actividades realizadas: ${totalRealizados}/${totalPlanificados}<br>
+                            • Modo offline activado<br>
+                            • Redirigiendo al resumen...
+                        `, 'warning');
+                        
+                        // Redirigir al resumen
+                        setTimeout(() => {
+                            window.location.href = 'resumen-confirmacion.html';
+                        }, 2000);
+                    }, 1500);
+                    
+                    return;
                 }
                 
-                const supabase = window.SICOF_CONFIG.supabase;
+                // Actualizar en Supabase
+                actualizarLoading('Actualizando en base de datos...', 'Tabla: servicios', 2, 'processing');
                 
-                // 2. Verificar que el servicio existe
-                const { data: servicioExistente, error: errorVerificar } = await supabase
-                    .from('servicios')
-                    .select('id')
-                    .eq('id', servicioId)
-                    .single();
-                
-                if (errorVerificar) {
-                    throw new Error(`El servicio no existe en la base de datos: ${errorVerificar.message}`);
-                }
-                
-                console.log('✓ Servicio verificado:', servicioExistente);
-                
-                // 3. ACTUALIZAR en Supabase
-                const { error } = await supabase
+                const { data, error } = await SICOF_CONFIG.supabase
                     .from('servicios')
                     .update(formData)
                     .eq('id', servicioId);
                 
                 if (error) {
-                    console.error('Error al actualizar en Supabase:', error);
-                    throw new Error(`Error de base de datos: ${error.message}`);
+                    console.error('❌ Error actualizando en Supabase:', error);
+                    
+                    if (error.code === '42501') {
+                        throw new Error('Permiso denegado: No tiene permisos para actualizar');
+                    } else if (error.code === 'PGRST116') {
+                        throw new Error('El servicio no existe en la base de datos');
+                    } else {
+                        throw new Error(`Error de base de datos: ${error.message}`);
+                    }
                 }
                 
-                console.log('✓ Datos de demanda preventiva actualizados en Supabase');
+                console.log('✅ Servicio actualizado exitosamente:', data);
                 
-                // 4. Guardar datos en localStorage
+                // Guardar datos en localStorage también
                 localStorage.setItem('servicio_paso3', JSON.stringify(formData));
                 
-                // 5. Mostrar mensaje de éxito
-                mostrarMensaje('✅ Datos guardados correctamente. Redirigiendo al resumen...', 'success');
+                actualizarLoading('✅ Paso 3 completado', 'Datos guardados correctamente', 2, 'success');
                 
-                // 6. Pequeña pausa
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // 7. Redirigir al resumen
-                window.location.href = 'resumen-confirmacion.html';
-                
-            } catch (error) {
-                console.error('Error guardando datos:', error);
-                mostrarMensaje(`❌ Error al guardar: ${error.message}`, 'danger');
-                
-                // Guardar en localStorage como fallback
-                try {
-                    localStorage.setItem('servicio_paso3', JSON.stringify(formData));
-                    localStorage.setItem('servicio_offline', 'true');
-                    console.warn('✓ Datos guardados en localStorage (modo offline)');
-                    mostrarMensaje('⚠ Modo offline - Datos guardados localmente. Continuando...', 'warning');
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
                     
+                    // Determinar nivel de cumplimiento
+                    let nivelCumplimiento = 'BAJO';
+                    let iconoCumplimiento = '📉';
+                    
+                    if (porcentajeCumplimiento >= 80) {
+                        nivelCumplimiento = 'EXCELENTE';
+                        iconoCumplimiento = '✅';
+                    } else if (porcentajeCumplimiento >= 50) {
+                        nivelCumplimiento = 'REGULAR';
+                        iconoCumplimiento = '⚠️';
+                    }
+                    
+                    mostrarMensaje(`
+                        ✅ <strong>PASO 3 COMPLETADO CORRECTAMENTE</strong><br>
+                        ${iconoCumplimiento} <strong>Cumplimiento ${nivelCumplimiento}: ${porcentajeCumplimiento}%</strong><br>
+                        • Actividades realizadas: ${totalRealizados}/${totalPlanificados}<br>
+                        • Redirigiendo al resumen completo...
+                    `, 'success');
+                    
+                    // Redirigir al resumen después de 2 segundos
                     setTimeout(() => {
                         window.location.href = 'resumen-confirmacion.html';
                     }, 2000);
-                } catch (localError) {
-                    console.error('Error guardando en localStorage:', localError);
-                }
-            } finally {
-                document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                }, 1500);
+                
+            } catch (error) {
+                console.error('🔥 Error guardando paso 3:', error);
+                
+                actualizarLoading('❌ Error al guardar', error.message, 2, 'error');
+                
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                    // Intentar guardar localmente como fallback
+                    try {
+                        const formData = {
+                            hitos_planificados: parseInt(document.getElementById('hitos_planificados').value) || 0,
+                            hitos_realizados: parseInt(document.getElementById('hitos_realizados').value) || 0,
+                            pnh_planificados: parseInt(document.getElementById('pnh_planificados').value) || 0,
+                            pnh_realizados: parseInt(document.getElementById('pnh_realizados').value) || 0,
+                            sitios_planificados: parseInt(document.getElementById('sitios_planificados').value) || 0,
+                            sitios_realizados: parseInt(document.getElementById('sitios_realizados').value) || 0,
+                            observaciones: document.getElementById('observaciones').value.trim() || null
+                        };
+                        
+                        localStorage.setItem('servicio_paso3', JSON.stringify(formData));
+                        localStorage.setItem('servicio_offline', 'true');
+                        modoOffline = true;
+                        
+                        const { totalPlanificados, totalRealizados } = calcularCumplimiento();
+                        const porcentajeCumplimiento = totalPlanificados > 0 ? 
+                            Math.round((totalRealizados / totalPlanificados) * 100) : 0;
+                        
+                        console.log('💾 Datos guardados en modo offline');
+                        
+                        mostrarMensaje(`
+                            ⚠️ <strong>MODO OFFLINE ACTIVADO</strong><br>
+                            • Error de conexión a la base de datos<br>
+                            • Los datos se guardaron localmente<br>
+                            • Cumplimiento: ${porcentajeCumplimiento}%<br>
+                            • Se sincronizarán cuando haya conexión<br>
+                            • Redirigiendo al resumen...
+                        `, 'warning');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'resumen-confirmacion.html';
+                        }, 3000);
+                        
+                    } catch (localError) {
+                        console.error('Error guardando localmente:', localError);
+                        mostrarMensaje(`❌ Error crítico: ${error.message}<br>No se pudieron guardar los datos`, 'danger');
+                    }
+                }, 2000);
             }
-        });
-        
-        // Validar números positivos
-        document.querySelectorAll('.planificacion-input').forEach(input => {
-            input.addEventListener('change', function() {
-                const value = parseInt(this.value);
-                if (isNaN(value) || value < 0) {
-                    this.value = 0;
-                }
-                if (value > 999) {
-                    this.value = 999;
-                }
-            });
-        });
+        }
         
         // Función para debugging
         window.debugInfo = function() {
-            console.log('=== DEBUG PASO 3 ===');
-            console.log('servicio_id:', localStorage.getItem('servicio_id'));
-            console.log('servicio_paso2:', localStorage.getItem('servicio_paso2'));
-            console.log('SICOF_CONFIG:', window.SICOF_CONFIG ? 'Disponible' : 'No disponible');
-            console.log('====================');
+            console.log('=== DEBUG DEMANDA-PREVENTIVA ===');
+            console.log('Usuario:', userData);
+            console.log('Servicio ID:', servicioId);
+            console.log('Servicio Info:', servicioInfo);
+            console.log('Datos Paso 2:', datosPaso2);
+            console.log('Modo Offline:', modoOffline);
+            console.log('Servicio Paso 3 (localStorage):', localStorage.getItem('servicio_paso3'));
+            console.log('SICOF_CONFIG:', SICOF_CONFIG ? 'Presente' : 'Ausente');
+            console.log('Supabase inicializado:', SICOF_CONFIG.supabase ? '✅' : '❌');
+            console.log('===============================');
+            
+            alert('Debug info en consola. Verifica la consola del navegador (F12)');
         };
     </script>
 </body>
