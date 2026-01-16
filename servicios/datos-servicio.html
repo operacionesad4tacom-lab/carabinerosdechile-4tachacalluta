@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../css/mobile.css">
     <link rel="stylesheet" href="../css/tablet.css">
     <link rel="stylesheet" href="../css/desktop.css">
+    <link rel="icon" href="../assets/logos/favicon.ico">
     <style>
         .paso-indicador {
             display: flex;
@@ -75,6 +76,7 @@
             padding: var(--spacing-xl);
             margin-bottom: var(--spacing-xl);
             border: 1px solid var(--verde-claro);
+            box-shadow: var(--shadow-sm);
         }
         
         .section-title {
@@ -91,6 +93,20 @@
             font-size: 1.5rem;
         }
         
+        .grid-2, .grid-3 {
+            display: grid;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
         .time-inputs {
             display: flex;
             align-items: center;
@@ -103,44 +119,37 @@
             color: var(--verde-oficial);
         }
         
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-lg);
-        }
-        
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--spacing-lg);
-        }
-        
         .panel-riesgo {
             padding: var(--spacing-lg);
             border-radius: var(--border-radius-md);
             margin-top: var(--spacing-lg);
             text-align: center;
             font-weight: bold;
+            display: none;
         }
         
         .panel-riesgo.bajo {
-            background: #27ae60;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
             color: white;
+            border: 2px solid #27ae60;
         }
         
         .panel-riesgo.medio {
-            background: #f39c12;
+            background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
             color: white;
+            border: 2px solid #f39c12;
         }
         
         .panel-riesgo.alto {
-            background: #e67e22;
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
             color: white;
+            border: 2px solid #e67e22;
         }
         
         .panel-riesgo.muy-alto {
-            background: #c0392b;
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
             color: white;
+            border: 2px solid #c0392b;
         }
         
         .loading {
@@ -161,45 +170,114 @@
         }
         
         .error-text {
-            color: #dc3545;
+            color: var(--rojo-alerta);
             font-size: 0.875rem;
-            margin-top: 0.25rem;
-            display: block;
+            margin-top: 4px;
+            display: none;
         }
         
         .success-text {
-            color: #28a745;
+            color: var(--verde-exito);
             font-size: 0.875rem;
-            margin-top: 0.25rem;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        .has-error .form-control {
+            border-color: var(--rojo-alerta);
+        }
+        
+        .has-error .error-text {
             display: block;
+        }
+        
+        .field-info {
+            font-size: 0.75rem;
+            color: var(--gris-medio);
+            margin-top: 4px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 300px;
+        }
+        
+        .loading-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-message {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-details {
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+        }
+        
+        .debug-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 2rem; border-radius: 8px; text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
-            <div style="font-size: 1.2rem; font-weight: bold;">Guardando...</div>
-        </div>
-    </div>
-
-    <header class="header">
-        <div class="container header-content">
-            <div class="logo">
-                <div class="logo-escudo"></div>
+    <!-- Header Institucional -->
+    <header class="header-institucional">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="../assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
                 <div class="logo-text">
-                    <div class="logo-title">SICOF</div>
-                    <div class="logo-subtitle">Carabineros de Chile</div>
+                    <div class="logo-title">SICOF - Sistema Integrado</div>
+                    <div class="logo-subtitle">Nuevo Servicio - Paso 1</div>
                 </div>
             </div>
-            <div class="user-info">
-                <span id="userInfo"></span>
-                <button class="btn btn-outline btn-sm" onclick="logout()">Cerrar Sesión</button>
+            <div class="user-info" style="color: var(--blanco); text-align: right;">
+                <div id="cuartelNombre" style="font-weight: 600;">Cargando...</div>
+                <div style="font-size: 0.875rem; opacity: 0.9;" id="userInfo">Digitador</div>
             </div>
         </div>
     </header>
 
-    <main class="main-content container">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-icon">⏳</div>
+            <div class="loading-message" id="loadingMessage">Guardando datos del servicio...</div>
+            <div class="loading-details" id="loadingDetails"></div>
+            <div class="debug-panel" id="debugPanel"></div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="container" style="padding: var(--spacing-xl) 0;">
         <div id="message" class="alert" style="display: none;"></div>
         
         <h1 class="page-title">📝 Registrar Nuevo Servicio</h1>
@@ -235,7 +313,7 @@
                 <div class="grid-2">
                     <div class="form-group">
                         <label for="fecha" class="form-label">
-                            📅 FECHA
+                            📅 FECHA DEL SERVICIO
                         </label>
                         <input 
                             type="date" 
@@ -243,24 +321,23 @@
                             class="form-control"
                             required
                         >
+                        <div class="error-text" id="fechaError"></div>
+                        <div class="field-info">
+                            Fecha en la que se realiza el servicio
+                        </div>
                     </div>
                     
                     <div class="form-group">
                         <label for="cuartel_codigo" class="form-label">
-                            🏢 CUARTEL
+                            🏢 CUARTEL RESPONSABLE
                         </label>
                         <select id="cuartel_codigo" class="form-control" required>
                             <option value="">Seleccionar cuartel...</option>
-                            <option value="R. Alcerreca (F)">R. Alcerreca (F)</option>
-                            <option value="R. Caquena (F)">R. Caquena (F)</option>
-                            <option value="4ta. Com. Chacalluta (F)">4ta. Com. Chacalluta (F)</option>
-                            <option value="R. Chilcaya (F)">R. Chilcaya (F)</option>
-                            <option value="Tcia Chungara (F)">Tcia Chungara (F)</option>
-                            <option value="R. Chucuyo (F)">R. Chucuyo (F)</option>
-                            <option value="R. Guallatire (F)">R. Guallatire (F)</option>
-                            <option value="R. Tacora (F)">R. Tacora (F)</option>
-                            <option value="Tcia Visviri (F)">Tcia Visviri (F)</option>
                         </select>
+                        <div class="error-text" id="cuartelError"></div>
+                        <div class="field-info" id="cuartelInfo">
+                            Cuartel al que pertenece el servicio
+                        </div>
                     </div>
                 </div>
                 
@@ -272,10 +349,14 @@
                         type="text" 
                         id="nombre_servicio" 
                         class="form-control"
-                        placeholder="Ej: Patrullaje fronterizo sector norte"
+                        placeholder="Ej: Patrullaje fronterizo sector norte - Control migratorio"
                         maxlength="200"
                         required
                     >
+                    <div class="error-text" id="nombreServicioError"></div>
+                    <div class="field-info">
+                        Nombre descriptivo del servicio (máx. 200 caracteres)
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -286,9 +367,14 @@
                         type="text" 
                         id="jefe_servicio" 
                         class="form-control"
-                        placeholder="Ej: Capitán Juan Pérez"
+                        placeholder="Ej: Capitán Juan Pérez Rodríguez"
+                        maxlength="100"
                         required
                     >
+                    <div class="error-text" id="jefeServicioError"></div>
+                    <div class="field-info">
+                        Nombre completo del jefe responsable del servicio
+                    </div>
                 </div>
                 
                 <div class="grid-2">
@@ -297,19 +383,33 @@
                             🕐 HORARIO DEL SERVICIO
                         </label>
                         <div class="time-inputs">
-                            <input 
-                                type="time" 
-                                id="horario_inicio" 
-                                class="form-control"
-                                required
-                            >
+                            <div style="flex: 1;">
+                                <input 
+                                    type="time" 
+                                    id="horario_inicio" 
+                                    class="form-control"
+                                    required
+                                >
+                                <div class="field-info" style="text-align: center; margin-top: 4px;">
+                                    Inicio
+                                </div>
+                            </div>
                             <span class="time-separator">─</span>
-                            <input 
-                                type="time" 
-                                id="horario_termino" 
-                                class="form-control"
-                                required
-                            >
+                            <div style="flex: 1;">
+                                <input 
+                                    type="time" 
+                                    id="horario_termino" 
+                                    class="form-control"
+                                    required
+                                >
+                                <div class="field-info" style="text-align: center; margin-top: 4px;">
+                                    Término
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error-text" id="horarioError"></div>
+                        <div class="field-info">
+                            Horario de inicio y término del servicio
                         </div>
                     </div>
                 </div>
@@ -341,6 +441,10 @@
                         <option value="helada">🧊 Helada</option>
                         <option value="viento_fuerte">💨 Viento Fuerte</option>
                     </select>
+                    <div class="error-text" id="condicionMeteoError"></div>
+                    <div class="field-info">
+                        Condición meteorológica predominante durante el servicio
+                    </div>
                 </div>
                 
                 <div class="grid-3">
@@ -353,8 +457,13 @@
                             id="temperatura" 
                             class="form-control"
                             step="0.1"
+                            min="-50"
+                            max="50"
                             placeholder="Ej: -5.5"
                         >
+                        <div class="field-info">
+                            Temperatura en grados Celsius
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -365,20 +474,30 @@
                             type="number" 
                             id="visibilidad" 
                             class="form-control"
+                            min="0"
+                            max="10000"
                             placeholder="Ej: 1000"
                         >
+                        <div class="field-info">
+                            Visibilidad horizontal en metros
+                        </div>
                     </div>
                     
                     <div class="form-group">
                         <label for="viento_velocidad" class="form-label">
-                            💨 VIENTO (km/h)
+                            💨 VELOCIDAD DEL VIENTO (km/h)
                         </label>
                         <input 
                             type="number" 
                             id="viento_velocidad" 
                             class="form-control"
+                            min="0"
+                            max="200"
                             placeholder="Ej: 25"
                         >
+                        <div class="field-info">
+                            Velocidad máxima del viento
+                        </div>
                     </div>
                 </div>
                 
@@ -390,12 +509,25 @@
                         id="observaciones_clima" 
                         class="form-control"
                         rows="3"
-                        placeholder="Describa condiciones especiales del clima..."
+                        placeholder="Describa condiciones climáticas especiales, cambios repentinos, fenómenos particulares..."
+                        maxlength="500"
                     ></textarea>
+                    <div class="field-info">
+                        Observaciones adicionales sobre el clima (máx. 500 caracteres)
+                    </div>
                 </div>
                 
                 <!-- Panel de Riesgo (se actualiza automáticamente) -->
-                <div id="panelRiesgo" style="display: none;"></div>
+                <div id="panelRiesgo" class="panel-riesgo">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;" id="riesgoIcon">⚠️</div>
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;" id="riesgoTitulo">
+                        Riesgo Medio
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem;" id="riesgoDescripcion">
+                        Recomendaciones de operación
+                    </div>
+                    <div style="text-align: left; font-size: 0.85rem;" id="riesgoRecomendaciones"></div>
+                </div>
             </div>
             
             <!-- Botones de Navegación -->
@@ -404,22 +536,26 @@
                     🚪 Salir
                 </button>
                 <button type="submit" class="btn btn-primary" id="btnContinuar">
-                    CONTINUAR →
+                    GUARDAR Y CONTINUAR →
                 </button>
             </div>
         </form>
+        
+        <!-- Debug Info (solo visible en desarrollo) -->
+        <button type="button" onclick="window.debugInfo()" style="position: fixed; bottom: 10px; right: 10px; background: #f0f0f0; border: 1px solid #ccc; padding: 5px 10px; border-radius: 3px; font-size: 12px; cursor: pointer; z-index: 100;">
+            🐛 Debug
+        </button>
     </main>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/config.js"></script>
-    <script src="../js/modules/alertas-tempranas.js"></script>
     <script>
-        function logout() {
-            localStorage.clear();
-            window.location.href = '../index.html';
-        }
-
+        // Variables globales
+        let userData = {};
+        let cuartelesDisponibles = [];
+        let servicioId = null;
+        
         // Función para mostrar mensajes
         function mostrarMensaje(texto, tipo = 'info') {
             const messageEl = document.getElementById('message');
@@ -431,360 +567,553 @@
                 messageEl.style.display = 'none';
             }, 5000);
         }
-
-        // Lista de cuarteles definida directamente en el código
-        const CUARTELES = [
-            { codigo: 'R. Alcerreca (F)', nombre: 'R. Alcerreca (F)' },
-            { codigo: 'R. Caquena (F)', nombre: 'R. Caquena (F)' },
-            { codigo: '4ta. Com. Chacalluta (F)', nombre: '4ta. Com. Chacalluta (F)' },
-            { codigo: 'R. Chilcaya (F)', nombre: 'R. Chilcaya (F)' },
-            { codigo: 'Tcia Chungara (F)', nombre: 'Tcia Chungara (F)' },
-            { codigo: 'R. Chucuyo (F)', nombre: 'R. Chucuyo (F)' },
-            { codigo: 'R. Guallatire (F)', nombre: 'R. Guallatire (F)' },
-            { codigo: 'R. Tacora (F)', nombre: 'R. Tacora (F)' },
-            { codigo: 'Tcia Visviri (F)', nombre: 'Tcia Visviri (F)' }
-        ];
-
-        // Función para configurar select de cuarteles según el rol del usuario
-        function configurarCuarteles() {
-            const select = document.getElementById('cuartel_codigo');
-            const user = JSON.parse(localStorage.getItem('sicof_user'));
+        
+        // Función para mostrar error en campo
+        function mostrarErrorCampo(campoId, mensaje) {
+            const campo = document.getElementById(campoId);
+            const errorEl = document.getElementById(campoId + 'Error');
             
-            if (!user) {
-                console.error('Usuario no autenticado');
-                return;
+            if (errorEl) {
+                errorEl.textContent = mensaje;
+                campo.parentElement.classList.add('has-error');
             }
-            
-            console.log('Configurando cuarteles para usuario:', user.email, 'Rol:', user.rol);
-            
-            if (user.rol === 'digitador' && user.cuartel_codigo) {
-                // Digitador con cuartel asignado - mostrar solo su cuartel
-                const cuartelAsignado = CUARTELES.find(c => c.codigo === user.cuartel_codigo);
+        }
+        
+        // Función para limpiar errores
+        function limpiarErrores() {
+            document.querySelectorAll('.has-error').forEach(el => {
+                el.classList.remove('has-error');
+            });
+            document.querySelectorAll('.error-text').forEach(el => {
+                el.textContent = '';
+            });
+        }
+        
+        // Función para actualizar loading
+        function actualizarLoading(mensaje, detalles = '') {
+            document.getElementById('loadingMessage').textContent = mensaje;
+            document.getElementById('loadingDetails').textContent = detalles;
+        }
+        
+        // Función para mostrar debug
+        function mostrarDebug(info) {
+            const panel = document.getElementById('debugPanel');
+            panel.textContent = JSON.stringify(info, null, 2);
+            panel.style.display = 'block';
+        }
+        
+        // Función para cargar cuarteles
+        async function cargarCuarteles() {
+            try {
+                const select = document.getElementById('cuartel_codigo');
+                select.innerHTML = '<option value="">Seleccionar cuartel...</option>';
                 
-                if (cuartelAsignado) {
-                    select.innerHTML = `<option value="${cuartelAsignado.codigo}">${cuartelAsignado.nombre}</option>`;
-                    select.disabled = true;
-                    console.log(`Cuartel asignado para digitador: ${cuartelAsignado.nombre}`);
-                } else {
-                    // Si no encuentra su cuartel en la lista, mostrar todos
-                    CUARTELES.forEach(cuartel => {
-                        const option = document.createElement('option');
-                        option.value = cuartel.codigo;
-                        option.textContent = cuartel.nombre;
-                        select.appendChild(option);
-                    });
-                    console.warn(`Cuartel asignado (${user.cuartel_codigo}) no encontrado en la lista local`);
-                }
-            } else {
-                // Administrador o usuario sin cuartel asignado - mostrar todos los cuarteles
-                CUARTELES.forEach(cuartel => {
+                // Intentar obtener cuarteles de Supabase
+                const cuarteles = await obtenerCuarteles();
+                cuartelesDisponibles = cuarteles;
+                
+                // Agregar opciones
+                cuarteles.forEach(cuartel => {
                     const option = document.createElement('option');
                     option.value = cuartel.codigo;
                     option.textContent = cuartel.nombre;
                     select.appendChild(option);
                 });
-                console.log('Mostrando todos los cuarteles para administrador');
-            }
-        }
-
-        // Inicializar la aplicación
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('=== INICIALIZANDO APLICACIÓN ===');
-            
-            try {
-                // 1. Verificar autenticación
-                const user = JSON.parse(localStorage.getItem('sicof_user'));
-                console.log('DEBUG: Usuario en localStorage:', user);
                 
-                if (!user) {
-                    console.warn('⚠ Usuario no autenticado, redirigiendo...');
-                    window.location.href = '../index.html';
-                    return;
+                // Si el usuario tiene cuartel asignado, seleccionarlo
+                if (userData.cuartel_codigo) {
+                    const cuartelUsuario = cuarteles.find(c => c.codigo === userData.cuartel_codigo);
+                    if (cuartelUsuario) {
+                        select.value = userData.cuartel_codigo;
+                        document.getElementById('cuartelNombre').textContent = cuartelUsuario.nombre;
+                        document.getElementById('cuartelInfo').textContent = `Cuartel asignado: ${cuartelUsuario.nombre}`;
+                        select.disabled = true;
+                    }
                 }
                 
-                // Mostrar información del usuario
-                document.getElementById('userInfo').textContent = `${user.rol ? user.rol.toUpperCase() : 'USUARIO'} - ${user.email || 'Sin email'}`;
-                console.log(`✓ Usuario autenticado: ${user.email}, Rol: ${user.rol}`);
-                
-                // 2. Configurar cuarteles desde la lista local
-                console.log('Configurando cuarteles desde lista local...');
-                configurarCuarteles();
-                console.log('✓ Cuarteles configurados desde lista local');
-                
-                // 3. Establecer fecha por defecto (hoy)
-                const hoy = new Date().toISOString().split('T')[0];
-                document.getElementById('fecha').value = hoy;
-                console.log(`✓ Fecha establecida: ${hoy}`);
-                
-                // 4. Configurar listeners para panel de riesgo
-                document.getElementById('condicion_meteo').addEventListener('change', actualizarPanelRiesgo);
-                document.getElementById('temperatura').addEventListener('input', actualizarPanelRiesgo);
-                document.getElementById('visibilidad').addEventListener('input', actualizarPanelRiesgo);
-                console.log('✓ Listeners configurados');
-                
-                console.log('=== APLICACIÓN INICIALIZADA CON ÉXITO ===');
+                console.log('✅ Cuarteles cargados:', cuarteles.length);
                 
             } catch (error) {
-                console.error('✗ Error inicializando la aplicación:', error);
-                mostrarMensaje('Error al inicializar la aplicación: ' + error.message, 'danger');
+                console.error('❌ Error cargando cuarteles:', error);
+                
+                // Usar lista local como fallback
+                const cuarteles = window.SICOF_CONFIG.cuarteles;
+                const select = document.getElementById('cuartel_codigo');
+                
+                cuarteles.forEach(cuartel => {
+                    const option = document.createElement('option');
+                    option.value = cuartel.codigo;
+                    option.textContent = cuartel.nombre;
+                    select.appendChild(option);
+                });
+                
+                mostrarMensaje('⚠️ Usando lista local de cuarteles', 'warning');
             }
-        });
-
+        }
+        
         // Función para actualizar panel de riesgo
         function actualizarPanelRiesgo() {
             const condicion = document.getElementById('condicion_meteo').value;
+            const temperatura = parseFloat(document.getElementById('temperatura').value) || null;
+            const visibilidad = parseInt(document.getElementById('visibilidad').value) || null;
             
             if (!condicion) {
                 document.getElementById('panelRiesgo').style.display = 'none';
                 return;
             }
             
-            // Usar módulo de alertas tempranas si está disponible
-            if (window.AlertasTempranasModule && typeof window.AlertasTempranasModule.evaluarRiesgoOperacional === 'function') {
-                try {
-                    const temperatura = parseFloat(document.getElementById('temperatura').value) || 0;
-                    const visibilidad = parseInt(document.getElementById('visibilidad').value) || 1000;
-                    
-                    const riesgo = window.AlertasTempranasModule.evaluarRiesgoOperacional(
-                        condicion, 
-                        0, // detenidos
-                        0  // controles
-                    );
-                    
-                    const recomendaciones = window.AlertasTempranasModule.generarRecomendaciones(
-                        condicion,
-                        temperatura,
-                        visibilidad
-                    );
-                    
-                    let html = `
-                        <div class="panel-riesgo ${riesgo.label.toLowerCase().replace(' ', '-')}">
-                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">${riesgo.icon}</div>
-                            <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">
-                                Riesgo ${riesgo.label}
-                            </div>
-                            <div style="font-size: 0.9rem; opacity: 0.9;">
-                                ${riesgo.recomendacion}
-                            </div>
-                    `;
-                    
-                    if (recomendaciones && recomendaciones.length > 0) {
-                        html += `
-                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.3); text-align: left;">
-                                <strong>⚠️ Recomendaciones:</strong>
-                                <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                        `;
-                        recomendaciones.slice(0, 3).forEach(rec => {
-                            html += `<li style="margin-bottom: 0.3rem;">${rec}</li>`;
-                        });
-                        html += `</ul></div>`;
-                    }
-                    
-                    html += `</div>`;
-                    
-                    const panel = document.getElementById('panelRiesgo');
-                    panel.innerHTML = html;
-                    panel.style.display = 'block';
-                    
-                } catch (error) {
-                    console.error('Error en actualizarPanelRiesgo:', error);
+            // Determinar riesgo basado en condiciones
+            let riesgo = 'bajo';
+            let icono = '✅';
+            let titulo = 'Riesgo Bajo';
+            let descripcion = 'Condiciones normales de operación';
+            let recomendaciones = [];
+            
+            // Evaluar por condición meteorológica
+            const condicionesAltoRiesgo = ['tormenta', 'ventisca', 'niebla_densa', 'lluvia_intensa', 'nevada_intensa'];
+            const condicionesMedioRiesgo = ['lluvia_ligera', 'nieve_ligera', 'helada', 'viento_fuerte', 'nublado'];
+            
+            if (condicionesAltoRiesgo.includes(condicion)) {
+                riesgo = 'alto';
+                icono = '🚨';
+                titulo = 'Riesgo Alto';
+                descripcion = 'Condiciones adversas - Extremar precauciones';
+            } else if (condicionesMedioRiesgo.includes(condicion)) {
+                riesgo = 'medio';
+                icono = '⚠️';
+                titulo = 'Riesgo Medio';
+                descripcion = 'Condiciones moderadas - Precaución';
+            }
+            
+            // Evaluar por temperatura
+            if (temperatura !== null) {
+                if (temperatura < -10) {
+                    riesgo = 'alto';
+                    icono = '🚨';
+                    titulo = 'Riesgo Alto';
+                    descripcion = 'Temperatura extrema - Riesgo de hipotermia';
+                    recomendaciones.push('🧥 Equipamiento térmico obligatorio');
+                    recomendaciones.push('⏱️ Limitar tiempo de exposición exterior');
+                    recomendaciones.push('🔥 Verificar sistemas de calefacción en vehículos');
+                } else if (temperatura < 0) {
+                    if (riesgo !== 'alto') riesgo = 'medio';
+                    recomendaciones.push('🧤 Guantes y gorros térmicos recomendados');
+                    recomendaciones.push('🚗 Verificar anticongelante en vehículos');
+                } else if (temperatura > 30) {
+                    if (riesgo !== 'alto') riesgo = 'medio';
+                    recomendaciones.push('💧 Hidratación constante obligatoria');
+                    recomendaciones.push('🧴 Protección solar recomendada');
+                    recomendaciones.push('⏱️ Evitar exposición prolongada al sol');
                 }
             }
-        }
-
-        // Reemplazar TODO el event listener del submit con este código:
-        document.getElementById('servicioForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
             
-            console.log('=== INICIANDO PASO 1 ===');
+            // Evaluar por visibilidad
+            if (visibilidad !== null) {
+                if (visibilidad < 50) {
+                    riesgo = 'muy-alto';
+                    icono = '🔴';
+                    titulo = 'Riesgo Muy Alto';
+                    descripcion = 'Visibilidad crítica - Operaciones limitadas';
+                    recomendaciones.push('🚨 Suspender patrullajes no esenciales');
+                    recomendaciones.push('💡 Luces de emergencia activadas');
+                    recomendaciones.push('📻 Comunicación permanente con base');
+                } else if (visibilidad < 200) {
+                    riesgo = 'alto';
+                    icono = '🚨';
+                    titulo = 'Riesgo Alto';
+                    descripcion = 'Visibilidad reducida - Precaución extrema';
+                    recomendaciones.push('🚗 Reducir velocidad de vehículos');
+                    recomendaciones.push('💡 Usar luces antiniebla');
+                    recomendaciones.push('👁️ Mantener distancia de seguridad aumentada');
+                } else if (visibilidad < 500) {
+                    if (riesgo === 'bajo') riesgo = 'medio';
+                    recomendaciones.push('🚗 Conducir con precaución');
+                    recomendaciones.push('💡 Luces bajas encendidas');
+                }
+            }
+            
+            // Recomendaciones específicas por condición
+            if (condicion.includes('lluvia') || condicion.includes('nieve')) {
+                recomendaciones.push('🧥 Equipo impermeable obligatorio');
+                recomendaciones.push('👢 Calzado antideslizante');
+            }
+            
+            if (condicion.includes('nieve') || condicion.includes('helada')) {
+                recomendaciones.push('❄️ Cadenas para vehículos');
+                recomendaciones.push('🚗 Verificar frenos y neumáticos');
+            }
+            
+            if (condicion === 'viento_fuerte') {
+                recomendaciones.push('🌬️ Precaución con objetos voladores');
+                recomendaciones.push('🏠 Evitar áreas con árboles altos');
+            }
+            
+            // Actualizar panel
+            const panel = document.getElementById('panelRiesgo');
+            panel.className = `panel-riesgo ${riesgo}`;
+            panel.style.display = 'block';
+            
+            document.getElementById('riesgoIcon').textContent = icono;
+            document.getElementById('riesgoTitulo').textContent = titulo;
+            document.getElementById('riesgoDescripcion').textContent = descripcion;
+            
+            const recomendacionesHtml = recomendaciones.map(rec => 
+                `<div style="margin-bottom: 0.5rem; padding-left: 1rem; border-left: 3px solid rgba(255,255,255,0.5);">${rec}</div>`
+            ).join('');
+            
+            document.getElementById('riesgoRecomendaciones').innerHTML = recomendacionesHtml;
+        }
+        
+        // Función para validar formulario
+        function validarFormulario() {
+            let esValido = true;
+            limpiarErrores();
+            
+            // Validar fecha
+            const fecha = document.getElementById('fecha').value;
+            if (!fecha) {
+                mostrarErrorCampo('fecha', 'La fecha es requerida');
+                esValido = false;
+            } else {
+                const fechaObj = new Date(fecha);
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                
+                if (fechaObj > hoy) {
+                    mostrarErrorCampo('fecha', 'No puede seleccionar una fecha futura');
+                    esValido = false;
+                }
+            }
             
             // Validar cuartel
             const cuartel = document.getElementById('cuartel_codigo').value;
             if (!cuartel) {
-                mostrarMensaje('Debe seleccionar un cuartel', 'danger');
-                return;
+                mostrarErrorCampo('cuartel_codigo', 'Debe seleccionar un cuartel');
+                esValido = false;
             }
             
-            // Obtener usuario
-            const user = JSON.parse(localStorage.getItem('sicof_user'));
-            if (!user || !user.email) {
-                mostrarMensaje('Error: Usuario no autenticado', 'danger');
-                window.location.href = '../index.html';
-                return;
+            // Validar nombre del servicio
+            const nombreServicio = document.getElementById('nombre_servicio').value.trim();
+            if (!nombreServicio) {
+                mostrarErrorCampo('nombre_servicio', 'El nombre del servicio es requerido');
+                esValido = false;
+            } else if (nombreServicio.length < 5) {
+                mostrarErrorCampo('nombre_servicio', 'El nombre debe tener al menos 5 caracteres');
+                esValido = false;
+            }
+            
+            // Validar jefe del servicio
+            const jefeServicio = document.getElementById('jefe_servicio').value.trim();
+            if (!jefeServicio) {
+                mostrarErrorCampo('jefe_servicio', 'El jefe del servicio es requerido');
+                esValido = false;
             }
             
             // Validar horarios
             const horarioInicio = document.getElementById('horario_inicio').value;
             const horarioTermino = document.getElementById('horario_termino').value;
-            if (horarioInicio >= horarioTermino) {
-                mostrarMensaje('El horario de término debe ser posterior al de inicio', 'danger');
-                return;
+            
+            if (!horarioInicio) {
+                mostrarErrorCampo('horario_inicio', 'El horario de inicio es requerido');
+                esValido = false;
             }
             
-            // Validar nombre y jefe
-            if (!document.getElementById('nombre_servicio').value.trim()) {
-                mostrarMensaje('El nombre del servicio es requerido', 'danger');
-                return;
+            if (!horarioTermino) {
+                mostrarErrorCampo('horario_termino', 'El horario de término es requerido');
+                esValido = false;
             }
             
-            if (!document.getElementById('jefe_servicio').value.trim()) {
-                mostrarMensaje('El jefe del servicio es requerido', 'danger');
-                return;
+            if (horarioInicio && horarioTermino) {
+                if (horarioInicio >= horarioTermino) {
+                    mostrarErrorCampo('horario_inicio', 'El horario de término debe ser posterior al de inicio');
+                    esValido = false;
+                }
             }
             
-            // Preparar datos EXACTAMENTE como la tabla
-            const formData = {
-                fecha: document.getElementById('fecha').value,
-                cuartel_codigo: cuartel,
-                nombre_servicio: document.getElementById('nombre_servicio').value.trim(),
-                jefe_servicio: document.getElementById('jefe_servicio').value.trim(),
-                horario_inicio: horarioInicio,
-                horario_termino: horarioTermino,
-                condicion_meteo: document.getElementById('condicion_meteo').value,
-                temperatura: document.getElementById('temperatura').value || null,
-                visibilidad: document.getElementById('visibilidad').value || null,
-                viento_velocidad: document.getElementById('viento_velocidad').value || null,
-                observaciones_clima: document.getElementById('observaciones_clima').value.trim() || null,
-                digitador_email: user.email
-            };
+            // Validar condición meteorológica
+            const condicionMeteo = document.getElementById('condicion_meteo').value;
+            if (!condicionMeteo) {
+                mostrarErrorCampo('condicion_meteo', 'La condición meteorológica es requerida');
+                esValido = false;
+            }
             
-            console.log('Datos a enviar a Supabase:', formData);
-            
-            // Mostrar loading
-            document.getElementById('loadingOverlay').style.display = 'flex';
+            return esValido;
+        }
+        
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Iniciando datos-servicio.html');
             
             try {
-                // 1. VERIFICAR QUE SUPABASE ESTÉ CONFIGURADO
-                console.log('Verificando configuración de Supabase...');
-                if (!window.SICOF_CONFIG || !window.SICOF_CONFIG.supabase) {
-                    console.error('SICOF_CONFIG no encontrado:', window.SICOF_CONFIG);
-                    throw new Error('Configuración de Supabase no encontrada. Verifica config.js');
-                }
+                // Verificar autenticación
+                userData = await protegerPagina('digitador');
+                if (!userData) return;
                 
-                const supabase = window.SICOF_CONFIG.supabase;
-                console.log('Supabase configurado correctamente');
+                console.log('✅ Usuario autenticado:', userData);
                 
-                // 2. HACER EL INSERT EN SUPABASE
-                console.log('Insertando en tabla "servicios"...');
-                const { data, error } = await supabase
-                    .from('servicios')
-                    .insert([formData])
-                    .select()  // IMPORTANTE: .select() para obtener los datos insertados
-                    .single(); // .single() para obtener un solo objeto
+                // Mostrar información del usuario
+                document.getElementById('userInfo').textContent = `${userData.rol.toUpperCase()} - ${userData.email}`;
                 
-                if (error) {
-                    console.error('ERROR de Supabase:', error);
-                    console.error('Código:', error.code);
-                    console.error('Mensaje:', error.message);
-                    console.error('Detalles:', error.details);
-                    
-                    // Verificar si es error de clave foránea
-                    if (error.code === '23503') {
-                        throw new Error('El cuartel no existe en la tabla "cuarteles". Verifica la base de datos.');
-                    }
-                    
-                    throw new Error(`Error de base de datos: ${error.message}`);
-                }
+                // Cargar cuarteles
+                await cargarCuarteles();
                 
-                console.log('RESPUESTA de Supabase:', data);
+                // Establecer valores por defecto
+                establecerValoresPorDefecto();
                 
-                // 3. VERIFICAR QUE SE RECIBIÓ EL ID
-                if (!data || !data.id) {
-                    console.error('No se recibió ID en la respuesta:', data);
-                    throw new Error('No se recibió ID del registro. La respuesta fue: ' + JSON.stringify(data));
-                }
+                // Configurar eventos
+                configurarEventos();
                 
-                console.log('✅ REGISTRO CREADO EXITOSAMENTE');
-                console.log('ID generado:', data.id);
-                console.log('Datos completos recibidos:', data);
-                
-                // 4. GUARDAR EL ID EN localStorage (CRÍTICO)
-                localStorage.setItem('servicio_id', data.id);
-                localStorage.setItem('servicio_paso1', JSON.stringify(formData));
-                
-                console.log('localStorage actualizado:');
-                console.log('- servicio_id:', localStorage.getItem('servicio_id'));
-                console.log('- servicio_paso1:', localStorage.getItem('servicio_paso1'));
-                
-                // 5. MOSTRAR CONFIRMACIÓN DETALLADA
-                mostrarMensaje(`
-                    ✅ <strong>REGISTRO CREADO CORRECTAMENTE</strong><br>
-                    • ID: ${data.id.substring(0, 8)}...<br>
-                    • Fecha: ${formData.fecha}<br>
-                    • Cuartel: ${formData.cuartel_codigo}<br>
-                    • Redirigiendo al paso 2...
-                `, 'success');
-                
-                // 6. PAUSA PARA QUE SE VEA EL MENSAJE
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                // 7. REDIRIGIR A PASO 2
-                console.log('Redirigiendo a demanda-ciudadana.html...');
-                window.location.href = 'demanda-ciudadana.html';
+                console.log('✅ Aplicación inicializada correctamente');
                 
             } catch (error) {
-                console.error('❌ ERROR COMPLETO en paso 1:', error);
-                
-                let mensajeError = error.message;
-                
-                // Modo offline
-                if (error.message.includes('Supabase') || error.message.includes('configuración')) {
-                    console.warn('Intentando modo offline...');
-                    
-                    // Generar ID temporal
-                    const tempId = 'offline_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                    
-                    localStorage.setItem('servicio_id', tempId);
-                    localStorage.setItem('servicio_paso1', JSON.stringify(formData));
-                    localStorage.setItem('servicio_offline', 'true');
-                    
-                    console.log('✓ Datos guardados en modo offline. ID temporal:', tempId);
-                    
-                    mostrarMensaje(`
-                        ⚠️ <strong>MODO OFFLINE ACTIVADO</strong><br>
-                        • Los datos se guardaron localmente<br>
-                        • ID temporal: ${tempId}<br>
-                        • Se sincronizará cuando haya conexión<br>
-                        • Redirigiendo al paso 2...
-                    `, 'warning');
-                    
-                    setTimeout(() => {
-                        window.location.href = 'demanda-ciudadana.html';
-                    }, 2000);
-                    return;
-                }
-                
-                mostrarMensaje(`❌ ERROR: ${mensajeError}`, 'danger');
-                
-                // Botón para debug
-                const debugBtn = document.createElement('button');
-                debugBtn.textContent = '📋 Ver detalles del error';
-                debugBtn.className = 'btn btn-outline btn-sm mt-2';
-                debugBtn.onclick = () => {
-                    console.log('=== DEBUG COMPLETO ===');
-                    console.log('1. Datos enviados:', formData);
-                    console.log('2. Configuración:', window.SICOF_CONFIG);
-                    console.log('3. Error completo:', error);
-                    console.log('4. localStorage servicio_id:', localStorage.getItem('servicio_id'));
-                    alert('Revisa la consola (F12) para ver los detalles del error');
-                };
-                
-                document.getElementById('message').appendChild(debugBtn);
-                
-            } finally {
-                document.getElementById('loadingOverlay').style.display = 'none';
+                console.error('❌ Error inicializando aplicación:', error);
+                mostrarMensaje(`Error inicializando: ${error.message}`, 'danger');
             }
         });
         
-        // Función de utilidad para debugging
+        function establecerValoresPorDefecto() {
+            // Fecha actual
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha').value = hoy;
+            
+            // Horarios por defecto (08:00 - 20:00)
+            document.getElementById('horario_inicio').value = '08:00';
+            document.getElementById('horario_termino').value = '20:00';
+            
+            // Condición meteorológica por defecto
+            document.getElementById('condicion_meteo').value = 'despejado';
+            
+            // Temperatura por defecto (según estación)
+            const mes = new Date().getMonth() + 1;
+            if (mes >= 6 && mes <= 8) { // Invierno
+                document.getElementById('temperatura').value = '5';
+            } else if (mes >= 12 || mes <= 2) { // Verano
+                document.getElementById('temperatura').value = '20';
+            } else {
+                document.getElementById('temperatura').value = '15';
+            }
+            
+            // Visibilidad por defecto
+            document.getElementById('visibilidad').value = '1000';
+            
+            // Actualizar panel de riesgo
+            actualizarPanelRiesgo();
+        }
+        
+        function configurarEventos() {
+            // Actualizar panel de riesgo cuando cambian las condiciones
+            document.getElementById('condicion_meteo').addEventListener('change', actualizarPanelRiesgo);
+            document.getElementById('temperatura').addEventListener('input', actualizarPanelRiesgo);
+            document.getElementById('visibilidad').addEventListener('input', actualizarPanelRiesgo);
+            
+            // Validar números
+            document.getElementById('temperatura').addEventListener('change', function() {
+                const value = parseFloat(this.value);
+                if (isNaN(value) || value < -50 || value > 50) {
+                    this.value = '';
+                }
+            });
+            
+            document.getElementById('visibilidad').addEventListener('change', function() {
+                const value = parseInt(this.value);
+                if (isNaN(value) || value < 0 || value > 10000) {
+                    this.value = '';
+                }
+            });
+            
+            document.getElementById('viento_velocidad').addEventListener('change', function() {
+                const value = parseInt(this.value);
+                if (isNaN(value) || value < 0 || value > 200) {
+                    this.value = '';
+                }
+            });
+            
+            // Manejar envío del formulario
+            document.getElementById('servicioForm').addEventListener('submit', guardarPaso1);
+        }
+        
+        async function guardarPaso1(e) {
+            e.preventDefault();
+            
+            console.log('📝 Iniciando guardado del paso 1...');
+            
+            // Validar formulario
+            if (!validarFormulario()) {
+                mostrarMensaje('❌ Por favor corrija los errores en el formulario', 'danger');
+                return;
+            }
+            
+            // Mostrar loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            actualizarLoading('Guardando datos del servicio...', 'Paso 1: Datos básicos');
+            
+            try {
+                // Preparar datos para tabla servicios
+                const formData = {
+                    // Datos básicos
+                    cuartel_codigo: document.getElementById('cuartel_codigo').value,
+                    fecha: document.getElementById('fecha').value,
+                    nombre_servicio: document.getElementById('nombre_servicio').value.trim(),
+                    jefe_servicio: document.getElementById('jefe_servicio').value.trim(),
+                    horario_inicio: document.getElementById('horario_inicio').value,
+                    horario_termino: document.getElementById('horario_termino').value,
+                    
+                    // Condiciones meteorológicas
+                    condicion_meteo: document.getElementById('condicion_meteo').value,
+                    temperatura: document.getElementById('temperatura').value ? 
+                        parseFloat(document.getElementById('temperatura').value) : null,
+                    visibilidad: document.getElementById('visibilidad').value ? 
+                        parseInt(document.getElementById('visibilidad').value) : null,
+                    viento_velocidad: document.getElementById('viento_velocidad').value ? 
+                        parseInt(document.getElementById('viento_velocidad').value) : null,
+                    observaciones_clima: document.getElementById('observaciones_clima').value.trim() || null,
+                    
+                    // Datos del digitador
+                    digitador_email: userData.email
+                };
+                
+                console.log('📦 Datos preparados para insertar:', formData);
+                mostrarDebug(formData);
+                
+                // Verificar que el cuartel existe
+                actualizarLoading('Verificando cuartel...', formData.cuartel_codigo);
+                const { existe, mensaje } = await verificarCuartel(formData.cuartel_codigo);
+                
+                if (!existe) {
+                    throw new Error(`Error: ${mensaje}`);
+                }
+                
+                // Insertar en Supabase
+                actualizarLoading('Insertando en base de datos...', 'Tabla: servicios');
+                const { data, error } = await SICOF_CONFIG.supabase
+                    .from('servicios')
+                    .insert([formData])
+                    .select()
+                    .single();
+                
+                if (error) {
+                    console.error('❌ Error Supabase:', error);
+                    
+                    if (error.code === '23503') { // Foreign key violation
+                        throw new Error('El cuartel no existe en la base de datos');
+                    } else if (error.code === '42501') {
+                        throw new Error('Permiso denegado: No tiene permisos para insertar');
+                    } else if (error.code === '42P01') {
+                        throw new Error('La tabla "servicios" no existe en la base de datos');
+                    } else {
+                        throw new Error(`Error de base de datos: ${error.message}`);
+                    }
+                }
+                
+                if (!data || !data.id) {
+                    throw new Error('No se recibió ID del registro insertado');
+                }
+                
+                console.log('✅ Servicio creado exitosamente:', data);
+                
+                // Guardar ID y datos en localStorage
+                servicioId = data.id;
+                localStorage.setItem('servicio_id', servicioId);
+                localStorage.setItem('servicio_paso1', JSON.stringify(formData));
+                
+                console.log('💾 Datos guardados en localStorage:', {
+                    servicio_id: servicioId,
+                    servicio_paso1: formData
+                });
+                
+                // Mostrar mensaje de éxito
+                actualizarLoading('✅ ¡Paso 1 completado!', `ID: ${servicioId.substring(0, 8)}...`);
+                
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                    mostrarMensaje(`
+                        ✅ <strong>PASO 1 COMPLETADO CORRECTAMENTE</strong><br>
+                        • ID del servicio: ${servicioId.substring(0, 8)}...<br>
+                        • Fecha: ${formData.fecha}<br>
+                        • Cuartel: ${formData.cuartel_codigo}<br>
+                        • Redirigiendo al paso 2...
+                    `, 'success');
+                    
+                    // Redirigir al paso 2 después de 2 segundos
+                    setTimeout(() => {
+                        window.location.href = 'demanda-ciudadana.html';
+                    }, 2000);
+                    
+                }, 1500);
+                
+            } catch (error) {
+                console.error('🔥 Error guardando paso 1:', error);
+                
+                actualizarLoading('❌ Error al guardar', error.message);
+                
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                    let mensajeError = `❌ ERROR AL GUARDAR:<br>${error.message}`;
+                    
+                    // Intentar guardar localmente como fallback
+                    try {
+                        const formData = {
+                            cuartel_codigo: document.getElementById('cuartel_codigo').value,
+                            fecha: document.getElementById('fecha').value,
+                            nombre_servicio: document.getElementById('nombre_servicio').value.trim(),
+                            jefe_servicio: document.getElementById('jefe_servicio').value.trim(),
+                            horario_inicio: document.getElementById('horario_inicio').value,
+                            horario_termino: document.getElementById('horario_termino').value,
+                            condicion_meteo: document.getElementById('condicion_meteo').value,
+                            temperatura: document.getElementById('temperatura').value ? 
+                                parseFloat(document.getElementById('temperatura').value) : null,
+                            visibilidad: document.getElementById('visibilidad').value ? 
+                                parseInt(document.getElementById('visibilidad').value) : null,
+                            viento_velocidad: document.getElementById('viento_velocidad').value ? 
+                                parseInt(document.getElementById('viento_velocidad').value) : null,
+                            observaciones_clima: document.getElementById('observaciones_clima').value.trim() || null,
+                            digitador_email: userData.email
+                        };
+                        
+                        // Generar ID temporal
+                        const tempId = 'offline_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                        servicioId = tempId;
+                        
+                        localStorage.setItem('servicio_id', tempId);
+                        localStorage.setItem('servicio_paso1', JSON.stringify(formData));
+                        localStorage.setItem('servicio_offline', 'true');
+                        
+                        console.log('💾 Datos guardados en modo offline:', tempId);
+                        
+                        mensajeError += `<br><br>⚠️ <strong>MODO OFFLINE ACTIVADO</strong><br>
+                        • Los datos se guardaron localmente<br>
+                        • ID temporal: ${tempId}<br>
+                        • Se sincronizará cuando haya conexión<br>
+                        • Redirigiendo al paso 2...`;
+                        
+                        mostrarMensaje(mensajeError, 'warning');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'demanda-ciudadana.html';
+                        }, 3000);
+                        
+                    } catch (localError) {
+                        console.error('Error guardando localmente:', localError);
+                        mostrarMensaje(mensajeError + `<br><br>❌ Error guardando localmente: ${localError.message}`, 'danger');
+                    }
+                }, 2000);
+            }
+        }
+        
+        // Función para debugging
         window.debugInfo = function() {
-            console.log('=== INFORMACIÓN DEL SISTEMA ===');
-            console.log('1. Usuario:', JSON.parse(localStorage.getItem('sicof_user')));
-            console.log('2. Cuarteles definidos:', CUARTELES);
-            console.log('3. Cuartel seleccionado:', document.getElementById('cuartel_codigo').value);
-            console.log('4. SICOF_CONFIG disponible:', !!window.SICOF_CONFIG);
-            console.log('5. servicio_id en localStorage:', localStorage.getItem('servicio_id'));
-            console.log('=== FIN DEBUG ===');
+            console.log('=== DEBUG DATOS-SERVICIO ===');
+            console.log('Usuario:', userData);
+            console.log('Cuarteles disponibles:', cuartelesDisponibles);
+            console.log('Servicio ID (localStorage):', localStorage.getItem('servicio_id'));
+            console.log('Servicio Paso 1 (localStorage):', localStorage.getItem('servicio_paso1'));
+            console.log('SICOF_CONFIG:', SICOF_CONFIG ? 'Presente' : 'Ausente');
+            console.log('Supabase inicializado:', SICOF_CONFIG.supabase ? '✅' : '❌');
+            console.log('============================');
+            
+            alert('Debug info en consola. Verifica la consola del navegador (F12)');
         };
     </script>
 </body>
