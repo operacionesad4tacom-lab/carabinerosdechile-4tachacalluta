@@ -211,7 +211,7 @@
             right: 0;
             bottom: 0;
             background: rgba(255, 255, 255, 0.95);
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -235,20 +235,31 @@
             color: var(--verde-oficial);
         }
         
-        .progress-bar {
+        .progress-container {
             width: 300px;
+            margin-top: var(--spacing-lg);
+        }
+        
+        .progress-bar {
+            width: 100%;
             height: 10px;
             background: var(--gris-claro);
             border-radius: 5px;
-            margin-top: var(--spacing-md);
             overflow: hidden;
+            margin-bottom: var(--spacing-sm);
         }
         
         .progress-fill {
             height: 100%;
             background: var(--verde-oficial);
             width: 0%;
-            transition: width 0.3s ease;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+            text-align: center;
         }
         
         .step-status {
@@ -256,11 +267,25 @@
             color: var(--gris-medio);
             margin-top: var(--spacing-sm);
             min-height: 20px;
+            text-align: center;
+            width: 300px;
         }
         
-        .step-success { color: var(--verde-exito); }
-        .step-error { color: var(--rojo-alerta); }
-        .step-processing { color: var(--azul-info); }
+        .step-success {
+            color: var(--verde-exito);
+        }
+        
+        .step-error {
+            color: var(--rojo-alerta);
+        }
+        
+        .step-processing {
+            color: var(--azul-info);
+        }
+        
+        .step-warning {
+            color: var(--naranja-advertencia);
+        }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -277,6 +302,61 @@
             overflow-y: auto;
             font-family: monospace;
             font-size: 0.75rem;
+            display: none;
+        }
+        
+        .success-message {
+            text-align: center;
+            padding: var(--spacing-xl);
+            display: none;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            color: var(--verde-exito);
+            margin-bottom: var(--spacing-md);
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border: 2px solid #ffb74d;
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            display: none;
+        }
+        
+        .warning-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+            text-align: center;
+        }
+        
+        .warning-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #f57c00;
+            margin-bottom: var(--spacing-sm);
+            text-align: center;
+        }
+        
+        .warning-message {
+            color: #5d4037;
+            text-align: center;
+        }
+        
+        .servicio-id {
+            font-family: monospace;
+            background: var(--gris-claro);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.875rem;
         }
     </style>
 </head>
@@ -288,7 +368,7 @@
                 <img src="../assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
                 <div class="logo-text">
                     <div class="logo-title">SICOF - Sistema Integrado</div>
-                    <div class="logo-subtitle">Control Operativo Fronterizo</div>
+                    <div class="logo-subtitle">Resumen y Confirmación - Paso 4</div>
                 </div>
             </div>
             <div class="user-info" style="color: var(--blanco); text-align: right;">
@@ -299,25 +379,43 @@
     </header>
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-        <div class="loading-spinner"></div>
-        <div class="loading-text" id="loadingText">Procesando confirmación...</div>
-        
-        <!-- Barra de progreso -->
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div style="text-align: center; max-width: 400px;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">Procesando confirmación...</div>
+            
+            <!-- Contenedor de progreso -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">0% completado</div>
+            </div>
+            
+            <!-- Estado de cada paso -->
+            <div class="step-status" id="step1Status"></div>
+            <div class="step-status" id="step2Status"></div>
+            <div class="step-status" id="step3Status"></div>
+            <div class="step-status" id="step4Status"></div>
+            <div class="step-status" id="step5Status"></div>
         </div>
         
-        <!-- Estado de cada paso -->
-        <div class="step-status" id="step1Status"></div>
-        <div class="step-status" id="step2Status"></div>
-        <div class="step-status" id="step3Status"></div>
-        
         <!-- Vista previa de datos (solo para debug) -->
-        <div class="data-preview" id="dataPreview" style="display: none;">
+        <div class="data-preview" id="dataPreview">
             <strong>Datos a insertar:</strong>
             <pre id="jsonPreview"></pre>
         </div>
+    </div>
+
+    <!-- Mensaje de éxito (oculto inicialmente) -->
+    <div id="successMessage" class="success-message">
+        <div class="success-icon">✅</div>
+        <h3 style="margin-bottom: var(--spacing-sm); color: var(--verde-exito);">¡SERVICIO REGISTRADO EXITOSAMENTE!</h3>
+        <p>El servicio ha sido guardado permanentemente en la base de datos.</p>
+        <div class="servicio-id" id="finalServiceId"></div>
+        <p style="font-size: 0.875rem; color: var(--gris-medio); margin-top: var(--spacing-md);">
+            Redirigiendo al inicio...
+        </p>
     </div>
 
     <!-- Contenido Principal -->
@@ -345,9 +443,19 @@
         <!-- Mensajes -->
         <div id="message" class="alert" style="display: none;"></div>
         
+        <!-- Advertencia modo offline -->
+        <div class="warning-box" id="offlineWarning">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-title">MODO OFFLINE DETECTADO</div>
+            <div class="warning-message">
+                Los datos se guardaron localmente. Al confirmar, se intentará sincronizar con la base de datos.
+                Si hay conexión a internet, los datos se enviarán automáticamente.
+            </div>
+        </div>
+        
         <!-- Resumen del Servicio -->
         <h2 style="margin-bottom: var(--spacing-xl); color: var(--verde-oscuro);">
-            📊 RESUMEN DEL SERVICIO
+            📊 RESUMEN COMPLETO DEL SERVICIO
         </h2>
         
         <!-- Datos Básicos -->
@@ -465,14 +573,44 @@
             <!-- Los indicadores se cargarán dinámicamente -->
         </div>
         
+        <!-- Información del Digitador -->
+        <div class="resumen-card" style="margin-bottom: var(--spacing-xl);">
+            <div class="resumen-header">
+                <span class="resumen-icon">👤</span>
+                <span class="resumen-title">INFORMACIÓN DEL DIGITADOR</span>
+            </div>
+            
+            <div class="grid-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg);">
+                <div class="resumen-item">
+                    <div class="resumen-label">DIGITADOR</div>
+                    <div class="resumen-value" id="resDigitador"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">ROL</div>
+                    <div class="resumen-value" id="resRol"></div>
+                </div>
+                
+                <div class="resumen-item">
+                    <div class="resumen-label">FECHA REGISTRO</div>
+                    <div class="resumen-value" id="resFechaRegistro"></div>
+                </div>
+            </div>
+            
+            <div class="resumen-item">
+                <div class="resumen-label">ID DEL SERVICIO</div>
+                <div class="resumen-value">
+                    <span class="servicio-id" id="resServicioId">Cargando...</span>
+                </div>
+            </div>
+        </div>
+        
         <!-- Alerta de Confirmación -->
         <div class="alerta-confirmacion">
             <div class="alerta-icono">⚠️</div>
             <div class="alerta-titulo">IMPORTANTE: CONFIRMACIÓN FINAL</div>
             <div class="alerta-mensaje">
                 Una vez que confirme este registro, el proceso se completará y <strong>no podrá modificar los datos</strong>.
-            </div>
-            <div class="alerta-mensaje">
                 Los datos se guardarán permanentemente en la base de datos central de SICOF.
             </div>
             <div class="alerta-destacado" id="resumenDetalles">
@@ -490,16 +628,11 @@
                 <button type="button" class="btn btn-outline" onclick="window.location.href='../index.html'">
                     🚪 Salir
                 </button>
-                <button type="button" class="btn btn-primary" id="btnConfirmar" style="min-width: 200px;">
+                <button type="button" class="btn btn-primary" id="btnConfirmar" style="min-width: 250px;">
                     ✅ CONFIRMAR Y GUARDAR EN BD
                 </button>
             </div>
         </div>
-        
-        <!-- Para debugging -->
-        <button type="button" onclick="window.debugInfo()" style="position: fixed; bottom: 10px; right: 10px; background: #f0f0f0; border: 1px solid #ccc; padding: 5px 10px; border-radius: 3px; font-size: 12px; cursor: pointer; z-index: 100;">
-            🐛 Debug
-        </button>
     </main>
 
     <!-- Scripts -->
@@ -507,8 +640,11 @@
     <script src="../js/config.js"></script>
     <script>
         // Variables globales
-        let datosCompletos = {};
         let userData = {};
+        let datosCompletos = {};
+        let modoOffline = false;
+        let servicioExistente = null;
+        let servicioId = null;
         
         // Función para mostrar mensajes
         function mostrarMensaje(texto, tipo = 'info') {
@@ -531,52 +667,60 @@
             }
             
             // Actualizar barra de progreso
-            const progreso = paso * 33;
+            const porcentajes = [0, 20, 40, 60, 80, 100];
+            const progreso = porcentajes[paso] || 0;
             document.getElementById('progressFill').style.width = `${progreso}%`;
+            document.getElementById('progressText').textContent = `${progreso}% completado`;
+        }
+        
+        // Actualizar texto de loading
+        function actualizarLoading(texto) {
+            document.getElementById('loadingText').textContent = texto;
+        }
+        
+        // Mostrar datos para debug
+        function mostrarDebug(info) {
+            document.getElementById('jsonPreview').textContent = JSON.stringify(info, null, 2);
+            document.getElementById('dataPreview').style.display = 'block';
         }
         
         // Verificar autenticación y cargar datos
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('🔍 Iniciando paso 4 - Confirmación');
             
-            userData = JSON.parse(localStorage.getItem('sicof_user'));
-            
-            if (!userData || userData.rol !== 'digitador') {
-                mostrarMensaje('⚠️ Debe iniciar sesión como digitador', 'warning');
-                setTimeout(() => window.location.href = '../index.html', 2000);
-                return;
-            }
-            
-            // Verificar que tenga todos los datos de los 3 pasos
-            const paso1 = localStorage.getItem('servicio_paso1');
-            const paso2 = localStorage.getItem('servicio_paso2');
-            const paso3 = localStorage.getItem('servicio_paso3');
-            
-            console.log('Datos encontrados:', {
-                paso1: !!paso1,
-                paso2: !!paso2,
-                paso3: !!paso3
-            });
-            
-            if (!paso1) {
-                mostrarMensaje('❌ Complete primero el paso 1: Datos del Servicio', 'danger');
-                setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
-                return;
-            }
-            
-            if (!paso2) {
-                mostrarMensaje('❌ Complete primero el paso 2: Demanda Ciudadana', 'danger');
-                setTimeout(() => window.location.href = 'demanda-ciudadana.html', 2000);
-                return;
-            }
-            
-            if (!paso3) {
-                mostrarMensaje('❌ Complete primero el paso 3: Demanda Preventiva', 'danger');
-                setTimeout(() => window.location.href = 'demanda-preventiva.html', 2000);
-                return;
-            }
-            
             try {
+                // Verificar autenticación
+                userData = await protegerPagina('digitador');
+                if (!userData) return;
+                
+                console.log('✅ Usuario autenticado:', userData);
+                
+                // Verificar que tenga todos los datos de los 3 pasos
+                const paso1 = localStorage.getItem('servicio_paso1');
+                const paso2 = localStorage.getItem('servicio_paso2');
+                const paso3 = localStorage.getItem('servicio_paso3');
+                servicioId = localStorage.getItem('servicio_id');
+                
+                console.log('📋 Datos encontrados:', {
+                    paso1: !!paso1,
+                    paso2: !!paso2,
+                    paso3: !!paso3,
+                    servicioId: servicioId
+                });
+                
+                if (!paso1 || !paso2 || !paso3 || !servicioId) {
+                    mostrarMensaje('❌ Complete todos los pasos anteriores primero', 'danger');
+                    setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
+                    return;
+                }
+                
+                // Verificar modo offline
+                modoOffline = localStorage.getItem('servicio_offline') === 'true';
+                if (modoOffline) {
+                    document.getElementById('offlineWarning').style.display = 'block';
+                    console.log('🌐 Modo offline detectado');
+                }
+                
                 // Combinar todos los datos
                 datosCompletos = {
                     ...JSON.parse(paso1),
@@ -584,31 +728,30 @@
                     ...JSON.parse(paso3)
                 };
                 
-                console.log('✅ Datos combinados correctamente:', datosCompletos);
-            } catch (error) {
-                console.error('❌ Error parseando datos:', error);
-                mostrarMensaje('❌ Error al cargar los datos guardados', 'danger');
-                return;
-            }
-            
-            // Mostrar información del usuario
-            document.getElementById('userInfo').textContent = `${userData.rol.toUpperCase()} - ${userData.email}`;
-            
-            // Mostrar cuartel
-            if (window.SICOF_CONFIG && window.SICOF_CONFIG.cuarteles) {
-                const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === userData.cuartel_codigo);
-                if (cuartel) {
-                    document.getElementById('cuartelNombre').textContent = cuartel.nombre;
+                console.log('✅ Datos combinados correctamente');
+                
+                // Mostrar información del usuario
+                document.getElementById('userInfo').textContent = `${userData.rol.toUpperCase()} - ${userData.email}`;
+                
+                // Mostrar cuartel
+                const cuartelInfo = await obtenerCuarteles();
+                const cuartelUsuario = cuartelInfo.find(c => c.codigo === userData.cuartel_codigo);
+                if (cuartelUsuario) {
+                    document.getElementById('cuartelNombre').textContent = cuartelUsuario.nombre;
                 }
+                
+                // Mostrar resumen
+                mostrarResumen();
+                
+                // Configurar botón de confirmación
+                document.getElementById('btnConfirmar').addEventListener('click', confirmarRegistro);
+                
+                console.log('✅ Paso 4 listo para confirmar');
+                
+            } catch (error) {
+                console.error('❌ Error inicializando aplicación:', error);
+                mostrarMensaje(`Error inicializando: ${error.message}`, 'danger');
             }
-            
-            // Mostrar resumen
-            mostrarResumen();
-            
-            // Configurar botón de confirmación
-            document.getElementById('btnConfirmar').addEventListener('click', confirmarRegistro);
-            
-            console.log('✅ Paso 4 listo para confirmar');
         });
         
         function mostrarResumen() {
@@ -622,12 +765,18 @@
                 
                 // Clima
                 const climaMap = {
-                    'soleado': '☀️ Soleado',
+                    'despejado': '☀️ Despejado',
+                    'parcialmente_nublado': '⛅ Parcialmente Nublado',
                     'nublado': '☁️ Nublado',
-                    'lluvia': '🌧️ Lluvia',
-                    'nieve': '❄️ Nieve',
-                    'tormenta': '⛈️ Tormenta',
-                    'viento': '💨 Viento'
+                    'lluvia_ligera': '🌧️ Lluvia Ligera',
+                    'lluvia_intensa': '⛈️ Lluvia Intensa',
+                    'tormenta': '⚡ Tormenta Eléctrica',
+                    'nieve_ligera': '🌨️ Nieve Ligera',
+                    'nevada_intensa': '❄️ Nevada Intensa',
+                    'ventisca': '🌬️ Ventisca',
+                    'niebla_densa': '🌫️ Niebla Densa',
+                    'helada': '🧊 Helada',
+                    'viento_fuerte': '💨 Viento Fuerte'
                 };
                 document.getElementById('resClima').textContent = climaMap[datosCompletos.condicion_meteo] || datosCompletos.condicion_meteo;
                 
@@ -686,7 +835,16 @@
                 document.getElementById('resCumplimiento').textContent = `${cumplimiento}%`;
                 
                 // Observaciones
-                document.getElementById('resObservaciones').textContent = datosCompletos.observaciones || 'Sin observaciones';
+                const observaciones = datosCompletos.observaciones;
+                document.getElementById('resObservaciones').textContent = observaciones ? 
+                    (observaciones.length > 50 ? observaciones.substring(0, 50) + '...' : observaciones) : 
+                    'Sin observaciones';
+                
+                // Información del digitador
+                document.getElementById('resDigitador').textContent = userData.email;
+                document.getElementById('resRol').textContent = userData.rol.toUpperCase();
+                document.getElementById('resFechaRegistro').textContent = new Date().toLocaleDateString('es-CL');
+                document.getElementById('resServicioId').textContent = servicioId ? servicioId.substring(0, 8) + '...' : 'No disponible';
                 
                 // Actualizar resumen en alerta
                 document.getElementById('resumenDetalles').textContent = 
@@ -714,6 +872,10 @@
                 
                 const tasaDetencion = totalControles > 0
                     ? Math.round(((parseInt(datosCompletos.detenidos_cantidad) || 0) / totalControles) * 1000) / 10
+                    : 0;
+                
+                const efectividadPreventiva = totalControles > 0
+                    ? Math.round(((totalControles - totalInfracciones) / totalControles) * 100)
                     : 0;
                 
                 // Mostrar indicadores
@@ -750,12 +912,12 @@
                     </div>
                     
                     <div class="indicador-card">
-                        <div class="indicador-valor">
-                            ${totalControles.toLocaleString()}
+                        <div class="indicador-valor ${clasificarEfectividad(efectividadPreventiva)}">
+                            ${efectividadPreventiva}%
                         </div>
-                        <div class="indicador-titulo">TOTAL CONTROLES</div>
+                        <div class="indicador-titulo">EFECTIVIDAD PREVENTIVA</div>
                         <div class="indicador-descripcion">
-                            Controles investigativos, preventivos, migratorios y vehiculares
+                            ${totalControles - totalInfracciones} controles sin infracciones
                         </div>
                     </div>
                 `;
@@ -786,7 +948,7 @@
         
         function formatearFecha(fechaStr) {
             try {
-                const fecha = new Date(fechaStr);
+                const fecha = new Date(fechaStr + 'T00:00:00');
                 return fecha.toLocaleDateString('es-CL', {
                     weekday: 'long',
                     year: 'numeric',
@@ -813,24 +975,18 @@
             
             // Mostrar loading
             document.getElementById('loadingOverlay').style.display = 'flex';
-            document.getElementById('loadingText').textContent = 'Guardando en base de datos...';
             document.getElementById('btnConfirmar').disabled = true;
+            actualizarLoading('Iniciando proceso de confirmación...');
             
             try {
-                console.log('🚀 Iniciando proceso de guardado en Supabase');
+                console.log('🚀 Iniciando proceso completo de guardado');
                 
-                // 1. Verificar que Supabase esté configurado
-                if (!window.SICOF_CONFIG || !window.SICOF_CONFIG.supabase) {
-                    throw new Error('Configuración de Supabase no encontrada');
-                }
+                // PASO 1: Preparar datos finales
+                actualizarEstado(1, 'Preparando datos del servicio...', 'processing');
                 
-                const supabase = window.SICOF_CONFIG.supabase;
-                actualizarEstado(1, 'Preparando datos...', 'processing');
-                
-                // 2. Preparar datos finales para insertar
                 const datosFinales = {
                     // Datos del paso 1
-                    cuartel_codigo: datosCompletos.cuartel_codigo || userData.cuartel_codigo,
+                    cuartel_codigo: datosCompletos.cuartel_codigo,
                     fecha: datosCompletos.fecha,
                     nombre_servicio: datosCompletos.nombre_servicio,
                     jefe_servicio: datosCompletos.jefe_servicio,
@@ -868,127 +1024,337 @@
                     digitador_email: userData.email
                 };
                 
-                console.log('📦 Datos preparados para insertar:', datosFinales);
-                actualizarEstado(1, '✓ Datos preparados', 'success');
-                actualizarEstado(2, 'Conectando con base de datos...', 'processing');
+                console.log('📦 Datos finales preparados:', datosFinales);
+                actualizarEstado(1, '✓ Datos preparados correctamente', 'success');
                 
-                // 3. Validar campos obligatorios
-                const camposRequeridos = [
-                    'cuartel_codigo', 'fecha', 'nombre_servicio', 
-                    'jefe_servicio', 'horario_inicio', 'horario_termino'
-                ];
+                // PASO 2: Verificar que el cuartel existe
+                actualizarEstado(2, 'Verificando cuartel en la base de datos...', 'processing');
+                actualizarLoading('Verificando datos del cuartel...');
                 
-                const camposFaltantes = camposRequeridos.filter(campo => !datosFinales[campo]);
-                if (camposFaltantes.length > 0) {
-                    throw new Error(`Campos requeridos faltantes: ${camposFaltantes.join(', ')}`);
+                const { existe, mensaje } = await verificarCuartel(datosFinales.cuartel_codigo);
+                if (!existe) {
+                    throw new Error(`Error: ${mensaje}`);
                 }
                 
-                // 4. INSERTAR EN SUPABASE
-                actualizarEstado(2, '✓ Conectado a Supabase', 'success');
-                actualizarEstado(3, 'Insertando registro...', 'processing');
-                document.getElementById('loadingText').textContent = 'Insertando registro en la tabla servicios...';
+                actualizarEstado(2, '✓ Cuartel verificado correctamente', 'success');
                 
-                const { data, error } = await supabase
+                // PASO 3: Procesar según modo
+                if (modoOffline) {
+                    await procesarModoOffline(datosFinales);
+                } else {
+                    await procesarModoOnline(datosFinales);
+                }
+                
+                // PASO 4: Finalizar proceso
+                actualizarEstado(5, 'Finalizando proceso...', 'processing');
+                actualizarLoading('Proceso completado exitosamente');
+                
+                // Mostrar mensaje de éxito final
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                    // Ocultar formulario y mostrar mensaje de éxito
+                    document.querySelector('main').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                    
+                    // Limpiar localStorage (mantener solo sicof_user)
+                    limpiarLocalStorage();
+                    
+                    console.log('✅ Proceso completado exitosamente');
+                    
+                    // Redirigir después de 5 segundos
+                    setTimeout(() => {
+                        window.location.href = '../index.html';
+                    }, 5000);
+                    
+                }, 2000);
+                
+            } catch (error) {
+                console.error('🔥 Error en confirmación:', error);
+                manejarErrorConfirmacion(error);
+            }
+        }
+        
+        async function procesarModoOffline(datosFinales) {
+            console.log('🌐 Procesando en modo offline...');
+            
+            actualizarEstado(3, 'Modo offline detectado...', 'warning');
+            actualizarLoading('Sincronizando datos offline...');
+            
+            // Intentar conectar a Supabase
+            try {
+                // Verificar conexión
+                const { data: test, error: testError } = await SICOF_CONFIG.supabase
+                    .from('servicios')
+                    .select('count')
+                    .limit(1);
+                
+                if (testError) {
+                    throw new Error('Sin conexión a la base de datos');
+                }
+                
+                // Si hay conexión, intentar insertar
+                actualizarEstado(3, 'Conexión restablecida, sincronizando...', 'processing');
+                
+                const { data, error } = await SICOF_CONFIG.supabase
                     .from('servicios')
                     .insert([datosFinales])
                     .select()
                     .single();
                 
                 if (error) {
-                    console.error('❌ Error Supabase al insertar:', error);
-                    
-                    // Intentar diagnóstico
-                    if (error.code === '23503') {
-                        throw new Error(`Error de relación: Verifica que el cuartel ${datosFinales.cuartel_codigo} existe en la tabla cuarteles`);
-                    } else if (error.code === '42501') {
-                        throw new Error('Permiso denegado: No tiene permisos para insertar en esta tabla');
-                    } else if (error.code === '42P01') {
-                        throw new Error('La tabla "servicios" no existe en la base de datos');
-                    } else {
-                        throw new Error(`Error de base de datos: ${error.message} (Código: ${error.code})`);
+                    // Si falla el insert, guardar para sincronización posterior
+                    throw new Error(`Error sincronizando: ${error.message}`);
+                }
+                
+                console.log('✅ Datos sincronizados exitosamente:', data);
+                servicioId = data.id;
+                actualizarEstado(3, '✓ Datos sincronizados correctamente', 'success');
+                actualizarEstado(4, 'Eliminando datos locales...', 'processing');
+                
+                // Eliminar marca de offline
+                localStorage.removeItem('servicio_offline');
+                
+            } catch (syncError) {
+                console.warn('❌ No se pudo sincronizar, guardando localmente:', syncError.message);
+                
+                // Guardar datos para sincronización posterior
+                const serviciosPendientes = JSON.parse(localStorage.getItem('servicios_pendientes') || '[]');
+                serviciosPendientes.push({
+                    ...datosFinales,
+                    intentos: 0,
+                    fecha_creacion: new Date().toISOString()
+                });
+                
+                localStorage.setItem('servicios_pendientes', JSON.stringify(serviciosPendientes));
+                actualizarEstado(3, '⚠️ Datos guardados para sincronización posterior', 'warning');
+            }
+            
+            actualizarEstado(4, '✓ Proceso offline completado', 'success');
+        }
+        
+        async function procesarModoOnline(datosFinales) {
+            console.log('🌐 Procesando en modo online...');
+            
+            // PASO 3A: Verificar si el servicio ya existe
+            actualizarEstado(3, 'Verificando servicio existente...', 'processing');
+            actualizarLoading('Verificando estado del servicio...');
+            
+            let servicioExiste = false;
+            
+            if (servicioId && !servicioId.startsWith('offline_')) {
+                const { data: servicioDB, error } = await SICOF_CONFIG.supabase
+                    .from('servicios')
+                    .select('*')
+                    .eq('id', servicioId)
+                    .single();
+                
+                if (!error && servicioDB) {
+                    servicioExiste = true;
+                    servicioExistente = servicioDB;
+                    console.log('✅ Servicio encontrado en BD, actualizando...');
+                }
+            }
+            
+            // PASO 3B: Insertar o actualizar según corresponda
+            actualizarEstado(3, servicioExiste ? 'Actualizando servicio...' : 'Insertando nuevo servicio...', 'processing');
+            actualizarLoading(servicioExiste ? 'Actualizando registro...' : 'Creando nuevo registro...');
+            
+            let resultado;
+            
+            if (servicioExiste) {
+                // Actualizar servicio existente
+                const { data, error } = await SICOF_CONFIG.supabase
+                    .from('servicios')
+                    .update(datosFinales)
+                    .eq('id', servicioId)
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                resultado = data;
+                
+            } else {
+                // Insertar nuevo servicio
+                const { data, error } = await SICOF_CONFIG.supabase
+                    .from('servicios')
+                    .insert([datosFinales])
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                resultado = data;
+                servicioId = data.id;
+            }
+            
+            console.log('✅ Servicio guardado exitosamente:', resultado);
+            actualizarEstado(3, '✓ Servicio guardado correctamente', 'success');
+            
+            // PASO 4: Generar alertas si corresponde
+            actualizarEstado(4, 'Generando alertas automáticas...', 'processing');
+            actualizarLoading('Analizando datos para alertas...');
+            
+            await generarAlertasAutomaticas(resultado);
+            
+            actualizarEstado(4, '✓ Alertas procesadas', 'success');
+        }
+        
+        async function generarAlertasAutomaticas(servicio) {
+            try {
+                const alertas = [];
+                
+                // Alerta por detenidos
+                if (servicio.detenidos_cantidad > 0) {
+                    alertas.push({
+                        servicio_id: servicio.id,
+                        cuartel_codigo: servicio.cuartel_codigo,
+                        origen: 'sistema',
+                        tipo: 'detencion',
+                        prioridad: servicio.detenidos_cantidad >= 3 ? 'alta' : 'media',
+                        titulo: `Detención en servicio ${servicio.nombre_servicio}`,
+                        mensaje: `Se registraron ${servicio.detenidos_cantidad} detenidos durante el servicio. Motivo: ${servicio.motivo_detencion || 'No especificado'}`,
+                        nivel_riesgo: servicio.detenidos_cantidad >= 3 ? 'alto' : 'medio'
+                    });
+                }
+                
+                // Alerta por clima adverso
+                const condicionesAdversas = ['lluvia_intensa', 'tormenta', 'nevada_intensa', 'ventisca', 'niebla_densa'];
+                if (condicionesAdversas.includes(servicio.condicion_meteo)) {
+                    alertas.push({
+                        servicio_id: servicio.id,
+                        cuartel_codigo: servicio.cuartel_codigo,
+                        origen: 'sistema',
+                        tipo: 'clima_adverso',
+                        prioridad: 'media',
+                        titulo: `Condiciones climáticas adversas`,
+                        mensaje: `Servicio realizado bajo condiciones de ${servicio.condicion_meteo}. Temperatura: ${servicio.temperatura || 'N/A'}°C`,
+                        nivel_riesgo: 'medio'
+                    });
+                }
+                
+                // Alerta por bajo cumplimiento de demanda preventiva
+                const totalPlanificados = (servicio.hitos_planificados || 0) + (servicio.pnh_planificados || 0) + (servicio.sitios_planificados || 0);
+                const totalRealizados = (servicio.hitos_realizados || 0) + (servicio.pnh_realizados || 0) + (servicio.sitios_realizados || 0);
+                
+                if (totalPlanificados > 0) {
+                    const cumplimiento = Math.round((totalRealizados / totalPlanificados) * 100);
+                    if (cumplimiento < 50) {
+                        alertas.push({
+                            servicio_id: servicio.id,
+                            cuartel_codigo: servicio.cuartel_codigo,
+                            origen: 'sistema',
+                            tipo: 'falta_recursos',
+                            prioridad: 'baja',
+                            titulo: `Bajo cumplimiento de demanda preventiva`,
+                            mensaje: `Cumplimiento del ${cumplimiento}% en actividades planificadas`,
+                            nivel_riesgo: 'bajo'
+                        });
                     }
                 }
                 
-                if (!data) {
-                    throw new Error('No se recibió respuesta de la base de datos');
+                // Insertar alertas si hay alguna
+                if (alertas.length > 0) {
+                    const { error } = await SICOF_CONFIG.supabase
+                        .from('alertas')
+                        .insert(alertas);
+                    
+                    if (error) {
+                        console.warn('⚠️ Error insertando alertas:', error);
+                    } else {
+                        console.log(`✅ ${alertas.length} alertas generadas automáticamente`);
+                    }
                 }
-                
-                console.log('✅ Registro insertado correctamente:', data);
-                actualizarEstado(3, '✓ Registro insertado exitosamente', 'success');
-                document.getElementById('loadingText').textContent = '¡Registro completado con éxito!';
-                document.getElementById('progressFill').style.width = '100%';
-                
-                // 5. Mostrar mensaje de éxito
-                setTimeout(() => {
-                    mostrarMensaje(
-                        `✅ REGISTRO COMPLETADO CON ÉXITO<br>
-                        ✓ ID: ${data.id}<br>
-                        ✓ Servicio: ${data.nombre_servicio}<br>
-                        ✓ Fecha: ${formatearFecha(data.fecha)}<br>
-                        ✓ Guardado en: ${new Date().toLocaleTimeString()}`,
-                        'success'
-                    );
-                }, 500);
-                
-                // 6. Limpiar localStorage (mantener solo sicof_user)
-                const userDataBackup = localStorage.getItem('sicof_user');
-                const keysToRemove = [
-                    'servicio_paso1', 'servicio_paso2', 'servicio_paso3',
-                    'servicio_id', 'servicio_temporal'
-                ];
-                
-                keysToRemove.forEach(key => localStorage.removeItem(key));
-                if (userDataBackup) {
-                    localStorage.setItem('sicof_user', userDataBackup);
-                }
-                
-                console.log('🧹 localStorage limpiado');
-                
-                // 7. Redirigir después de 5 segundos
-                setTimeout(() => {
-                    window.location.href = '../index.html';
-                }, 5000);
                 
             } catch (error) {
-                console.error('🔥 Error completo:', error);
-                
-                // Ocultar loading
-                document.getElementById('loadingOverlay').style.display = 'none';
-                document.getElementById('btnConfirmar').disabled = false;
-                
-                // Mostrar error detallado
-                let mensajeError = `❌ ERROR AL GUARDAR:<br>${error.message}`;
-                
-                if (error.message.includes('permiso') || error.message.includes('RLS')) {
-                    mensajeError += `<br><br>🔒 PROBLEMA DE PERMISOS:<br>
-                    1. Verifica que RLS esté CONFIGURADO<br>
-                    2. Revisa las políticas de la tabla servicios<br>
-                    3. Contacta al administrador del sistema`;
-                }
-                
-                mostrarMensaje(mensajeError, 'danger');
-                
-                // Mostrar datos para debug
-                document.getElementById('dataPreview').style.display = 'block';
-                document.getElementById('jsonPreview').textContent = JSON.stringify(datosCompletos, null, 2);
+                console.warn('⚠️ Error generando alertas automáticas:', error);
+                // No lanzar error para no bloquear el proceso principal
             }
+        }
+        
+        function manejarErrorConfirmacion(error) {
+            console.error('❌ Error en confirmación:', error);
+            
+            // Ocultar loading
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('btnConfirmar').disabled = false;
+            
+            let mensajeError = `❌ ERROR AL CONFIRMAR:<br>${error.message}`;
+            
+            // Mensajes específicos según tipo de error
+            if (error.message.includes('permiso') || error.message.includes('RLS')) {
+                mensajeError += `<br><br>🔒 <strong>PROBLEMA DE PERMISOS:</strong><br>
+                1. Verifica que RLS esté CONFIGURADO correctamente<br>
+                2. Revisa las políticas de la tabla servicios<br>
+                3. Contacta al administrador del sistema`;
+            }
+            
+            if (error.message.includes('cuartel')) {
+                mensajeError += `<br><br>🏢 <strong>PROBLEMA CON EL CUARTEL:</strong><br>
+                El cuartel ${datosCompletos.cuartel_codigo} no existe en la base de datos.<br>
+                Verifica la tabla 'cuarteles' en Supabase.`;
+            }
+            
+            if (error.message.includes('conexión') || error.message.includes('sin conexión')) {
+                mensajeError += `<br><br>🌐 <strong>PROBLEMA DE CONEXIÓN:</strong><br>
+                Los datos se guardarán localmente y se sincronizarán automáticamente cuando se restablezca la conexión.`;
+                
+                // Guardar datos localmente como fallback
+                try {
+                    const serviciosPendientes = JSON.parse(localStorage.getItem('servicios_pendientes') || '[]');
+                    serviciosPendientes.push({
+                        ...datosCompletos,
+                        intentos: 0,
+                        fecha_creacion: new Date().toISOString(),
+                        digitador_email: userData.email
+                    });
+                    
+                    localStorage.setItem('servicios_pendientes', JSON.stringify(serviciosPendientes));
+                    localStorage.setItem('servicio_offline', 'true');
+                    
+                    console.log('💾 Datos guardados para sincronización posterior');
+                    
+                } catch (localError) {
+                    console.error('Error guardando localmente:', localError);
+                }
+            }
+            
+            mostrarMensaje(mensajeError, 'danger');
+            
+            // Mostrar datos para debug (solo en desarrollo)
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                mostrarDebug({
+                    error: error.message,
+                    datos: datosCompletos,
+                    usuario: userData
+                });
+            }
+        }
+        
+        function limpiarLocalStorage() {
+            const userDataBackup = localStorage.getItem('sicof_user');
+            const keysToRemove = [
+                'servicio_paso1', 'servicio_paso2', 'servicio_paso3',
+                'servicio_id', 'servicio_temporal', 'servicio_offline'
+            ];
+            
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            if (userDataBackup) {
+                localStorage.setItem('sicof_user', userDataBackup);
+            }
+            
+            console.log('🧹 localStorage limpiado');
         }
         
         // Función para debugging
         window.debugInfo = function() {
-            console.log('=== DEBUG PASO 4 ===');
+            console.log('=== DEBUG RESUMEN-CONFIRMACION ===');
             console.log('Usuario:', userData);
             console.log('Datos completos:', datosCompletos);
-            console.log('Config Supabase:', window.SICOF_CONFIG ? 'Presente' : 'Ausente');
-            
-            // Verificar conexión a Supabase
-            if (window.SICOF_CONFIG && window.SICOF_CONFIG.supabase) {
-                window.SICOF_CONFIG.supabase
-                    .from('servicios')
-                    .select('count')
-                    .then(res => console.log('Conexión Supabase:', res.error ? '❌ Error' : '✅ OK'))
-                    .catch(err => console.log('Error conexión:', err));
-            }
+            console.log('Modo Offline:', modoOffline);
+            console.log('Servicio ID:', servicioId);
+            console.log('Config Supabase:', SICOF_CONFIG ? 'Presente' : 'Ausente');
+            console.log('Supabase inicializado:', SICOF_CONFIG.supabase ? '✅' : '❌');
+            console.log('===============================');
             
             alert('Debug info en consola. Verifica la consola del navegador (F12)');
         };
