@@ -81,6 +81,7 @@
             padding: var(--spacing-xl);
             margin-bottom: var(--spacing-xl);
             border: 1px solid var(--verde-claro);
+            box-shadow: var(--shadow-sm);
         }
         
         .section-title {
@@ -101,6 +102,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
         }
         
         .counter-group {
@@ -108,6 +110,12 @@
             padding: var(--spacing-lg);
             border-radius: var(--border-radius-sm);
             border: 1px solid var(--verde-claro);
+            transition: all 0.3s ease;
+        }
+        
+        .counter-group:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
         
         .counter-title {
@@ -130,6 +138,7 @@
             text-align: center;
             font-family: var(--font-primary);
             background: var(--blanco);
+            transition: all 0.3s ease;
         }
         
         .counter-input:focus {
@@ -143,6 +152,172 @@
             color: var(--gris-medio);
             margin-top: var(--spacing-xs);
         }
+        
+        .counter-total {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--verde-oficial);
+            margin-top: var(--spacing-sm);
+            text-align: center;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: rgba(11, 107, 58, 0.1);
+            border-radius: var(--border-radius-sm);
+        }
+        
+        .grid-2, .grid-3 {
+            display: grid;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
+        .resumen-box {
+            background: var(--gris-muy-claro);
+            border: 2px solid var(--verde-claro);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-xl);
+            display: none;
+        }
+        
+        .resumen-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--verde-oscuro);
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .resumen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+        
+        .resumen-item {
+            text-align: center;
+            padding: var(--spacing-sm);
+            background: var(--blanco);
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--gris-claro);
+        }
+        
+        .resumen-valor {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--verde-oficial);
+        }
+        
+        .resumen-label {
+            font-size: 0.75rem;
+            color: var(--gris-medio);
+            margin-top: 4px;
+        }
+        
+        .error-message {
+            color: var(--rojo-alerta);
+            font-size: 0.875rem;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        .has-error .counter-input {
+            border-color: var(--rojo-alerta);
+        }
+        
+        .has-error .counter-help {
+            color: var(--rojo-alerta);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 300px;
+        }
+        
+        .loading-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-message {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .loading-details {
+            font-size: 0.875rem;
+            color: var(--gris-medio);
+        }
+        
+        .step-status {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            min-height: 20px;
+        }
+        
+        .step-success {
+            color: var(--verde-exito);
+        }
+        
+        .step-error {
+            color: var(--rojo-alerta);
+        }
+        
+        .step-processing {
+            color: var(--azul-info);
+        }
+        
+        .alert-detencion {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border: 2px solid #ff9800;
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+            display: none;
+        }
+        
+        .alert-detencion-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .alert-detencion-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #e65100;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .alert-detencion-message {
+            color: #5d4037;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body>
@@ -153,7 +328,7 @@
                 <img src="../assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="logo-img">
                 <div class="logo-text">
                     <div class="logo-title">SICOF - Sistema Integrado</div>
-                    <div class="logo-subtitle">Control Operativo Fronterizo</div>
+                    <div class="logo-subtitle">Demanda Ciudadana - Paso 2</div>
                 </div>
             </div>
             <div class="user-info" style="color: var(--blanco); text-align: right;">
@@ -164,10 +339,13 @@
     </header>
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 2rem; border-radius: 8px; text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
-            <div style="font-size: 1.2rem; font-weight: bold;">Actualizando...</div>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-icon">⏳</div>
+            <div class="loading-message" id="loadingMessage">Actualizando datos...</div>
+            <div class="loading-details" id="loadingDetails"></div>
+            <div class="step-status" id="step1Status"></div>
+            <div class="step-status" id="step2Status"></div>
         </div>
     </div>
 
@@ -196,6 +374,36 @@
         <!-- Mensajes -->
         <div id="message" class="alert" style="display: none;"></div>
         
+        <!-- Información del Servicio -->
+        <div class="form-section">
+            <h3 class="section-title">
+                <span class="section-icon">📋</span>
+                INFORMACIÓN DEL SERVICIO
+            </h3>
+            
+            <div class="grid-3">
+                <div class="form-group">
+                    <div class="form-label">📅 FECHA</div>
+                    <div class="form-control-static" id="infoFecha">Cargando...</div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">🏢 CUARTEL</div>
+                    <div class="form-control-static" id="infoCuartel">Cargando...</div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">👮‍♂️ JEFE</div>
+                    <div class="form-control-static" id="infoJefe">Cargando...</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-label">🚔 SERVICIO</div>
+                <div class="form-control-static" id="infoServicio">Cargando...</div>
+            </div>
+        </div>
+        
         <!-- Formulario -->
         <form id="demandaForm">
             <!-- Controles Realizados -->
@@ -220,8 +428,9 @@
                             value="0"
                         >
                         <div class="counter-help">
-                            Cantidad de controles con fines investigativos
+                            Controles con fines investigativos
                         </div>
+                        <div class="error-message" id="controlesInvestigativosError"></div>
                     </div>
                     
                     <div class="counter-group">
@@ -240,6 +449,7 @@
                         <div class="counter-help">
                             Controles de prevención y disuasión
                         </div>
+                        <div class="error-message" id="controlesPreventivosError"></div>
                     </div>
                     
                     <div class="counter-group">
@@ -258,6 +468,7 @@
                         <div class="counter-help">
                             Verificación de documentación migratoria
                         </div>
+                        <div class="error-message" id="controlesMigratoriosError"></div>
                     </div>
                     
                     <div class="counter-group">
@@ -276,7 +487,12 @@
                         <div class="counter-help">
                             Inspección de vehículos y carga
                         </div>
+                        <div class="error-message" id="controlesVehicularesError"></div>
                     </div>
+                </div>
+                
+                <div class="counter-total" id="totalControles">
+                    TOTAL CONTROLES: 0
                 </div>
             </div>
             
@@ -304,6 +520,7 @@
                         <div class="counter-help">
                             Infracciones a la ley de tránsito
                         </div>
+                        <div class="error-message" id="infraccionesTransitoError"></div>
                     </div>
                     
                     <div class="counter-group">
@@ -322,7 +539,12 @@
                         <div class="counter-help">
                             Infracciones a otras normativas
                         </div>
+                        <div class="error-message" id="otrasInfraccionesError"></div>
                     </div>
+                </div>
+                
+                <div class="counter-total" id="totalInfracciones">
+                    TOTAL INFRACCIONES: 0
                 </div>
             </div>
             
@@ -333,7 +555,7 @@
                     PERSONAS DETENIDAS
                 </h3>
                 
-                <div class="grid grid-2">
+                <div class="grid-2">
                     <div class="form-group">
                         <label for="detenidos_cantidad" class="form-label">
                             👤 CANTIDAD DE DETENIDOS
@@ -346,6 +568,10 @@
                             max="999"
                             value="0"
                         >
+                        <div class="counter-help">
+                            Número total de personas detenidas
+                        </div>
+                        <div class="error-message" id="detenidosCantidadError"></div>
                     </div>
                     
                     <div class="form-group">
@@ -353,7 +579,7 @@
                             📝 MOTIVO DE DETENCIÓN
                         </label>
                         <select id="motivo_detencion" class="form-control">
-                            <option value="">Seleccionar motivo...</option>
+                            <option value="">Sin detenidos</option>
                             <option value="robo_hurto">Robo/Hurto</option>
                             <option value="drogas">Drogas</option>
                             <option value="contrabando">Contrabando</option>
@@ -362,6 +588,19 @@
                             <option value="receptacion_vehiculos">Receptación de Vehículos</option>
                             <option value="otros">Otros</option>
                         </select>
+                        <div class="counter-help">
+                            Motivo principal de la detención
+                        </div>
+                        <div class="error-message" id="motivoDetencionError"></div>
+                    </div>
+                </div>
+                
+                <!-- Alerta si hay detenidos -->
+                <div class="alert-detencion" id="alertaDetencion">
+                    <div class="alert-detencion-icon">🚨</div>
+                    <div class="alert-detencion-title">ATENCIÓN: PERSONAS DETENIDAS</div>
+                    <div class="alert-detencion-message">
+                        Se han registrado detenciones durante el servicio. Esta información será reportada a la jefatura.
                     </div>
                 </div>
             </div>
@@ -373,48 +612,88 @@
                     DENUNCIAS POR VULNERACIÓN DE DERECHOS
                 </h3>
                 
-                <div class="grid grid-3">
-                    <div class="form-group">
-                        <label for="denuncias_vulneracion" class="form-label">
-                            📋 CANTIDAD DE DENUNCIAS
-                        </label>
+                <div class="grid-3">
+                    <div class="counter-group">
+                        <div class="counter-title">
+                            <span>📋</span>
+                            CANTIDAD DE DENUNCIAS
+                        </div>
                         <input 
                             type="number" 
                             id="denuncias_vulneracion"
-                            class="form-control"
+                            class="counter-input"
                             min="0"
                             max="999"
                             value="0"
                         >
+                        <div class="counter-help">
+                            Denuncias recibidas
+                        </div>
+                        <div class="error-message" id="denunciasVulneracionError"></div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="participantes_nna" class="form-label">
-                            👶 PARTICIPANTES NNA
-                        </label>
+                    <div class="counter-group">
+                        <div class="counter-title">
+                            <span>👶</span>
+                            PARTICIPANTES NNA
+                        </div>
                         <input 
                             type="number" 
                             id="participantes_nna"
-                            class="form-control"
+                            class="counter-input"
                             min="0"
                             max="999"
                             value="0"
-                            placeholder="Niños, Niñas, Adolescentes"
                         >
+                        <div class="counter-help">
+                            Niños, Niñas, Adolescentes
+                        </div>
+                        <div class="error-message" id="participantesNnaError"></div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="participantes_adultos" class="form-label">
-                            👨 PARTICIPANTES ADULTOS
-                        </label>
+                    <div class="counter-group">
+                        <div class="counter-title">
+                            <span>👨</span>
+                            PARTICIPANTES ADULTOS
+                        </div>
                         <input 
                             type="number" 
                             id="participantes_adultos"
-                            class="form-control"
+                            class="counter-input"
                             min="0"
                             max="999"
                             value="0"
                         >
+                        <div class="counter-help">
+                            Adultos participantes
+                        </div>
+                        <div class="error-message" id="participantesAdultosError"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resumen de Datos -->
+            <div class="resumen-box" id="resumenDatos">
+                <div class="resumen-title">
+                    <span>📊</span>
+                    RESUMEN DE DEMANDA CIUDADANA
+                </div>
+                <div class="resumen-grid">
+                    <div class="resumen-item">
+                        <div class="resumen-valor" id="resumenTotalControles">0</div>
+                        <div class="resumen-label">CONTROLES</div>
+                    </div>
+                    <div class="resumen-item">
+                        <div class="resumen-valor" id="resumenTotalInfracciones">0</div>
+                        <div class="resumen-label">INFRACCIONES</div>
+                    </div>
+                    <div class="resumen-item">
+                        <div class="resumen-valor" id="resumenTotalDetenidos">0</div>
+                        <div class="resumen-label">DETENIDOS</div>
+                    </div>
+                    <div class="resumen-item">
+                        <div class="resumen-valor" id="resumenTotalDenuncias">0</div>
+                        <div class="resumen-label">DENUNCIAS</div>
                     </div>
                 </div>
             </div>
@@ -422,15 +701,15 @@
             <!-- Botones de Navegación -->
             <div style="display: flex; justify-content: space-between;">
                 <button type="button" class="btn btn-outline" onclick="window.location.href='datos-servicio.html'">
-                    ← VOLVER
+                    ← VOLVER AL PASO 1
                 </button>
                 
                 <div style="display: flex; gap: var(--spacing-md);">
                     <button type="button" class="btn btn-outline" onclick="window.location.href='../index.html'">
                         🚪 Salir
                     </button>
-                    <button type="submit" class="btn btn-primary">
-                        CONTINUAR →
+                    <button type="submit" class="btn btn-primary" id="btnContinuar">
+                        GUARDAR Y CONTINUAR →
                     </button>
                 </div>
             </div>
@@ -442,7 +721,10 @@
     <script src="../js/config.js"></script>
     <script>
         // Variables globales
+        let userData = {};
         let servicioId = null;
+        let servicioInfo = {};
+        let modoOffline = false;
         
         // Función para mostrar mensajes
         function mostrarMensaje(texto, tipo = 'info') {
@@ -456,167 +738,464 @@
             }, 5000);
         }
         
-        // Verificar autenticación y cargar datos
-        document.addEventListener('DOMContentLoaded', async () => {
-            const user = JSON.parse(localStorage.getItem('sicof_user'));
+        // Función para mostrar error en campo
+        function mostrarErrorCampo(campoId, mensaje) {
+            const campo = document.getElementById(campoId);
+            const errorEl = document.getElementById(campoId + 'Error');
             
-            if (!user || user.rol !== 'digitador') {
-                window.location.href = '../index.html';
-                return;
+            if (errorEl) {
+                errorEl.textContent = mensaje;
+                campo.parentElement.classList.add('has-error');
             }
-            
-            // Obtener ID del servicio (VERIFICACIÓN CRÍTICA)
-            servicioId = localStorage.getItem('servicio_id');
-            console.log('Paso 2 - servicio_id encontrado:', servicioId);
-            
-            if (!servicioId) {
-                mostrarMensaje('❌ No se encontró el servicio. Complete el paso 1 primero.', 'danger');
-                setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
-                return;
-            }
-            
-            // Verificar que venga del paso 1
-            const paso1Data = localStorage.getItem('servicio_paso1');
-            if (!paso1Data) {
-                mostrarMensaje('❌ Datos del paso 1 no encontrados', 'danger');
-                setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
-                return;
-            }
-            
-            // Mostrar información del usuario
-            document.getElementById('userInfo').textContent = `${user.rol.toUpperCase()} - ${user.email}`;
-            
-            // Mostrar cuartel
-            if (window.SICOF_CONFIG && window.SICOF_CONFIG.cuarteles) {
-                const cuartel = window.SICOF_CONFIG.cuarteles.find(c => c.codigo === user.cuartel_codigo);
-                if (cuartel) {
-                    document.getElementById('cuartelNombre').textContent = cuartel.nombre;
-                }
-            }
-            
-            console.log('Paso 2 - Listo para continuar, ID:', servicioId);
-        });
+        }
         
-        // Manejar envío del formulario
-        document.getElementById('demandaForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Función para limpiar errores
+        function limpiarErrores() {
+            document.querySelectorAll('.has-error').forEach(el => {
+                el.classList.remove('has-error');
+            });
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+            });
+        }
+        
+        // Función para actualizar loading
+        function actualizarLoading(mensaje, detalles = '', paso = 1, estado = 'processing') {
+            document.getElementById('loadingMessage').textContent = mensaje;
+            document.getElementById('loadingDetails').textContent = detalles;
             
-            // Recopilar datos del formulario (EXACTAMENTE como la tabla)
-            const formData = {
-                controles_investigativos: parseInt(document.getElementById('controles_investigativos').value) || 0,
-                controles_preventivos: parseInt(document.getElementById('controles_preventivos').value) || 0,
-                controles_migratorios: parseInt(document.getElementById('controles_migratorios').value) || 0,
-                controles_vehiculares: parseInt(document.getElementById('controles_vehiculares').value) || 0,
-                infracciones_transito: parseInt(document.getElementById('infracciones_transito').value) || 0,
-                otras_infracciones: parseInt(document.getElementById('otras_infracciones').value) || 0,
-                detenidos_cantidad: parseInt(document.getElementById('detenidos_cantidad').value) || 0,
-                motivo_detencion: document.getElementById('motivo_detencion').value || null,
-                denuncias_vulneracion: parseInt(document.getElementById('denuncias_vulneracion').value) || 0,
-                participantes_nna: parseInt(document.getElementById('participantes_nna').value) || 0,
-                participantes_adultos: parseInt(document.getElementById('participantes_adultos').value) || 0
-            };
+            const stepEl = document.getElementById(`step${paso}Status`);
+            if (stepEl) {
+                stepEl.textContent = detalles;
+                stepEl.className = `step-status step-${estado}`;
+            }
+        }
+        
+        // Función para calcular totales
+        function calcularTotales() {
+            // Calcular total controles
+            const controlesInvestigativos = parseInt(document.getElementById('controles_investigativos').value) || 0;
+            const controlesPreventivos = parseInt(document.getElementById('controles_preventivos').value) || 0;
+            const controlesMigratorios = parseInt(document.getElementById('controles_migratorios').value) || 0;
+            const controlesVehiculares = parseInt(document.getElementById('controles_vehiculares').value) || 0;
             
-            // Validaciones
-            if (formData.detenidos_cantidad > 0 && !formData.motivo_detencion) {
-                mostrarMensaje('⚠ Si hay detenidos, debe especificar el motivo', 'warning');
-                return;
+            const totalControles = controlesInvestigativos + controlesPreventivos + controlesMigratorios + controlesVehiculares;
+            document.getElementById('totalControles').textContent = `TOTAL CONTROLES: ${totalControles}`;
+            document.getElementById('resumenTotalControles').textContent = totalControles;
+            
+            // Calcular total infracciones
+            const infraccionesTransito = parseInt(document.getElementById('infracciones_transito').value) || 0;
+            const otrasInfracciones = parseInt(document.getElementById('otras_infracciones').value) || 0;
+            
+            const totalInfracciones = infraccionesTransito + otrasInfracciones;
+            document.getElementById('totalInfracciones').textContent = `TOTAL INFRACCIONES: ${totalInfracciones}`;
+            document.getElementById('resumenTotalInfracciones').textContent = totalInfracciones;
+            
+            // Actualizar detenidos
+            const detenidosCantidad = parseInt(document.getElementById('detenidos_cantidad').value) || 0;
+            document.getElementById('resumenTotalDetenidos').textContent = detenidosCantidad;
+            
+            // Mostrar/ocultar alerta de detenidos
+            const alertaDetencion = document.getElementById('alertaDetencion');
+            if (detenidosCantidad > 0) {
+                alertaDetencion.style.display = 'block';
+            } else {
+                alertaDetencion.style.display = 'none';
             }
             
-            // Mostrar loading
-            document.getElementById('loadingOverlay').style.display = 'flex';
+            // Calcular total denuncias
+            const denunciasVulneracion = parseInt(document.getElementById('denuncias_vulneracion').value) || 0;
+            const participantesNna = parseInt(document.getElementById('participantes_nna').value) || 0;
+            const participantesAdultos = parseInt(document.getElementById('participantes_adultos').value) || 0;
             
+            const totalDenuncias = denunciasVulneracion + participantesNna + participantesAdultos;
+            document.getElementById('resumenTotalDenuncias').textContent = totalDenuncias;
+            
+            // Mostrar resumen si hay datos
+            const resumenDatos = document.getElementById('resumenDatos');
+            if (totalControles > 0 || totalInfracciones > 0 || detenidosCantidad > 0 || totalDenuncias > 0) {
+                resumenDatos.style.display = 'block';
+            } else {
+                resumenDatos.style.display = 'none';
+            }
+        }
+        
+        // Función para validar formulario
+        function validarFormulario() {
+            let esValido = true;
+            limpiarErrores();
+            
+            // Validar que si hay detenidos, debe haber motivo
+            const detenidosCantidad = parseInt(document.getElementById('detenidos_cantidad').value) || 0;
+            const motivoDetencion = document.getElementById('motivo_detencion').value;
+            
+            if (detenidosCantidad > 0 && !motivoDetencion) {
+                mostrarErrorCampo('motivo_detencion', 'Debe especificar el motivo de detención');
+                esValido = false;
+            }
+            
+            // Validar números positivos
+            const camposNumericos = [
+                'controles_investigativos', 'controles_preventivos', 'controles_migratorios', 'controles_vehiculares',
+                'infracciones_transito', 'otras_infracciones', 'detenidos_cantidad',
+                'denuncias_vulneracion', 'participantes_nna', 'participantes_adultos'
+            ];
+            
+            camposNumericos.forEach(campoId => {
+                const valor = parseInt(document.getElementById(campoId).value) || 0;
+                if (valor < 0) {
+                    mostrarErrorCampo(campoId, 'El valor no puede ser negativo');
+                    esValido = false;
+                }
+            });
+            
+            return esValido;
+        }
+        
+        // Función para cargar información del servicio
+        async function cargarInformacionServicio() {
             try {
-                console.log('Paso 2 - Actualizando servicio ID:', servicioId, 'Datos:', formData);
-                
-                // 1. Verificar que Supabase esté configurado
-                if (!window.SICOF_CONFIG || !window.SICOF_CONFIG.supabase) {
-                    throw new Error('Configuración de Supabase no encontrada');
+                // Obtener datos del paso 1 desde localStorage
+                const paso1Data = localStorage.getItem('servicio_paso1');
+                if (!paso1Data) {
+                    throw new Error('No se encontraron datos del paso 1');
                 }
                 
-                const supabase = window.SICOF_CONFIG.supabase;
+                servicioInfo = JSON.parse(paso1Data);
+                servicioId = localStorage.getItem('servicio_id');
                 
-                // 2. Verificar que el servicio existe (DEBUG)
-                console.log('Verificando existencia del servicio...');
-                const { data: servicioExistente, error: errorVerificar } = await supabase
+                if (!servicioId) {
+                    throw new Error('No se encontró ID del servicio');
+                }
+                
+                console.log('📋 Información del servicio cargada:', servicioInfo);
+                
+                // Mostrar información en la página
+                document.getElementById('infoFecha').textContent = servicioInfo.fecha;
+                document.getElementById('infoCuartel').textContent = servicioInfo.cuartel_codigo;
+                document.getElementById('infoJefe').textContent = servicioInfo.jefe_servicio;
+                document.getElementById('infoServicio').textContent = servicioInfo.nombre_servicio;
+                
+                // Verificar si el servicio existe en Supabase
+                actualizarLoading('Verificando servicio...', 'Buscando en base de datos', 1, 'processing');
+                
+                const { data: servicioExistente, error } = await SICOF_CONFIG.supabase
                     .from('servicios')
                     .select('id, cuartel_codigo, nombre_servicio')
                     .eq('id', servicioId)
                     .single();
                 
-                if (errorVerificar) {
-                    console.error('Error verificando servicio:', errorVerificar);
-                    throw new Error(`El servicio no existe en la base de datos: ${errorVerificar.message}`);
+                if (error) {
+                    if (error.code === 'PGRST116') { // No encontrado
+                        console.warn('⚠️ Servicio no encontrado en Supabase, usando modo offline');
+                        modoOffline = true;
+                        mostrarMensaje('⚠️ Modo offline: Los datos se guardarán localmente', 'warning');
+                    } else {
+                        throw error;
+                    }
+                } else {
+                    console.log('✅ Servicio verificado en Supabase:', servicioExistente);
+                    actualizarLoading('Servicio verificado', 'Listo para continuar', 1, 'success');
                 }
                 
-                console.log('✓ Servicio verificado:', servicioExistente);
+                // Cargar datos guardados del paso 2 si existen
+                const paso2Data = localStorage.getItem('servicio_paso2');
+                if (paso2Data) {
+                    const datosPaso2 = JSON.parse(paso2Data);
+                    console.log('📂 Datos del paso 2 cargados:', datosPaso2);
+                    
+                    // Llenar campos con datos existentes
+                    Object.keys(datosPaso2).forEach(key => {
+                        const elemento = document.getElementById(key);
+                        if (elemento) {
+                            if (elemento.type === 'number') {
+                                elemento.value = datosPaso2[key] || 0;
+                            } else if (elemento.tagName === 'SELECT') {
+                                elemento.value = datosPaso2[key] || '';
+                            }
+                        }
+                    });
+                    
+                    // Calcular totales iniciales
+                    calcularTotales();
+                }
                 
-                // 3. ACTUALIZAR en Supabase
-                const { error } = await supabase
+            } catch (error) {
+                console.error('❌ Error cargando información del servicio:', error);
+                throw error;
+            }
+        }
+        
+        // Inicializar aplicación
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Iniciando demanda-ciudadana.html');
+            
+            try {
+                // Verificar autenticación
+                userData = await protegerPagina('digitador');
+                if (!userData) return;
+                
+                console.log('✅ Usuario autenticado:', userData);
+                
+                // Mostrar información del usuario
+                document.getElementById('userInfo').textContent = `${userData.rol.toUpperCase()} - ${userData.email}`;
+                
+                // Mostrar cuartel
+                const cuartelInfo = await obtenerCuarteles();
+                const cuartelUsuario = cuartelInfo.find(c => c.codigo === userData.cuartel_codigo);
+                if (cuartelUsuario) {
+                    document.getElementById('cuartelNombre').textContent = cuartelUsuario.nombre;
+                }
+                
+                // Cargar información del servicio
+                await cargarInformacionServicio();
+                
+                // Configurar eventos
+                configurarEventos();
+                
+                console.log('✅ Aplicación inicializada correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error inicializando aplicación:', error);
+                
+                if (error.message.includes('paso 1')) {
+                    mostrarMensaje('❌ Complete primero el paso 1: Datos del Servicio', 'danger');
+                    setTimeout(() => window.location.href = 'datos-servicio.html', 2000);
+                } else {
+                    mostrarMensaje(`Error inicializando: ${error.message}`, 'danger');
+                }
+            }
+        });
+        
+        function configurarEventos() {
+            // Calcular totales en tiempo real
+            const camposCalculo = [
+                'controles_investigativos', 'controles_preventivos', 'controles_migratorios', 'controles_vehiculares',
+                'infracciones_transito', 'otras_infracciones', 'detenidos_cantidad',
+                'denuncias_vulneracion', 'participantes_nna', 'participantes_adultos'
+            ];
+            
+            camposCalculo.forEach(id => {
+                document.getElementById(id).addEventListener('input', calcularTotales);
+            });
+            
+            // Mostrar/ocultar alerta de detenidos
+            document.getElementById('detenidos_cantidad').addEventListener('input', function() {
+                const detenidos = parseInt(this.value) || 0;
+                const motivoSelect = document.getElementById('motivo_detencion');
+                
+                if (detenidos > 0) {
+                    if (motivoSelect.value === '') {
+                        motivoSelect.value = 'robo_hurto';
+                    }
+                } else {
+                    motivoSelect.value = '';
+                }
+            });
+            
+            // Validar números positivos
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    const value = parseInt(this.value);
+                    if (isNaN(value) || value < 0) {
+                        this.value = 0;
+                    }
+                    if (value > parseInt(this.max) || 9999) {
+                        this.value = this.max || 9999;
+                    }
+                });
+            });
+            
+            // Manejar envío del formulario
+            document.getElementById('demandaForm').addEventListener('submit', guardarPaso2);
+        }
+        
+        async function guardarPaso2(e) {
+            e.preventDefault();
+            
+            console.log('📝 Iniciando guardado del paso 2...');
+            
+            // Validar formulario
+            if (!validarFormulario()) {
+                mostrarMensaje('❌ Por favor corrija los errores en el formulario', 'danger');
+                return;
+            }
+            
+            // Mostrar loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            actualizarLoading('Guardando datos de demanda ciudadana...', 'Paso 2: Controles e infracciones', 1, 'processing');
+            
+            try {
+                // Preparar datos para actualizar
+                const formData = {
+                    // Controles
+                    controles_investigativos: parseInt(document.getElementById('controles_investigativos').value) || 0,
+                    controles_preventivos: parseInt(document.getElementById('controles_preventivos').value) || 0,
+                    controles_migratorios: parseInt(document.getElementById('controles_migratorios').value) || 0,
+                    controles_vehiculares: parseInt(document.getElementById('controles_vehiculares').value) || 0,
+                    
+                    // Infracciones
+                    infracciones_transito: parseInt(document.getElementById('infracciones_transito').value) || 0,
+                    otras_infracciones: parseInt(document.getElementById('otras_infracciones').value) || 0,
+                    
+                    // Detenidos
+                    detenidos_cantidad: parseInt(document.getElementById('detenidos_cantidad').value) || 0,
+                    motivo_detencion: document.getElementById('motivo_detencion').value || null,
+                    
+                    // Denuncias
+                    denuncias_vulneracion: parseInt(document.getElementById('denuncias_vulneracion').value) || 0,
+                    participantes_nna: parseInt(document.getElementById('participantes_nna').value) || 0,
+                    participantes_adultos: parseInt(document.getElementById('participantes_adultos').value) || 0
+                };
+                
+                console.log('📦 Datos preparados para actualizar:', formData);
+                
+                // Verificar si estamos en modo offline
+                if (modoOffline) {
+                    console.log('🌐 Modo offline detectado, guardando localmente');
+                    
+                    // Guardar datos en localStorage
+                    localStorage.setItem('servicio_paso2', JSON.stringify(formData));
+                    localStorage.setItem('servicio_offline', 'true');
+                    
+                    actualizarLoading('✅ Datos guardados localmente', 'Modo offline activado', 2, 'success');
+                    
+                    setTimeout(() => {
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        
+                        mostrarMensaje(`
+                            ✅ <strong>DATOS GUARDADOS LOCALMENTE</strong><br>
+                            • Modo offline activado<br>
+                            • Los datos se sincronizarán cuando haya conexión<br>
+                            • Redirigiendo al paso 3...
+                        `, 'warning');
+                        
+                        // Redirigir al paso 3
+                        setTimeout(() => {
+                            window.location.href = 'demanda-preventiva.html';
+                        }, 2000);
+                    }, 1500);
+                    
+                    return;
+                }
+                
+                // Actualizar en Supabase
+                actualizarLoading('Actualizando en base de datos...', 'Tabla: servicios', 2, 'processing');
+                
+                const { data, error } = await SICOF_CONFIG.supabase
                     .from('servicios')
                     .update(formData)
                     .eq('id', servicioId);
                 
                 if (error) {
-                    console.error('Error al actualizar en Supabase:', error);
-                    throw new Error(`Error de base de datos: ${error.message}`);
+                    console.error('❌ Error actualizando en Supabase:', error);
+                    
+                    if (error.code === '42501') {
+                        throw new Error('Permiso denegado: No tiene permisos para actualizar');
+                    } else if (error.code === 'PGRST116') {
+                        throw new Error('El servicio no existe en la base de datos');
+                    } else {
+                        throw new Error(`Error de base de datos: ${error.message}`);
+                    }
                 }
                 
-                console.log('✓ Datos de demanda ciudadana actualizados en Supabase');
+                console.log('✅ Servicio actualizado exitosamente:', data);
                 
-                // 4. Guardar datos en localStorage
+                // Guardar datos en localStorage también
                 localStorage.setItem('servicio_paso2', JSON.stringify(formData));
                 
-                // 5. Mostrar mensaje de éxito
-                mostrarMensaje('✅ Datos guardados correctamente. Redirigiendo al siguiente paso...', 'success');
+                actualizarLoading('✅ Paso 2 completado', 'Datos guardados correctamente', 2, 'success');
                 
-                // 6. Pequeña pausa
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // 7. Redirigir al siguiente paso
-                window.location.href = 'demanda-preventiva.html';
-                
-            } catch (error) {
-                console.error('Error guardando datos:', error);
-                mostrarMensaje(`❌ Error al guardar: ${error.message}`, 'danger');
-                
-                // Guardar en localStorage como fallback
-                try {
-                    localStorage.setItem('servicio_paso2', JSON.stringify(formData));
-                    localStorage.setItem('servicio_offline', 'true');
-                    console.warn('✓ Datos guardados en localStorage (modo offline)');
-                    mostrarMensaje('⚠ Modo offline - Datos guardados localmente. Continuando...', 'warning');
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
                     
+                    // Mostrar estadísticas
+                    const totalControles = 
+                        formData.controles_investigativos + 
+                        formData.controles_preventivos + 
+                        formData.controles_migratorios + 
+                        formData.controles_vehiculares;
+                    
+                    const totalInfracciones = formData.infracciones_transito + formData.otras_infracciones;
+                    
+                    mostrarMensaje(`
+                        ✅ <strong>PASO 2 COMPLETADO CORRECTAMENTE</strong><br>
+                        • Controles realizados: ${totalControles}<br>
+                        • Infracciones detectadas: ${totalInfracciones}<br>
+                        • Personas detenidas: ${formData.detenidos_cantidad}<br>
+                        • Redirigiendo al paso 3...
+                    `, 'success');
+                    
+                    // Redirigir al paso 3 después de 2 segundos
                     setTimeout(() => {
                         window.location.href = 'demanda-preventiva.html';
                     }, 2000);
-                } catch (localError) {
-                    console.error('Error guardando en localStorage:', localError);
-                }
-            } finally {
-                document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                }, 1500);
+                
+            } catch (error) {
+                console.error('🔥 Error guardando paso 2:', error);
+                
+                actualizarLoading('❌ Error al guardar', error.message, 2, 'error');
+                
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                    // Intentar guardar localmente como fallback
+                    try {
+                        const formData = {
+                            controles_investigativos: parseInt(document.getElementById('controles_investigativos').value) || 0,
+                            controles_preventivos: parseInt(document.getElementById('controles_preventivos').value) || 0,
+                            controles_migratorios: parseInt(document.getElementById('controles_migratorios').value) || 0,
+                            controles_vehiculares: parseInt(document.getElementById('controles_vehiculares').value) || 0,
+                            infracciones_transito: parseInt(document.getElementById('infracciones_transito').value) || 0,
+                            otras_infracciones: parseInt(document.getElementById('otras_infracciones').value) || 0,
+                            detenidos_cantidad: parseInt(document.getElementById('detenidos_cantidad').value) || 0,
+                            motivo_detencion: document.getElementById('motivo_detencion').value || null,
+                            denuncias_vulneracion: parseInt(document.getElementById('denuncias_vulneracion').value) || 0,
+                            participantes_nna: parseInt(document.getElementById('participantes_nna').value) || 0,
+                            participantes_adultos: parseInt(document.getElementById('participantes_adultos').value) || 0
+                        };
+                        
+                        localStorage.setItem('servicio_paso2', JSON.stringify(formData));
+                        localStorage.setItem('servicio_offline', 'true');
+                        modoOffline = true;
+                        
+                        console.log('💾 Datos guardados en modo offline');
+                        
+                        mostrarMensaje(`
+                            ⚠️ <strong>MODO OFFLINE ACTIVADO</strong><br>
+                            • Error de conexión a la base de datos<br>
+                            • Los datos se guardaron localmente<br>
+                            • Se sincronizarán cuando haya conexión<br>
+                            • Redirigiendo al paso 3...
+                        `, 'warning');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'demanda-preventiva.html';
+                        }, 3000);
+                        
+                    } catch (localError) {
+                        console.error('Error guardando localmente:', localError);
+                        mostrarMensaje(`❌ Error crítico: ${error.message}<br>No se pudieron guardar los datos`, 'danger');
+                    }
+                }, 2000);
             }
-        });
-        
-        // Validar números positivos
-        document.querySelectorAll('input[type="number"]').forEach(input => {
-            input.addEventListener('change', function() {
-                const value = parseInt(this.value);
-                if (isNaN(value) || value < 0) {
-                    this.value = 0;
-                }
-                if (value > 9999) {
-                    this.value = 9999;
-                }
-            });
-        });
+        }
         
         // Función para debugging
         window.debugInfo = function() {
-            console.log('=== DEBUG PASO 2 ===');
-            console.log('servicio_id:', localStorage.getItem('servicio_id'));
-            console.log('servicio_paso1:', localStorage.getItem('servicio_paso1'));
-            console.log('SICOF_CONFIG:', window.SICOF_CONFIG ? 'Disponible' : 'No disponible');
-            console.log('====================');
+            console.log('=== DEBUG DEMANDA-CIUDADANA ===');
+            console.log('Usuario:', userData);
+            console.log('Servicio ID:', servicioId);
+            console.log('Servicio Info:', servicioInfo);
+            console.log('Modo Offline:', modoOffline);
+            console.log('Servicio Paso 2 (localStorage):', localStorage.getItem('servicio_paso2'));
+            console.log('SICOF_CONFIG:', SICOF_CONFIG ? 'Presente' : 'Ausente');
+            console.log('Supabase inicializado:', SICOF_CONFIG.supabase ? '✅' : '❌');
+            console.log('===============================');
+            
+            alert('Debug info en consola. Verifica la consola del navegador (F12)');
         };
     </script>
 </body>
